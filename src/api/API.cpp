@@ -69,7 +69,7 @@ API size_t profileBufferDataSize(WaterWavelets::ProfileBuffer* buffer) {
 }
 
 API void copyProfileBufferData(WaterWavelets::ProfileBuffer* buffer, void * dest) {
-    memcpy(dest, buffer->m_data.data(), buffer->m_data.size());
+    memcpy(dest, buffer->m_data.data(), buffer->m_data.size() * sizeof(Vec4));
 }
 
 API float profileBufferPeriod(WaterWavelets::ProfileBuffer* buffer) {

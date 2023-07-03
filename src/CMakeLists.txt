@@ -5,4 +5,5 @@ target_link_libraries(WaveGrid Eigen3::Eigen)
 
 add_subdirectory(tests)
 add_subdirectory(api)
+add_subdirectory(visualization)
 

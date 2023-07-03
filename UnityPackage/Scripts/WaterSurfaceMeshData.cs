@@ -12,6 +12,8 @@ public class WaterSurfaceMeshData
     public float[] profileBufferData { get; private set; }  
     public float profileBufferPeriod { get; private set; }  
 
+    public bool hasProfileData => profileBufferData?.Length > 0;
+
     public delegate void WaterSurfaceMeshDelegate(Vector3[] v, float[][] amplitudes, int index);
     public WaterSurfaceMeshData(int size)
     {
@@ -21,7 +23,7 @@ public class WaterSurfaceMeshData
     public unsafe void LoadProfile(IntPtr buffer)
     {
         this.profileBufferPeriod = API.ProfileBuffer.profileBufferPeriod(buffer);
-        this.profileBufferData = new float[API.ProfileBuffer.profileBufferDataSize(buffer)];
+        this.profileBufferData = new float[API.ProfileBuffer.profileBufferDataSize(buffer) * 4];
 
         fixed (float* array = this.profileBufferData)
         {
@@ -49,11 +51,12 @@ public class WaterSurfaceMeshData
 
         this.positions = new Vector3[this.size * this.size];
         this.indices = new int[(this.size - 1) * (this.size - 1) * 4];
+        var delta = 2.0f / (this.size -1);
         for (var i = 0; i < this.size; i++)
         {
             for (var j = 0; j < this.size; j++)
             {
-                this.positions[i * this.size + j] = new Vector3(i, 0f, j);
+                this.positions[i * this.size + j] = new Vector3(-1f + i * delta, 0f,-1f + j * delta);
             }
         }
 

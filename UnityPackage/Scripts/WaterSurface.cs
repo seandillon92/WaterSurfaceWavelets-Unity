@@ -12,10 +12,10 @@ namespace WaterWaveSurface
         private int m_size = 50;
 
         [SerializeField]
-        private float m_max_zeta = 0.01f;
+        private float m_max_zeta = Mathf.Log(10, 2);
 
         [SerializeField]
-        private float m_min_zeta = 10;
+        private float m_min_zeta = Mathf.Log(0.03f, 2);
 
         [SerializeField]
         private int m_n_x = 100;
@@ -44,12 +44,17 @@ namespace WaterWaveSurface
         [SerializeField]
         float m_amplitude_mult = 4.0f;
 
+        [SerializeField]
+        Light m_directional_light;
+
         private float logdt = -0.9f;
 
         private IntPtr m_grid;
 
         private WaterSurfaceMeshData m_data;
         private WaterSurfaceMesh m_mesh;
+        private WaterSurfaceMeshRenderer m_meshRenderer;
+
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
@@ -64,6 +69,13 @@ namespace WaterWaveSurface
             Vector3 camPos = camTrans.MultiplyPoint(Vector3.zero);
             Vector3 dir = (point - camPos).normalized;
             return (dir, camPos);
+        }
+
+        private void Awake()
+        {
+
+            m_filter = GetComponent<MeshFilter>();
+            m_renderer = GetComponent<MeshRenderer>();
         }
 
         // Start is called before the first frame update
@@ -82,8 +94,7 @@ namespace WaterWaveSurface
             m_data = new WaterSurfaceMeshData(m_visualization_grid_resolution);
             m_mesh = new WaterSurfaceMesh(m_data);
 
-            m_filter = GetComponent<MeshFilter>();
-            m_renderer = GetComponent<MeshRenderer>();
+            m_meshRenderer = new WaterSurfaceMeshRenderer(m_data, m_renderer.sharedMaterial, m_directional_light);
 
             m_filter.sharedMesh = m_mesh.mesh;
 
@@ -114,7 +125,7 @@ namespace WaterWaveSurface
                    
                     float t = -camPos.y / dir.y;
 
-                    t = t < 0 ? 100 : t;
+                    t = t < 0 ? 1000 : t;
                     
                     position = camPos + t * dir;
 
@@ -125,7 +136,7 @@ namespace WaterWaveSurface
                     for (int itheta = 0; itheta < 16; itheta++)
                     {
                         float theta = API.Grid.idxToPos(m_grid, itheta, 2);
-                        Vector4 pos4 = new(position.x, position.y, theta, API.Grid.idxToPos(m_grid, 0, 3));
+                        Vector4 pos4 = new(position.x, position.z, theta, API.Grid.idxToPos(m_grid, 0, 3));
 
                         if (m_direction_to_show == -1 || m_direction_to_show== itheta)
                             amplitude[itheta] = m_amplitude_mult * API.Grid.amplitude(m_grid, pos4);
@@ -139,6 +150,7 @@ namespace WaterWaveSurface
             m_data.LoadProfile(API.Grid.getProfileBuffer(m_grid, 0));
 
             m_mesh.Update();
+            m_meshRenderer.Update();
             
             API.Grid.timeStep(m_grid, API.Grid.clfTimeStep(m_grid) * (float)Math.Pow(10, logdt), m_update_simulation);
         }

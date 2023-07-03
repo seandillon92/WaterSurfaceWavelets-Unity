@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: WaterSurfaceMaterial
-  m_Shader: {fileID: 15301, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 364bb5e7c8e6e0c47a30bdb086e40607, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -56,6 +56,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - textureData:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
@@ -76,6 +80,8 @@ Material:
     - _WireThickness: 76
     - _ZWrite: 1
     m_Colors:
+    - _Ambient: {r: 0.24999997, g: 0.2, b: 0.22999996, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Diffuse: {r: 0.4, g: 0.4, b: 0.8, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

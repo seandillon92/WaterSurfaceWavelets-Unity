@@ -17,7 +17,8 @@ public class WaterSurfaceMesh
         mesh = new Mesh();
         var layout = new[]
         {
-            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
+            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 4),
+            new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2),
             new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 4),
             new VertexAttributeDescriptor(VertexAttribute.TexCoord2, VertexAttributeFormat.Float32, 4),
             new VertexAttributeDescriptor(VertexAttribute.TexCoord3, VertexAttributeFormat.Float32, 4),
@@ -28,12 +29,18 @@ public class WaterSurfaceMesh
         mesh.SetIndices(m_data.indices, MeshTopology.Quads, 0);
 
         m_vertices = new Vertex[m_count];
+
+        for (int i = 0; i < m_vertices.Length; i++)
+        {
+            m_vertices[i].uv = new Vector2((i + 1) / (float)count, (i + 1) % (float)count);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct Vertex
     {
-        public Vector3 pos;
+        public Vector4 pos;
+        public Vector2 uv;
         public Vector4 amplitude1;
         public Vector4 amplitude2;
         public Vector4 amplitude3;
