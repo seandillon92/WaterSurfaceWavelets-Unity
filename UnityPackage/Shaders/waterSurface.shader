@@ -3,7 +3,6 @@ Shader"Unlit/waterSurface"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        textureData("Texture", 2D) = "white"{}
         _Diffuse("Diffuse", Color) = (1,1,1,1)
         _Ambient("Ambient", Color) = (1,1,1,1)
     }

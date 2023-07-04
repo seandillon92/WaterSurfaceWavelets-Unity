@@ -23,7 +23,6 @@ public class WaterSurfaceMeshRenderer
 
     public void Update()
     {
-
         if (m_data.hasProfileData)
         {
             if (!m_textureData)

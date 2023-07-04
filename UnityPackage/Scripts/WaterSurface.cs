@@ -58,19 +58,6 @@ namespace WaterWaveSurface
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
-        (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos, Camera cam)
-        {
-            Matrix4x4 camTrans = cam.transform.localToWorldMatrix;
-            Matrix4x4 camProj = cam.projectionMatrix;
-            Matrix4x4 trans = camTrans * camProj.inverse;
-
-            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + camProj.MultiplyPoint(Vector3.forward);
-            point = trans.MultiplyPoint(point);
-            Vector3 camPos = camTrans.MultiplyPoint(Vector3.zero);
-            Vector3 dir = (point - camPos).normalized;
-            return (dir, camPos);
-        }
-
         private void Awake()
         {
 
@@ -105,52 +92,19 @@ namespace WaterWaveSurface
         {
             if (m_update_simulation)
             {
-                m_data.SetVertices((Vector3[] positions, float[][] amplitudes, int index) =>
-                {
-                    var position = positions[index];
-                    var amplitude = amplitudes[index];
+                m_data.SetVertices(
+                    m_grid,
+                    m_visualization_grid_resolution,
+                    m_amplitude_mult, 
+                    Camera.main.transform.localToWorldMatrix,
+                    Camera.main.projectionMatrix,
+                    m_direction_to_show);
 
-                    int ix = index / (m_visualization_grid_resolution + 1);
-                    int iy = index % (m_visualization_grid_resolution + 1);
-                    
-                    Vector2 screenPos = new Vector2(
-                        ix * 2f / m_visualization_grid_resolution - 1f, 
-                        iy * 2f / m_visualization_grid_resolution - 1f);
+                m_data.LoadProfile(API.Grid.getProfileBuffer(m_grid, 0));
 
-                    var cam = Camera.main;
-
-                    var raycast = CameraRayCast(screenPos, cam);
-                    var dir = raycast.dir;
-                    var camPos = raycast.camPos;
-                   
-                    float t = -camPos.y / dir.y;
-
-                    t = t < 0 ? 1000 : t;
-                    
-                    position = camPos + t * dir;
-
-                    position.y = 0;
-
-                    positions[index] = position;
-
-                    for (int itheta = 0; itheta < 16; itheta++)
-                    {
-                        float theta = API.Grid.idxToPos(m_grid, itheta, 2);
-                        Vector4 pos4 = new(position.x, position.z, theta, API.Grid.idxToPos(m_grid, 0, 3));
-
-                        if (m_direction_to_show == -1 || m_direction_to_show== itheta)
-                            amplitude[itheta] = m_amplitude_mult * API.Grid.amplitude(m_grid, pos4);
-                        else
-                            amplitude[itheta] = 0;
-                    }
-
-                });
+                m_mesh.Update();
+                m_meshRenderer.Update();
             }
-
-            m_data.LoadProfile(API.Grid.getProfileBuffer(m_grid, 0));
-
-            m_mesh.Update();
-            m_meshRenderer.Update();
             
             API.Grid.timeStep(m_grid, API.Grid.clfTimeStep(m_grid) * (float)Math.Pow(10, logdt), m_update_simulation);
         }
@@ -158,6 +112,7 @@ namespace WaterWaveSurface
         void OnDestroy()
         {
             API.Grid.destroyGrid(m_grid);
+            m_data.Dispose();
         }
     }
 }

@@ -1,13 +1,16 @@
 using System;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using UnityEngine;
 using WaterWaveSurface;
 
-public class WaterSurfaceMeshData
+public class WaterSurfaceMeshData : IDisposable
 {
 
     public int size { get; private set; } = 10;
-    public float[][] amplitude { get; private set; }
-    public Vector3[] positions { get; private set; }
+    public NativeArray<float> amplitude { get; private set; }
+    public NativeArray<Vector3> positions { get; private set; }
     public int[] indices { get; private set; }
     public float[] profileBufferData { get; private set; }  
     public float profileBufferPeriod { get; private set; }  
@@ -32,33 +35,129 @@ public class WaterSurfaceMeshData
         
     }
 
-    public void SetVertices(WaterSurfaceMeshDelegate func)
+    private struct VerticesJob : IJobParallelFor
     {
-        for (int i = 0; i < size * size; i++)
+        public NativeArray<Vector3> positions;
+        [NativeDisableParallelForRestriction]
+        public NativeArray<float> amplitudes;
+        private int direction;
+        [NativeDisableUnsafePtrRestriction]
+        private IntPtr grid;
+        private int grid_resolution;
+        private float multiplier;
+        private Matrix4x4 cameraMatrix;
+        private Matrix4x4 projectionMatrix;
+
+        public VerticesJob(
+            IntPtr grid, 
+            int grid_resolution, 
+            float multiplier, 
+            Matrix4x4 cameraMatrix, 
+            Matrix4x4 projectionMatrix,
+            int direction,
+            NativeArray<Vector3> positions,
+            NativeArray<float> amplitudes)
         {
-            func(this.positions, this.amplitude, i);
+            this.grid = grid;
+            this.grid_resolution = grid_resolution;
+            this.multiplier = multiplier;
+            this.cameraMatrix = cameraMatrix;
+            this.projectionMatrix = projectionMatrix;
+            this.direction = direction;
+            this.positions = positions;
+            this.amplitudes = amplitudes;
         }
+
+        (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
+        {
+            Matrix4x4 trans = cameraMatrix * projectionMatrix.inverse;
+
+            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + projectionMatrix.MultiplyPoint(Vector3.forward);
+            point = trans.MultiplyPoint(point);
+            Vector3 camPos = cameraMatrix.MultiplyPoint(Vector3.zero);
+            Vector3 dir = (point - camPos).normalized;
+            return (dir, camPos);
+        }
+
+        public void Execute(int index)
+        {
+
+            int ix = index / (grid_resolution + 1);
+            int iy = index % (grid_resolution + 1);
+
+            Vector2 screenPos = new Vector2(
+                ix * 2f / grid_resolution - 1f,
+                iy * 2f / grid_resolution - 1f);
+
+            var raycast = CameraRayCast(screenPos);
+            var dir = raycast.dir;
+            var camPos = raycast.camPos;
+
+            float t = -camPos.y / dir.y;
+
+            t = t < 0 ? 1000 : t;
+
+            var position = camPos + t * dir;
+
+            position.y = 0;
+
+            positions[index] = position;
+
+            for (int itheta = 0; itheta < 16; itheta++)
+            {
+                float theta = API.Grid.idxToPos(grid, itheta, 2);
+                Vector4 pos4 = new(position.x, position.z, theta, API.Grid.idxToPos(grid, 0, 3));
+
+                if (direction == -1 || direction == itheta)
+                    amplitudes[index * 16 + itheta] = multiplier * API.Grid.amplitude(grid, pos4);
+                else
+                    amplitudes[index * 16 + itheta] = 0;
+            }
+
+        }
+    }
+
+    public void SetVertices(
+        IntPtr grid, 
+        int grid_resolution,
+        float multiplier,
+        Matrix4x4 cameraMatrix,
+        Matrix4x4 projectionMatrix,
+        int direction)
+    {
+        var job = new VerticesJob(
+            grid,
+            grid_resolution,
+            multiplier,
+            cameraMatrix,
+            projectionMatrix,
+            direction,
+            this.positions, 
+            this.amplitude);
+
+        var handle = job.Schedule(this.size * this.size, 1);
+        handle.Complete();
     }
 
     private void Init(int size)
     {
         this.size = size + 1;
-        this.amplitude = new float[this.size * this.size][];
-        for (int i = 0; i < this.amplitude.Length; i++)
-        {
-            this.amplitude[i] = new float[16];
-        }
-
-        this.positions = new Vector3[this.size * this.size];
+        var positions = new Vector3[this.size * this.size];
         this.indices = new int[(this.size - 1) * (this.size - 1) * 4];
+
         var delta = 2.0f / (this.size -1);
         for (var i = 0; i < this.size; i++)
         {
             for (var j = 0; j < this.size; j++)
             {
-                this.positions[i * this.size + j] = new Vector3(-1f + i * delta, 0f,-1f + j * delta);
+                positions[i * this.size + j] = new Vector3(-1f + i * delta, 0f,-1f + j * delta);
             }
         }
+
+        this.positions = new NativeArray<Vector3>(this.size * this.size, Allocator.Persistent);
+        this.positions.CopyFrom(positions);
+
+        this.amplitude = new NativeArray<float>(this.size * this.size * 16, Allocator.Persistent);
 
         for (var i = 0; i < this.size - 1; i++)
         {
@@ -70,5 +169,11 @@ public class WaterSurfaceMeshData
                 this.indices[i * (this.size - 1) * 4 + j * 4 + 3] = (i + 1) * this.size + j;
             }
         }
+    }
+
+    public void Dispose()
+    {
+        this.positions.Dispose();
+        this.amplitude.Dispose();
     }
 }

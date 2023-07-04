@@ -54,13 +54,13 @@ public class WaterSurfaceMesh
             m_vertices[i].pos = m_data.positions[i];
 
             m_vertices[i].amplitude1
-                = new Vector4(m_data.amplitude[i][0], m_data.amplitude[i][1], m_data.amplitude[i][2], m_data.amplitude[i][3]);
+                = new Vector4(m_data.amplitude[i*16], m_data.amplitude[i*16 + 1], m_data.amplitude[i*16 + 2], m_data.amplitude[i*16 + 3]);
             m_vertices[i].amplitude2
-                = new Vector4(m_data.amplitude[i][4], m_data.amplitude[i][5], m_data.amplitude[i][6], m_data.amplitude[i][7]);
+                = new Vector4(m_data.amplitude[i*16 + 4], m_data.amplitude[i*16 + 5], m_data.amplitude[i*16 + 6], m_data.amplitude[i*16 + 7]);
             m_vertices[i].amplitude3
-                = new Vector4(m_data.amplitude[i][8], m_data.amplitude[i][9], m_data.amplitude[i][10], m_data.amplitude[i][11]);
+                = new Vector4(m_data.amplitude[i*16 + 8], m_data.amplitude[i*16 + 9], m_data.amplitude[i*16 + 10], m_data.amplitude[i*16 + 11]);
             m_vertices[i].amplitude4
-                = new Vector4(m_data.amplitude[i][12], m_data.amplitude[i][13], m_data.amplitude[i][14], m_data.amplitude[i][15]);
+                = new Vector4(m_data.amplitude[i*16 + 12], m_data.amplitude[i*16 + 13], m_data.amplitude[i*16 + 14], m_data.amplitude[i*16 + 15]);
         }
 
         mesh.SetVertexBufferData(m_vertices, 0, 0, m_count);
