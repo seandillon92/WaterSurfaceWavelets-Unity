@@ -48,6 +48,12 @@ namespace WaterWaveSurface
 
             [DllImport(name)]
             public static extern float amplitude(IntPtr grid, Vector4 pos4);
+
+            [DllImport(name)]
+            public static extern void addPointDisturbance(IntPtr grid, Vector2 pos, float disturbance);
+
+            [DllImport(name)]
+            public static extern void addPointDisturbanceDirection(IntPtr grid, Vector3 pos, float disturbance);
         }
 
         public class ProfileBuffer

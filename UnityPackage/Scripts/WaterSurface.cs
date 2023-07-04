@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Audio;
 
 namespace WaterWaveSurface
 {
@@ -47,6 +48,9 @@ namespace WaterWaveSurface
         [SerializeField]
         Light m_directional_light;
 
+        [SerializeField]
+        private float m_distrurbance = 0.1f;
+
         private float logdt = -0.9f;
 
         private IntPtr m_grid;
@@ -57,6 +61,7 @@ namespace WaterWaveSurface
 
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
+        private Vector3? m_previous_distrurbance_position;
 
         private void Awake()
         {
@@ -88,6 +93,16 @@ namespace WaterWaveSurface
             Debug.Log(m_grid);
         }
 
+        float Angle(Vector3 v1, Vector3 v2)
+        {
+            var angle = Vector3.SignedAngle(v1, v2, Vector3.up);
+            if (angle < 0)
+            {
+                angle = 360 + angle;
+            }
+            return angle;
+        }
+
         void Update()
         {
             if (m_update_simulation)
@@ -95,7 +110,7 @@ namespace WaterWaveSurface
                 m_data.SetVertices(
                     m_grid,
                     m_visualization_grid_resolution,
-                    m_amplitude_mult, 
+                    m_amplitude_mult,
                     Camera.main.transform.localToWorldMatrix,
                     Camera.main.projectionMatrix,
                     m_direction_to_show);
@@ -105,8 +120,40 @@ namespace WaterWaveSurface
                 m_mesh.Update();
                 m_meshRenderer.Update();
             }
-            
+
             API.Grid.timeStep(m_grid, API.Grid.clfTimeStep(m_grid) * (float)Math.Pow(10, logdt), m_update_simulation);
+
+            UpdateControls();
+
+        }
+
+        private void UpdateControls()
+        {
+            if (Input.GetMouseButton(0))
+            {
+                var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                float t = -ray.origin.y / ray.direction.y;
+                var pos = ray.origin + t * ray.direction;
+
+                if (m_previous_distrurbance_position != null)
+                {
+                    float velocity = Vector3.Distance(m_previous_distrurbance_position.Value, pos) * Time.deltaTime;
+                    var direction = (pos - m_previous_distrurbance_position).Value.normalized;
+
+                    var angle1 = Angle(direction, Vector3.forward + Vector3.right * 0.5f);
+                    var angle2 = Angle(direction, Vector3.back + Vector3.right * 0.5f);
+
+                    API.Grid.addPointDisturbanceDirection(m_grid, new Vector3(pos.x, pos.z, angle1 * Mathf.Deg2Rad), m_distrurbance * velocity);
+                    API.Grid.addPointDisturbanceDirection(m_grid, new Vector3(pos.x, pos.z, angle2 * Mathf.Deg2Rad), m_distrurbance * velocity);
+                }
+
+                m_previous_distrurbance_position = pos;
+            }
+            else
+            {
+                m_previous_distrurbance_position = null;
+            }
         }
 
         void OnDestroy()

@@ -153,6 +153,8 @@ public:
    */
   void addPointDisturbance(Vec2 pos, Real val);
 
+  void addPointDisturbance(Vec3 pos, Real val);
+
 public:
   /**
    * @brief Preforms advection step

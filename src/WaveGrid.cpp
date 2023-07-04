@@ -166,6 +166,16 @@ void WaveGrid::addPointDisturbance(const Vec2 pos, const Real val) {
   }
 }
 
+void WaveGrid::addPointDisturbance(const Vec3 pos, const Real val) {
+  // Find the closest point on the grid to the point `pos`
+    int ix = posToIdx(pos[X], X);
+    int iy = posToIdx(pos[Y], Y);
+    int itheta = posToIdx(pos[Theta], Theta);
+    if (ix >= 0 && ix < gridDim(X) && iy >= 0 && iy < gridDim(Y)) {
+        m_amplitude(ix, iy, itheta, 0) += val;
+    }
+}
+
 void WaveGrid::advectionStep(const Real dt) {
 
   auto amplitude = interpolatedAmplitude();

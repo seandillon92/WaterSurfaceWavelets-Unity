@@ -57,6 +57,14 @@ API Real amplitude(WaterWavelets::WaveGrid* grid, Vec4 pos4){
     return grid->amplitude(pos4);
 }
 
+API void addPointDisturbance(WaterWavelets::WaveGrid* grid, Vec2 pos, Real disturbance) {
+    grid->addPointDisturbance(pos, disturbance);
+}
+
+API void addPointDisturbanceDirection(WaterWavelets::WaveGrid* grid, Vec3 pos, float disturbance) {
+    grid->addPointDisturbance(pos, disturbance);
+}
+
 #pragma endregion
 
 #pragma region Profile Buffer
