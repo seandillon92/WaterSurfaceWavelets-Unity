@@ -5,20 +5,19 @@ using Unity.Jobs;
 using UnityEngine;
 using WaterWaveSurface;
 
-public class WaterSurfaceMeshData : IDisposable
+internal class WaterSurfaceMeshData : IDisposable
 {
 
-    public int size { get; private set; } = 10;
-    public NativeArray<float> amplitude { get; private set; }
-    public NativeArray<Vector3> positions { get; private set; }
-    public int[] indices { get; private set; }
-    public float[] profileBufferData { get; private set; }  
-    public float profileBufferPeriod { get; private set; }  
+    internal int size { get; private set; } = 10;
+    internal NativeArray<float> amplitude { get; private set; }
+    internal NativeArray<Vector3> positions { get; private set; }
+    internal int[] indices { get; private set; }
+    internal float[] profileBufferData { get; private set; }  
+    internal float profileBufferPeriod { get; private set; }  
+    internal bool hasProfileData => profileBufferData?.Length > 0;
 
-    public bool hasProfileData => profileBufferData?.Length > 0;
-
-    public delegate void WaterSurfaceMeshDelegate(Vector3[] v, float[][] amplitudes, int index);
-    public WaterSurfaceMeshData(int size)
+    internal delegate void WaterSurfaceMeshDelegate(Vector3[] v, float[][] amplitudes, int index);
+    internal WaterSurfaceMeshData(int size)
     {
         Init(size);
     }
@@ -48,8 +47,8 @@ public class WaterSurfaceMeshData : IDisposable
         private Matrix4x4 cameraMatrix;
         private Matrix4x4 projectionMatrix;
 
-        public VerticesJob(
-            IntPtr grid, 
+        internal VerticesJob(
+            WaveGrid grid, 
             int grid_resolution, 
             float multiplier, 
             Matrix4x4 cameraMatrix, 
@@ -58,7 +57,7 @@ public class WaterSurfaceMeshData : IDisposable
             NativeArray<Vector3> positions,
             NativeArray<float> amplitudes)
         {
-            this.grid = grid;
+            this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
             this.multiplier = multiplier;
             this.cameraMatrix = cameraMatrix;
@@ -117,8 +116,8 @@ public class WaterSurfaceMeshData : IDisposable
         }
     }
 
-    public void SetVertices(
-        IntPtr grid, 
+    internal void SetVertices(
+        WaveGrid grid, 
         int grid_resolution,
         float multiplier,
         Matrix4x4 cameraMatrix,

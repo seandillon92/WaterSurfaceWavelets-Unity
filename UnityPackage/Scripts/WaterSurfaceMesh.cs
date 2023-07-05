@@ -2,16 +2,17 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class WaterSurfaceMesh
+internal class WaterSurfaceMesh
 {
-    public Mesh mesh { get; private set; }
+    internal Mesh mesh { get; private set; }
     private Vertex[] m_vertices;
     private int m_count;
     private WaterSurfaceMeshData m_data;
 
-    public WaterSurfaceMesh(WaterSurfaceMeshData data)
+    internal WaterSurfaceMesh(WaterSurfaceMeshData data)
     {
         m_data = data;
+
         var count = m_data.size;
         m_count = count * count;
         mesh = new Mesh();
@@ -37,7 +38,7 @@ public class WaterSurfaceMesh
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct Vertex
+    private struct Vertex
     {
         public Vector4 pos;
         public Vector2 uv;
@@ -47,7 +48,7 @@ public class WaterSurfaceMesh
         public Vector4 amplitude4;
     }
 
-    public void Update()
+    internal void Update()
     {
         for (int i = 0; i < m_count; i++)
         {
