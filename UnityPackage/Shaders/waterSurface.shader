@@ -5,6 +5,7 @@ Shader"Unlit/waterSurface"
         _Skybox("Skybox", Cube) = ""{}
 		[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
         _RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
+        _DepthIndex ("Depth Index", Range(0.0, 1.0)) = 1
     }
     SubShader
     {
@@ -42,7 +43,8 @@ Shader"Unlit/waterSurface"
                 float4 amplitude4 : TEXCOORD4;
                 float4 position : SV_POSITION;
                 float3 wavePosition : TEXCOORD5;
-                float2 depth : TEXCOORD6;};
+                float4 screenPos : TEXCOORD7;
+            };
 
 
             #include "waterSurface.cginc"
@@ -51,6 +53,7 @@ Shader"Unlit/waterSurface"
             float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
+            float _DepthIndex;
 
             v2f vert (appdata v)
             {
@@ -66,7 +69,7 @@ Shader"Unlit/waterSurface"
     
                 pos += wavePosition(pos, amplitude);
     
-                o.position = UnityObjectToClipPos(pos);
+                o.position = UnityObjectToClipPos(v.vertex.xyz);
                 UNITY_TRANSFER_FOG(o,o.vertex);
     
                 o.amplitude1 = v.amplitude1;
@@ -74,7 +77,7 @@ Shader"Unlit/waterSurface"
                 o.amplitude3 = v.amplitude3;
                 o.amplitude4 = v.amplitude4;
                 o.wavePosition = pos;
-                COMPUTE_EYEDEPTH(o.depth);
+                o.screenPos = ComputeScreenPos(o.position);
                 return o;
             }
 
@@ -86,8 +89,9 @@ Shader"Unlit/waterSurface"
                     i.amplitude3,
                     i.amplitude4};
     
-                float depth = LinearEyeDepth(i.depth);
-                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude, depth));
+                float depth = i.screenPos.y / i.screenPos.w;
+                depth = depth * _DepthIndex;
+                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude, 1-depth));
                 
                 fixed4 fragment;
                 normal= normalize(normal);

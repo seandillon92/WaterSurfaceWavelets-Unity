@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 internal class WaterSurfaceMeshRenderer
@@ -22,8 +23,9 @@ internal class WaterSurfaceMeshRenderer
         {
             if (!m_textureData)
             {
-
-                m_textureData = new Texture2D(m_data.profileBufferData.Length/4, 1, TextureFormat.RGBAFloat, false);
+                int size = m_data.profileBufferData.Length/4;
+                
+                m_textureData = new Texture2D(size, 1, TextureFormat.RGBAFloat, true);
                 m_textureData.wrapMode = TextureWrapMode.Repeat;
                 m_textureData.filterMode = FilterMode.Bilinear;
             }
