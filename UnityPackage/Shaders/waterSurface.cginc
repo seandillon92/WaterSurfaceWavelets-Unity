@@ -26,16 +26,8 @@ float iAmpl(float angle/*in [0,2pi]*/, float4 amplitude[NUM]) {
 
 static const int seed = 40234324;
 
-float3 wavePosition(appdata data) {
-
-    float3 p = data.vertex.xyz;
+float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
     float3 result = float3(0.0, 0.0, 0.0);
-    float4 amplitude[NUM] = { 
-        data.amplitude1, 
-        data.amplitude2, 
-        data.amplitude3, 
-        data.amplitude4
-    };
 
     const int N = NUM_INTEGRATION_NODES;
     float da = 1.0 / N;
@@ -44,7 +36,7 @@ float3 wavePosition(appdata data) {
 
         float angle = a * tau;
         float2 kdir = float2(cos(angle), sin(angle));
-        float kdir_x = dot(p.xz, kdir) + tau * sin(seed * a);
+        float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
         float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
@@ -55,29 +47,19 @@ float3 wavePosition(appdata data) {
     return result;
 }
 
-float3 waveNormal(v2f data) {
-    
-    float3 p = data.pos;
+float3 waveNormal(float3 pos, float4 amplitude[NUM], float depth) {
 
     float3 tx = float3(1.0, 0.0, 0.0);
     float3 ty = float3(0.0, 1.0, 0.0);
-    
-    float4 amplitude[NUM] =
-    {
-        data.amplitude1,
-        data.amplitude2,
-        data.amplitude3,
-        data.amplitude4
-    };
 
-    const int N = NUM_INTEGRATION_NODES;
+    const float N = NUM_INTEGRATION_NODES;
     float da = 1.0 / N;
     float dx = DIR_NUM * tau / N;
     for (float a = 0; a < 1; a += da) {
 
         float angle = a * tau;
         float2 kdir = float2(cos(angle), sin(angle));
-        float kdir_x = dot(p.xz, kdir) + tau * sin(seed * a);
+        float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
         float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));

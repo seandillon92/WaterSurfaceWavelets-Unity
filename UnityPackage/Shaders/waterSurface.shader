@@ -2,9 +2,9 @@ Shader"Unlit/waterSurface"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _Diffuse("Diffuse", Color) = (1,1,1,1)
-        _Ambient("Ambient", Color) = (1,1,1,1)
+        _Skybox("Skybox", Cube) = ""{}
+		[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
+        _RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
     }
     SubShader
     {
@@ -35,71 +35,79 @@ Shader"Unlit/waterSurface"
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 amplitude1 : TEXCOORD1;
                 float4 amplitude2 : TEXCOORD2;
                 float4 amplitude3 : TEXCOORD3;
                 float4 amplitude4 : TEXCOORD4;
-                float4 vertex : SV_POSITION;
-                float3 normal : TEXCOORD5;
-                float3 cameraDir : TEXCOORD6;
-                float3 lightDir : TEXCOORD7;
-                float3 pos : TEXCOORD8;
-            };
+                float4 position : SV_POSITION;
+                float3 wavePosition : TEXCOORD5;
+                float2 depth : TEXCOORD6;};
 
 
             #include "waterSurface.cginc"
-
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-            float4 _Diffuse;
-            float4 _Ambient;
+            samplerCUBE _Skybox;
+            float4 _FoamColor;
+            float3 _FresnelColor;
+            float _FresnelExponent;
+            float _RefractionIndex;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 float3 pos = v.vertex.xyz;
-                pos += wavePosition(v);
+                float4 amplitude[NUM] =
+                {
+                    v.amplitude1,
+                    v.amplitude2,
+                    v.amplitude3,
+                    v.amplitude4
+                };
     
-                o.vertex = UnityObjectToClipPos(pos);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                pos += wavePosition(pos, amplitude);
+    
+                o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);
     
                 o.amplitude1 = v.amplitude1;
                 o.amplitude2 = v.amplitude2;
                 o.amplitude3 = v.amplitude3;
                 o.amplitude4 = v.amplitude4;
-    
-                o.lightDir = normalize(light - o.vertex.xyz);
-                o.cameraDir = -o.vertex.xyz;
-                o.pos = v.vertex.xyz;
-                o.normal = UnityObjectToWorldNormal(float3(0, 1, 0));
+                o.wavePosition = pos;
+                COMPUTE_EYEDEPTH(o.depth);
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 normal = UnityObjectToWorldNormal(waveNormal(i));
-                float4 specular = float4(1.0, 1.0, 1.0, 1.0);
-                float4 lightColor = float4(1.0, 1.0, 1.0, 1.0);
-                float4 diffColor = _Diffuse;
-                if (i.pos.x < -50 || i.pos.x > 50 || i.pos.z < -50 || i.pos.z > 50)
-                {
-                    diffColor.rgb = float3(0.6, 0.6, 0.6);
-                }
+                float4 amplitude[NUM] = { 
+                    i.amplitude1,
+                    i.amplitude2,
+                    i.amplitude3,
+                    i.amplitude4};
+    
+                float depth = LinearEyeDepth(i.depth);
+                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude, depth));
                 
-                fixed4 fragment = _Ambient;
+                fixed4 fragment;
                 normal= normalize(normal);
-                float3 light = normalize(i.lightDir);
-                //Diffuse 
-                float intensity = max(0.0, dot(normal, light));
-                fragment += diffColor * lightColor * intensity;
+
+                float3 view = normalize(WorldSpaceViewDir(float4(i.wavePosition, 1.0f)));
+                float3 reflectionDir = reflect(-view, normal);
+                float3 reflection = texCUBE(_Skybox, reflectionDir);
+    
+                float3 refractionDir = refract(-view, normal, _RefractionIndex);
+                float3 refraction = texCUBE(_Skybox, refractionDir);
+    
+                float fresnel = dot(normal, view);
+                
+                fresnel = saturate(1 - fresnel);
+			    //raise the fresnel value to the exponents power to be able to adjust it
+                fresnel = pow(fresnel, _FresnelExponent);
+                fragment.xyz = (1 - fresnel) * refraction + (fresnel) * reflection;
                 
                 // apply fog
-                //UNITY_APPLY_FOG(i.fogCoord, fragment);
-                //fragment.xyz = waveNormal(i);
-                //fragment.w = 1.0;
+                UNITY_APPLY_FOG(i.fogCoord, fragment);
                 return fragment;
             }
             ENDCG
