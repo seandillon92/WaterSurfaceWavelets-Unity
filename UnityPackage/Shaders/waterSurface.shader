@@ -69,7 +69,7 @@ Shader"Unlit/waterSurface"
     
                 pos += wavePosition(pos, amplitude);
     
-                o.position = UnityObjectToClipPos(v.vertex.xyz);
+                o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);
     
                 o.amplitude1 = v.amplitude1;
