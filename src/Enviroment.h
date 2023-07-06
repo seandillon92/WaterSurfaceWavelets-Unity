@@ -6,7 +6,7 @@ namespace WaterWavelets {
 
 class Environment {
 public:
-  Environment(float size);
+  Environment(float size, float* data, size_t data_size);
 
   bool inDomain(Vec2 pos) const;
   Real levelset(Vec2 pos) const;
@@ -14,6 +14,9 @@ public:
 
 public:
   float _dx;
+private:
+  float* _data;
+  int N;
 };
 
 } // namespace WaterWavelets

@@ -71,6 +71,10 @@ public:
       LinearBasis,
       PiersonMoskowitz
     } spectrumType = PiersonMoskowitz;
+
+    /** The terrain height map.*/
+    float* terrain;
+    size_t terrain_size;
   };
 
 public:

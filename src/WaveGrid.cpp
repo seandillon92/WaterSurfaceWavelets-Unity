@@ -9,7 +9,7 @@ constexpr int pos_modulo(int n, int d) { return (n % d + d) % d; }
 
 constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
 
-  WaveGrid::WaveGrid(Settings s) : m_spectrum(10),m_enviroment(s.size) {
+  WaveGrid::WaveGrid(Settings s) : m_spectrum(10),m_enviroment(s.size, s.terrain, s.terrain_size) {
 
   m_amplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
   m_newAmplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);

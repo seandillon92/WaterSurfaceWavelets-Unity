@@ -3,6 +3,7 @@
 
 #include "../WaveGrid.h"
 #include "waterSurface/WaterSurfaceMesh.h"
+#include "../data/harbor_data.cpp"
 
 #include <iostream>
 
@@ -24,6 +25,9 @@ auto settings = []() { // this use of lambda is basically emulating Designated
   s.n_zeta  = 1;
 
   s.initial_time = 100;
+
+  s.terrain = const_cast<float*>(harbor_data);
+  s.terrain_size = sizeof(harbor_data)/sizeof(float);
 
   return s;
 }();
