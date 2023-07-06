@@ -64,12 +64,12 @@ namespace WaterWaveSurface
                     Camera.main.transform.localToWorldMatrix,
                     Camera.main.projectionMatrix,
                     m_directionToShow);
-
-                m_data.LoadProfile(m_grid.GetProfileBuffer(0));
-
-                m_mesh.Update();
-                m_meshRenderer.Update();
             }
+
+            m_data.LoadProfile(m_grid.GetProfileBuffer(0));
+
+            m_mesh.Update();
+            m_meshRenderer.Update();
 
             m_grid.Timestep(m_grid.ClfTimeStep() * (float)Math.Pow(10, logdt), m_updateSimulation);
         }

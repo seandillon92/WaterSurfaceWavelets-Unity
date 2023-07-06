@@ -5,12 +5,51 @@ public class CameraMovement : MonoBehaviour
     [SerializeField]
     private Camera m_Camera;
 
+    [SerializeField]
+
+    private float scrollSpeed = 3.0f;
+
     private Vector3? m_last_right_mouse_pos;
+    private Vector3? m_last_middle_mouse_pos;
 
     private void LateUpdate()
     {
+        HandleRightMouse();
+        HandleMiddleMouse();
+        HandleMouseScroll();
+    }
 
-            HandleRightMouse();
+    private void HandleMouseScroll()
+    {
+        if (Input.mouseScrollDelta.magnitude > 0)
+        {
+            m_Camera.transform.position += 
+                m_Camera.transform.forward * 
+                -Input.mouseScrollDelta.y * 
+                scrollSpeed;
+        }
+    }
+
+    private void HandleMiddleMouse()
+    {
+        if (Input.GetMouseButton(2))
+        {
+            var pos = Input.mousePosition;
+            if (m_last_middle_mouse_pos != null)
+            {
+                var velocity = pos - m_last_middle_mouse_pos;
+                velocity *= Time.deltaTime;
+                m_Camera.transform.position =
+                    m_Camera.transform.position + 
+                    m_Camera.transform.up * -velocity.Value.y + 
+                    m_Camera.transform.right * velocity.Value.x;
+            }
+            m_last_middle_mouse_pos = pos;
+        }
+        else
+        {
+            m_last_middle_mouse_pos = null;
+        }
     }
 
     private void HandleRightMouse()

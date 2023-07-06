@@ -65,6 +65,7 @@ internal class WaterSurfaceMesh
         }
 
         mesh.SetVertexBufferData(m_vertices, 0, 0, m_count);
+        mesh.RecalculateBounds();
     }
 
 }
