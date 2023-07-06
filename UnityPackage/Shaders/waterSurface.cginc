@@ -47,7 +47,7 @@ float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
     return result;
 }
 
-float3 waveNormal(float3 pos, float4 amplitude[NUM], float depth) {
+float3 waveNormal(float3 pos, float4 amplitude[NUM]) {
 
     float3 tx = float3(1.0, 0.0, 0.0);
     float3 ty = float3(0.0, 1.0, 0.0);
@@ -62,7 +62,7 @@ float3 waveNormal(float3 pos, float4 amplitude[NUM], float depth) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, (1 - depth) * 12));
+        float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
 
         tx.xz += kdir.x * tt.zw;
         ty.yz += kdir.y * tt.zw;

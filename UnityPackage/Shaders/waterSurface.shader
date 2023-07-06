@@ -5,7 +5,6 @@ Shader"Unlit/waterSurface"
         _Skybox("Skybox", Cube) = ""{}
 		[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
         _RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
-        _DepthIndex ("Depth Index", Range(0.0, 1.0)) = 1
     }
     SubShader
     {
@@ -43,7 +42,6 @@ Shader"Unlit/waterSurface"
                 float4 amplitude4 : TEXCOORD4;
                 float4 position : SV_POSITION;
                 float3 wavePosition : TEXCOORD5;
-                float4 screenPos : TEXCOORD7;
             };
 
 
@@ -53,7 +51,6 @@ Shader"Unlit/waterSurface"
             float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
-            float _DepthIndex;
 
             v2f vert (appdata v)
             {
@@ -77,7 +74,6 @@ Shader"Unlit/waterSurface"
                 o.amplitude3 = v.amplitude3;
                 o.amplitude4 = v.amplitude4;
                 o.wavePosition = pos;
-                o.screenPos = ComputeScreenPos(o.position);
                 return o;
             }
 
@@ -88,10 +84,7 @@ Shader"Unlit/waterSurface"
                     i.amplitude2,
                     i.amplitude3,
                     i.amplitude4};
-    
-                float depth = i.screenPos.y / i.screenPos.w;
-                depth = depth * _DepthIndex;
-                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude, 1-depth));
+                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude));
                 
                 fixed4 fragment;
                 normal= normalize(normal);
@@ -106,7 +99,6 @@ Shader"Unlit/waterSurface"
                 float fresnel = dot(normal, view);
                 
                 fresnel = saturate(1 - fresnel);
-			    //raise the fresnel value to the exponents power to be able to adjust it
                 fresnel = pow(fresnel, _FresnelExponent);
                 fragment.xyz = (1 - fresnel) * refraction + (fresnel) * reflection;
                 
