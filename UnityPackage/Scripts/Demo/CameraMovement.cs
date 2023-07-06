@@ -12,7 +12,7 @@ public class CameraMovement : MonoBehaviour
     private Vector3? m_last_right_mouse_pos;
     private Vector3? m_last_middle_mouse_pos;
 
-    private void LateUpdate()
+    private void Update()
     {
         HandleRightMouse();
         HandleMiddleMouse();

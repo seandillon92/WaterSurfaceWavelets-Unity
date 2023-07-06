@@ -53,7 +53,7 @@ namespace WaterWaveSurface
             m_filter.sharedMesh = m_mesh.mesh;
         }
 
-        void Update()
+        void LateUpdate()
         {
             if (m_updateSimulation)
             {
