@@ -33,16 +33,13 @@ namespace WaterWaveSurface
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
-        internal WaveGrid.Settings Settings => m_settings;
-
         private void Awake()
         {
-
             m_filter = GetComponent<MeshFilter>();
             m_renderer = GetComponent<MeshRenderer>();
         }
 
-        // Start is called before the first frame update
+
         void Start()
         {
             m_grid = new WaveGrid(m_settings);

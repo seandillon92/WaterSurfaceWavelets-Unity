@@ -1,16 +1,13 @@
-using System;
 using UnityEngine;
 using WaterWaveSurface;
 
-[RequireComponent(typeof(MeshRenderer))]
-[RequireComponent(typeof(MeshFilter))]
 internal class TerrainBaker : MonoBehaviour
 {
     [SerializeField]
-    private LayerMask m_layers;
+    private WaterTerrain m_terrain;
 
     [SerializeField]
-    private WaterSurface m_surface;
+    private LayerMask m_layers;
 
     [SerializeField]
     private int m_minHeight = -100;
@@ -19,46 +16,20 @@ internal class TerrainBaker : MonoBehaviour
     private int m_maxHeight = 100;
 
     [SerializeField]
-    private TextAsset dataText;
+    private Vector2Int m_samples;
 
     [SerializeField]
-    private MeshRenderer m_renderer;
+    private int m_size;
 
-    [SerializeField]
-    private MeshFilter m_filter;
+    internal WaterTerrain WaterTerrain => m_terrain;
 
-    private void Awake()
-    {
-        m_renderer = GetComponent<MeshRenderer>();
-        m_filter = GetComponent<MeshFilter>();
-        Load();
-    }
-
-    public void Start() {
-        GenerateMesh();
-    }
-
-    public void Load()
-    {
-        var text = dataText.text;
-        var tokens = text.Split('\n', '\t');
-        Debug.Log("Tokens: " + tokens.Length);
-        var settings = m_surface.Settings;
-        settings.terrain = new float[tokens.Length];
-        for(int i = 0; i < tokens.Length; i++)
-        {
-            settings.terrain[i] = float.Parse(tokens[i]);
-        }
-
-    }
-
-    public void GenerateMesh()
+    private Mesh Debug_GenerateMesh(WaterSurface surface)
     {
         var mesh = new Mesh();
         var side = 100;
         var positions = new Vector3[side * side];
         var indices = new int[(side - 1) * (side - 1) * 4];
-        var size = m_surface.Settings.size;
+        var size = m_terrain.size;
 
         for (int i =  0; i < side * side; i++)
         {
@@ -71,7 +42,7 @@ internal class TerrainBaker : MonoBehaviour
             x *= 0.99f * size;
             y *= 0.99f * size;
             positions[i] = 
-                new Vector3(x, (float)(-10 * Math.Tanh(m_surface.GetTerrainHeight(new Vector2(x,y)) * 0.1f)), y);
+                new Vector3(x, -surface.GetTerrainHeight(new Vector2(x,y)), y);
         }
 
         for (var i = 0; i < side - 1; i++)
@@ -92,33 +63,36 @@ internal class TerrainBaker : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateTangents();
 
-        m_filter.sharedMesh = mesh;
+        return mesh;
     }
 
     public void Bake()
     {
-        var settings = m_surface.Settings;
+        m_terrain.heights = new float[(m_samples.x + 1) * (m_samples.y + 1)];
+        var heights = m_terrain.heights;
 
-        var size = settings.size;
-        settings.terrain = new float[(size * 2 + 1) * (size * 2 + 1)];
-        var terrain = settings.terrain;
+        float dx = 1f / m_samples.x;
+        float dy = 1f / m_samples.y;
 
-        for (int i = -size; i <= size; i++)
+        int index = 0;
+        for (float x = -1f ; x <= 1f; x+= dx * 2)
         {
-            for (int j = -size; j <= size; j++)
+            for (float y = -1f; y <= 1f; y += dy * 2)
             {
-
-                int index = (i + size) * (size * 2 + 1) + (j + size);
-                Ray ray = new Ray(new Vector3(i, m_maxHeight, j), Vector3.down);
+                Ray ray = new Ray(new Vector3(x * m_size, m_maxHeight, y * m_size), Vector3.down);
                 if (Physics.Raycast(ray, out RaycastHit hit, m_maxHeight - m_minHeight, m_layers))
                 {
-                    terrain[index] = hit.point.y;
+                    heights[index] = -hit.point.y;
                 }
                 else
                 {
-                    terrain[index] = m_minHeight;
+                    heights[index] = m_minHeight;
                 }
+
+                index++;
             }
         }
+
+        m_terrain.size = m_size;
     }
 }
