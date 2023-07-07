@@ -19,6 +19,7 @@ internal class WaveGrid : IDisposable
         public int n_zeta = 1;
         public float initial_time = 100;
         public int spectrum_type = 1;
+        public float[] terrain;
     }
 
     internal WaveGrid(Settings settings)
@@ -31,7 +32,9 @@ internal class WaveGrid : IDisposable
             settings.n_theta,
             settings.n_zeta,
             settings.initial_time,
-            settings.spectrum_type);
+            settings.spectrum_type,
+            settings.terrain, 
+            settings.terrain.Length);
     }
 
     internal float ClfTimeStep()
@@ -67,6 +70,11 @@ internal class WaveGrid : IDisposable
     internal void AddPointDisturbance(Vector2 pos, float value)
     {
         API.Grid.addPointDisturbance(m_grid, pos, value);
+    }
+
+    internal float GetTerrainHeight(Vector2 pos)
+    {
+        return API.Grid.levelSet(m_grid, pos);
     }
 
     public void Dispose()

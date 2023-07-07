@@ -59,7 +59,6 @@ auto grid_dy = [](Vec2 pos, float dx, size_t N, float* data) -> float {
 Environment::Environment(float size, float* data, size_t data_size) {
     _data = new float[data_size];
     memcpy(_data, data, sizeof(float) * data_size);
-    std::cout << "TEST" << std::endl;
     N = sqrt(data_size);
     _dx = (2 * size) / N;
 }

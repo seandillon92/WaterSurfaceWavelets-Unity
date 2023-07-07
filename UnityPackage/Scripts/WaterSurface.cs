@@ -33,6 +33,8 @@ namespace WaterWaveSurface
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
+        internal WaveGrid.Settings Settings => m_settings;
+
         private void Awake()
         {
 
@@ -89,6 +91,14 @@ namespace WaterWaveSurface
         public void AddPointDirectionDisturbance(Vector3 pos, float value)
         {
             m_grid.AddPointDisturbance(pos, value);
+        }
+
+        /// <summary>
+        /// Get the height of the terrain (ocean bed or land).
+        /// </summary>
+        public float GetTerrainHeight(Vector2 pos)
+        {
+            return m_grid.GetTerrainHeight(pos);
         }
 
 

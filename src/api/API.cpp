@@ -16,7 +16,9 @@ API WaterWavelets::WaveGrid* createGrid(
     int n_theta,
     int n_zeta,
     Real initial_time,
-    int spectumType) {
+    int spectumType,
+    void* terrain,
+    size_t terrain_size) {
 
 
     auto settings = WaterWavelets::WaveGrid::Settings{
@@ -27,7 +29,9 @@ API WaterWavelets::WaveGrid* createGrid(
         n_theta,
         n_zeta,
         initial_time,
-        static_cast<WaterWavelets::WaveGrid::Settings::SpectrumType>(spectumType)
+        static_cast<WaterWavelets::WaveGrid::Settings::SpectrumType>(spectumType),
+        static_cast<float*>(terrain),
+        terrain_size
     };
 
 	return new WaterWavelets::WaveGrid(settings);
@@ -51,6 +55,10 @@ API size_t profileBuffersSize(WaterWavelets::WaveGrid* grid) {
 
 API Real idxToPos(WaterWavelets::WaveGrid* grid, int idx, int dim) {
     return grid->idxToPos(idx, dim);
+}
+
+API Real levelSet(WaterWavelets::WaveGrid* grid, Vec2 pos) {
+    return grid->m_enviroment.levelset(pos);
 }
 
 API Real amplitude(WaterWavelets::WaveGrid* grid, Vec4 pos4){

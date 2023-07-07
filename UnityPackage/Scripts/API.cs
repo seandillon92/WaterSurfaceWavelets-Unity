@@ -7,7 +7,9 @@ using static WaterWaveSurface.API;
 
 namespace WaterWaveSurface
 {
-    public class API
+
+    
+    internal class API
     {
         public const string name =
 #if UNITY_IOS
@@ -15,7 +17,7 @@ namespace WaterWaveSurface
 #else
             "watersurfacewavelets";
 #endif
-        public class Grid
+        internal class Grid
         {
             [DllImport(name)]
             public static extern IntPtr createGrid(
@@ -26,7 +28,9 @@ namespace WaterWaveSurface
                 int n_theta,
                 int n_zeta,
                 float initial_time,
-                int spectumType);
+                int spectumType,
+                float[] terrain,
+                long terrain_size);
 
             [DllImport(name)]
             public static extern void destroyGrid(IntPtr grid);
@@ -54,6 +58,9 @@ namespace WaterWaveSurface
 
             [DllImport(name)]
             public static extern void addPointDisturbanceDirection(IntPtr grid, Vector3 pos, float disturbance);
+
+            [DllImport(name)]
+            public static extern float levelSet(IntPtr grid, Vector2 pos);
         }
 
         public class ProfileBuffer
