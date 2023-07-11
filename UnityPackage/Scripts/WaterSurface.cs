@@ -67,7 +67,7 @@ namespace WaterWaveSurface
                     m_grid,
                     m_visualizationGridResolution,
                     m_amplitudeMultiplier,
-                    Camera.main.transform.localToWorldMatrix,
+                    Camera.main.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)),
                     Camera.main.projectionMatrix,
                     translationXZ,
                     m_directionToShow,
