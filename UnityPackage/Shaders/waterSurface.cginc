@@ -6,9 +6,7 @@ static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
 
 uniform sampler2D textureData;
 uniform float profilePeriod;
-uniform float3 light;
 
-// Define getAmpl for vertex shader
 float Ampl(int i, float4 amplitude[NUM]) {
     i = i % DIR_NUM;
     

@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WaterSurfaceMaterial
-  m_Shader: {fileID: 4800000, guid: 364bb5e7c8e6e0c47a30bdb086e40607, type: 3}
+  m_Name: BakeVolume
+  m_Shader: {fileID: 4800000, guid: 0adfdf98040ca6845bd8b93bd2127ff2, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -40,12 +40,8 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Foam:
-        m_Texture: {fileID: 2800000, guid: 1847c427ebed2b7469dd22667fe6e4e0, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: d5c8151d0e0bcf046887fc78cecd1b1b, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -60,43 +56,29 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _Skybox:
-        m_Texture: {fileID: 8900000, guid: e71fc492f440446b99875b8e1df890ba, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - textureData:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
+    m_Ints:
+    - _DivX: 4
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _DepthIndex: 0.05
     - _DetailNormalMapScale: 1
+    - _Dividers: 0.4
     - _DstBlend: 0
-    - _FresnelExponent: 0.51
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _MaxAmplitudeNormal: 0
-    - _MaxAmplitudePosition: 10
+    - _LineWidth: 0.001
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RefractionIndex: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _WireThickness: 76
     - _ZWrite: 1
     m_Colors:
-    - _Ambient: {r: 0.24999997, g: 0.2, b: 0.22999996, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Diffuse: {r: 0.4, g: 0.4, b: 0.8, a: 1}
+    - _Color: {r: 0.039525747, g: 1, b: 0, a: 0.21176471}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
-    - _FresnelColor: {r: 0.7737985, g: 0.8262564, b: 0.9811321, a: 1}
+    - _Water: {r: 0, g: 0, b: 0.5, a: 0.49411765}
   m_BuildTextureStacks: []

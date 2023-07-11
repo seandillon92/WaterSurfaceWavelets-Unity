@@ -24,7 +24,7 @@ internal class WaveGrid : IDisposable
     internal WaveGrid(Settings settings)
     {
         m_grid = API.Grid.createGrid(
-            settings.terrain.size,
+            settings.terrain.size.x,
             settings.max_zeta,
             settings.min_zeta,
             settings.n_x,

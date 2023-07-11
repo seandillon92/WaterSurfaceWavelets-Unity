@@ -46,6 +46,8 @@ internal class WaterSurfaceMeshData : IDisposable
         private float multiplier;
         private Matrix4x4 cameraMatrix;
         private Matrix4x4 projectionMatrix;
+        private Vector2 translation;
+        private float waterLevel;
 
         internal VerticesJob(
             WaveGrid grid, 
@@ -55,7 +57,9 @@ internal class WaterSurfaceMeshData : IDisposable
             Matrix4x4 projectionMatrix,
             int direction,
             NativeArray<Vector3> positions,
-            NativeArray<float> amplitudes)
+            NativeArray<float> amplitudes,
+            Vector2 translation,
+            float waterLevel)
         {
             this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
@@ -65,6 +69,8 @@ internal class WaterSurfaceMeshData : IDisposable
             this.direction = direction;
             this.positions = positions;
             this.amplitudes = amplitudes;
+            this.translation = translation;
+            this.waterLevel = waterLevel;
         }
 
         (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
@@ -91,21 +97,22 @@ internal class WaterSurfaceMeshData : IDisposable
             var raycast = CameraRayCast(screenPos);
             var dir = raycast.dir;
             var camPos = raycast.camPos;
-
-            float t = -camPos.y / dir.y;
+            var camY = camPos.y - waterLevel;
+            float t = -camY / dir.y;
 
             t = t < 0 ? 1000 : t;
 
             var position = camPos + t * dir;
 
-            position.y = 0;
+            position.y = waterLevel;
 
             positions[index] = position;
 
             for (int itheta = 0; itheta < 16; itheta++)
             {
                 float theta = API.Grid.idxToPos(grid, itheta, 2);
-                Vector4 pos4 = new(position.x, position.z, theta, API.Grid.idxToPos(grid, 0, 3));
+                Vector4 pos4 = 
+                    new(position.x - translation.x, position.z - translation.y, theta, API.Grid.idxToPos(grid, 0, 3));
 
                 if (direction == -1 || direction == itheta)
                     amplitudes[index * 16 + itheta] = multiplier * API.Grid.amplitude(grid, pos4);
@@ -122,7 +129,9 @@ internal class WaterSurfaceMeshData : IDisposable
         float multiplier,
         Matrix4x4 cameraMatrix,
         Matrix4x4 projectionMatrix,
-        int direction)
+        Vector2 translation,
+        int direction,
+        float waterLevel)
     {
         var job = new VerticesJob(
             grid,
@@ -132,7 +141,9 @@ internal class WaterSurfaceMeshData : IDisposable
             projectionMatrix,
             direction,
             this.positions, 
-            this.amplitude);
+            this.amplitude,
+            translation,
+            waterLevel);
 
         var handle = job.Schedule(this.size * this.size, 1);
         handle.Complete();

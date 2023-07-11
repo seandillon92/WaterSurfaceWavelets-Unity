@@ -1,3 +1,4 @@
+using Palmmedia.ReportGenerator.Core;
 using System;
 using UnityEngine;
 
@@ -50,10 +51,16 @@ namespace WaterWaveSurface
             m_meshRenderer = new WaterSurfaceMeshRenderer(m_data, m_renderer.sharedMaterial);
 
             m_filter.sharedMesh = m_mesh.mesh;
+
+            transform.localScale = Vector3.one;
+            transform.localPosition = Vector3.zero;
         }
 
         void LateUpdate()
         {
+            var translation = m_settings.terrain.transform.GetPosition();
+            var translationXZ = new Vector2(translation.x, translation.z);
+
             if (m_updateSimulation)
             {
                 m_data.SetVertices(
@@ -62,7 +69,9 @@ namespace WaterWaveSurface
                     m_amplitudeMultiplier,
                     Camera.main.transform.localToWorldMatrix,
                     Camera.main.projectionMatrix,
-                    m_directionToShow);
+                    translationXZ,
+                    m_directionToShow,
+                    m_settings.terrain.water_level);
             }
 
             m_data.LoadProfile(m_grid.GetProfileBuffer(0));
@@ -97,7 +106,6 @@ namespace WaterWaveSurface
         {
             return m_grid.GetTerrainHeight(pos);
         }
-
 
         void OnDestroy()
         {

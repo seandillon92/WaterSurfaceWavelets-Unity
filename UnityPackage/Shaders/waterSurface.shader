@@ -1,4 +1,4 @@
-Shader"Unlit/waterSurface"
+Shader"Unlit/WaterWaveSurfaces/waterSurface"
 {
     Properties
     {
@@ -68,7 +68,7 @@ Shader"Unlit/waterSurface"
     
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);
-    
+
                 o.amplitude1 = v.amplitude1;
                 o.amplitude2 = v.amplitude2;
                 o.amplitude3 = v.amplitude3;
