@@ -45,8 +45,6 @@ internal class Disturbance : MonoBehaviour
             pos.x -= terrainPos.x;
             pos.z -= terrainPos.z;
 
-            
-
             if (m_previous_left_mouse_position != null)
             {
                 float velocity = Vector3.Distance(m_previous_left_mouse_position.Value, pos) * Time.deltaTime;
@@ -67,10 +65,16 @@ internal class Disturbance : MonoBehaviour
 
     private void Rain()
     {
-        if (m_enableRain)
-        {
-            var point = new Vector2(Random.Range(-50, 50), Random.Range(-50, 50)); 
-            m_waterSurface.AddPointDisturbance(point, m_disturbance);
-        }
+        if (!m_enableRain)
+            return;
+
+        var terrain = m_waterSurface.Settings.terrain;
+        var size = terrain.size;
+        var offset = terrain.transform.GetPosition();
+        var point = new Vector2(
+            Random.Range(offset.x - size.x, offset.x + size.x),
+            Random.Range(offset.z - size.y, offset.z + size.y));
+
+        m_waterSurface.AddPointDisturbance(point, m_disturbance);
     }
 }
