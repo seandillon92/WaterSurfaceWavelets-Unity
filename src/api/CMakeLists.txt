@@ -6,6 +6,6 @@ add_custom_command(
 	TARGET WaterSurfaceWavelets POST_BUILD        
     	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 	$<TARGET_FILE:WaterSurfaceWavelets>
-        "${PROJECT_SOURCE_DIR}/UnityPackage/Plugins/x86_64/watersurfacewavelets.dll")
+        "${PROJECT_SOURCE_DIR}/UnityPackage/Runtime/Plugins/x86_64/watersurfacewavelets.dll")
 
 
