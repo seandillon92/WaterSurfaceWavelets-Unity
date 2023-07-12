@@ -10,11 +10,12 @@ internal class TerrainBaker : MonoBehaviour
     private LayerMask m_layers;
 
     [SerializeField]
-    internal Vector2Int m_samples;
+    private Vector2Int m_samples;
 
-    internal WaterTerrain WaterTerrain => m_terrain;
+    [SerializeField]
+    private float m_waterLevel;
 
-    public void Bake(Vector3Int extends, Vector3 position, float waterLevel)
+    public void Bake(Vector3Int extends, Vector3 position)
     {
         m_terrain.heights = new float[(m_samples.x + 1) * (m_samples.y + 1)];
         var heights = m_terrain.heights;
@@ -30,11 +31,11 @@ internal class TerrainBaker : MonoBehaviour
                 Ray ray = new Ray(new Vector3(x * extends.x + position.x, position.y + extends.y, z * extends.z + position.z), Vector3.down);
                 if (Physics.Raycast(ray, out RaycastHit hit, extends.y * 2, m_layers))
                 {
-                    heights[index] = waterLevel-hit.point.y;
+                    heights[index] = m_waterLevel-hit.point.y;
                 }
                 else
                 {
-                    heights[index] = waterLevel-(position.y);
+                    heights[index] = m_waterLevel-(position.y - extends.y);
                 }
 
                 index++;
@@ -43,6 +44,6 @@ internal class TerrainBaker : MonoBehaviour
 
         m_terrain.size = new Vector2Int(extends.x, extends.z);
         m_terrain.transform = transform.localToWorldMatrix;
-        m_terrain.water_level = waterLevel;
+        m_terrain.water_level = m_waterLevel;
     }
 }

@@ -8,32 +8,12 @@ internal class TerrainBakerEditor : Editor
 {
     private TerrainBaker Target => (TerrainBaker)this.target;
 
-    private Mesh m_terrain_preview_mesh;
-
-    private Material m_default_material;
-
-    private Material m_volume_material;
-
-    private bool m_showPreview = true;
-
-    private Matrix4x4 m_matrix_translateXZ;
-
-    private MeshPreview m_preview;
-
-    private float m_water_level;
-
-    private float TerrainWaterLevel
-    {
-        get => Target.WaterTerrain.water_level;
-        set
-        {
-            Target.WaterTerrain.water_level = value;
-            EditorUtility.SetDirty(Target.WaterTerrain);
-        }
-    }
-
     private Mesh m_waterLevel_mesh;
     private Mesh m_bakingVolume_mesh;
+    private Mesh m_terrain_preview_mesh;
+
+    private Material m_volume_material;
+    private MeshPreview m_preview;
 
     private Mesh GenerateWaterTerrainMesh(int visualizationSize, Vector2Int terrainSize, WaveGrid grid)
     {
@@ -89,22 +69,53 @@ internal class TerrainBakerEditor : Editor
             }
         }
     }
+
+    SerializedProperty waterLevel;
+    SerializedProperty terrain;
+
+    void OnEnable()
+    {
+        waterLevel = serializedObject.FindProperty("m_waterLevel");
+        terrain = serializedObject.FindProperty("m_terrain");
+
+        SceneView.duringSceneGui -= CustomSceneGUI;
+        SceneView.duringSceneGui += CustomSceneGUI;
+    }
+
+    void OnDisable()
+    {
+        SceneView.duringSceneGui -= CustomSceneGUI;
+        m_preview?.Dispose();
+    }
+
+    private float WaterLevel
+    {
+        get => waterLevel.floatValue;
+        set => waterLevel.floatValue = value;
+    }
+
+    private WaterTerrain Terrain
+    {
+        get => terrain.objectReferenceValue as WaterTerrain;
+        set => terrain.objectReferenceValue = value;
+    }
+
+
     public override void OnInspectorGUI()
     {
+        serializedObject.Update();
         DrawDefaultInspector();
 
-        m_showPreview = EditorGUILayout.Toggle("Show Preview", m_showPreview);
         if (GUILayout.Button("Bake"))
         {
-           
-            Target.Bake(Extends, Target.transform.position, m_water_level);
-            EditorUtility.SetDirty(Target.WaterTerrain);
+
+            Target.Bake(Extends, Target.transform.position);
             m_terrain_preview_mesh = null;
 
             m_preview?.Dispose();
             m_preview = null;
         }
-        m_water_level = EditorGUILayout.FloatField("Water Level", m_water_level);
+        serializedObject.ApplyModifiedProperties();
     }
 
     private void DrawSceneObjects()
@@ -117,12 +128,12 @@ internal class TerrainBakerEditor : Editor
         DrawBakingVolume();
     }
 
-    public void OnSceneGUI()
+    private void CustomSceneGUI(SceneView view)
     {
         var maxExtension = Mathf.Max(Extends.x, Extends.z);
         var pos = Target.transform.position;
         var targetY = Target.transform.position.y;
-        pos.y = m_water_level;
+        pos.y = WaterLevel;
 
         Handles.color = new Color(1, 1, 1, 1);
 
@@ -131,7 +142,7 @@ internal class TerrainBakerEditor : Editor
         Vector3 newPos = Handles.Slider(pos, Vector3.up);
 
         newPos.y = Mathf.Clamp(newPos.y, targetY - Extends.y, targetY + Extends.y);
-        m_water_level = newPos.y;
+        WaterLevel = newPos.y;
 
         Handles.Label(newPos, "Water Level");
 
@@ -147,43 +158,18 @@ internal class TerrainBakerEditor : Editor
         }
 
         DrawSceneObjects();
+        serializedObject.ApplyModifiedProperties();
     }
-
-    private Matrix4x4 GetTerrainMatrix()
-    {
-        var translation = Target.WaterTerrain.transform.GetPosition();
-        translation.y = 0;
-        m_matrix_translateXZ = Matrix4x4.Translate(translation);
-
-        return m_matrix_translateXZ;
-    }
-
-    private Material GetDefaultMaterial()
-    {
-        if (m_default_material == null)
-        {
-            m_default_material = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
-        }
-        return m_default_material;
-    }
-
 
     private Material GetVolumeMaterial()
     {
 
-        if (m_volume_material== null)
+        if (m_volume_material == null)
         {
             m_volume_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/BakeVolume"));
         }
-        m_volume_material.SetFloat(Shader.PropertyToID("WaterLevel"), m_water_level);
+        m_volume_material.SetFloat(Shader.PropertyToID("WaterLevel"), WaterLevel);
         return m_volume_material;
-    }
-
-    private void DrawPreview()
-    {
-        GenerateTerrainPreview();
-
-        Graphics.DrawMesh(m_terrain_preview_mesh, GetTerrainMatrix(), GetDefaultMaterial(), 0);
     }
 
     private void GenerateTerrainPreview()
@@ -191,7 +177,7 @@ internal class TerrainBakerEditor : Editor
         if (m_terrain_preview_mesh == null)
         {
             var settings = new WaveGrid.Settings();
-            settings.terrain = Target.WaterTerrain;
+            settings.terrain = Terrain;
             var extends = Extends;
             using (var grid = new WaveGrid(settings))
             {
@@ -274,10 +260,10 @@ internal class TerrainBakerEditor : Editor
         }
 
         var pos = Target.transform.position;
-        
+
         var matrix =
             Matrix4x4.Translate(Vector3.right * pos.x + Vector3.forward * pos.z) *
-            Matrix4x4.Translate(Vector3.up * m_water_level) *
+            Matrix4x4.Translate(Vector3.up * WaterLevel) *
             Matrix4x4.Scale(Vector3.right * Extends.x * 2 + Vector3.forward * Extends.z * 2);
 
         Graphics.DrawMesh(m_waterLevel_mesh, matrix, GetVolumeMaterial(), 0);
@@ -306,8 +292,8 @@ internal class TerrainBakerEditor : Editor
             var max = Mathf.Max(Math.Max(bound.extents.x, bound.extents.y), bound.extents.z);
             var normalized = Instantiate(m_terrain_preview_mesh);
             var positions = normalized.vertices;
-            
-            for ( var i = 0; i < normalized.vertexCount; i++)
+
+            for (var i = 0; i < normalized.vertexCount; i++)
             {
                 positions[i] /= max;
             }
@@ -317,11 +303,8 @@ internal class TerrainBakerEditor : Editor
             normalized.RecalculateNormals();
             m_preview = new MeshPreview(normalized);
         }
-        m_preview.OnPreviewGUI(r, background);
-    }
 
-    private void OnDisable()
-    {
-        m_preview?.Dispose();
+        m_preview.OnPreviewGUI(r, background);
+        GUI.Label(r, "Ocean Bed Preview");
     }
 }
