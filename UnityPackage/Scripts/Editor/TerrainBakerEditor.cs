@@ -121,18 +121,19 @@ internal class TerrainBakerEditor : Editor
     {
         var maxExtension = Mathf.Max(Extends.x, Extends.z);
         var pos = Target.transform.position;
+        var targetY = Target.transform.position.y;
         pos.y = m_water_level;
 
         Handles.color = new Color(1, 1, 1, 1);
 
         pos = GetHandlePosition(maxExtension, pos);
 
-        EditorGUI.BeginChangeCheck();
         Vector3 newPos = Handles.Slider(pos, Vector3.up);
-        if (EditorGUI.EndChangeCheck())
-        {
-            m_water_level = newPos.y;
-        }
+
+        newPos.y = Mathf.Clamp(newPos.y, targetY - Extends.y, targetY + Extends.y);
+        m_water_level = newPos.y;
+
+        Handles.Label(newPos, "Water Level");
 
         Vector3 GetHandlePosition(int maxExtension, Vector3 pos)
         {
