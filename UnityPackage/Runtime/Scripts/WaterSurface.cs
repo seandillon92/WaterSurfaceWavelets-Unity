@@ -35,6 +35,8 @@ namespace WaterWaveSurface
 
         internal WaveGrid.Settings Settings { get { return m_settings; } }
 
+        private float m_zeta;
+
         private void Awake()
         {
             m_filter = GetComponent<MeshFilter>();
@@ -55,6 +57,7 @@ namespace WaterWaveSurface
 
             transform.localScale = Vector3.one;
             transform.localPosition = Vector3.zero;
+            m_zeta = m_settings.min_zeta + 0.5f * (m_settings.max_zeta - m_settings.min_zeta) / m_settings.n_zeta;
         }
 
         void LateUpdate()
@@ -74,7 +77,8 @@ namespace WaterWaveSurface
                     m_settings.terrain.size,
                     m_directionToShow,
                     m_settings.terrain.water_level,
-                    m_renderOutsideBorders);
+                    m_renderOutsideBorders,
+                    m_zeta);
             }
 
             m_data.LoadProfile(m_grid.GetProfileBuffer(0));

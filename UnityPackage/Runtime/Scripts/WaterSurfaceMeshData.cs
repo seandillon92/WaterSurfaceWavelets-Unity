@@ -57,6 +57,7 @@ internal class WaterSurfaceMeshData : IDisposable
         public ProfilerMarker marker1;
         public ProfilerMarker marker2;
         public ProfilerMarker marker3;
+        private float zeta;
 
         internal VerticesJob(
             WaveGrid grid, 
@@ -70,7 +71,8 @@ internal class WaterSurfaceMeshData : IDisposable
             Vector2 translation,
             Vector2 size,
             float waterLevel,
-            bool renderOutsideBorders)
+            bool renderOutsideBorders,
+            float zeta)
         {
             this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
@@ -88,6 +90,7 @@ internal class WaterSurfaceMeshData : IDisposable
             this.marker2 = WaterSurfaceMeshData.marker2;
             this.marker3 = WaterSurfaceMeshData.marker3;
             this.projectionMatrix_Inverse = projectionMatrix.inverse;
+            this.zeta = zeta;
         }
 
         (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
@@ -137,7 +140,7 @@ internal class WaterSurfaceMeshData : IDisposable
             {
                 float theta = API.Grid.idxToPos(grid, itheta, 2);
                 Vector4 pos4 = 
-                    new(position.x - translation.x, position.z - translation.y, theta, API.Grid.idxToPos(grid, 0, 3));
+                    new(position.x - translation.x, position.z - translation.y, theta, zeta);
 
                 if (direction == -1 || direction == itheta)
                     amplitudes[index * 16 + itheta] = multiplier * API.Grid.amplitude(grid, pos4);
@@ -158,7 +161,8 @@ internal class WaterSurfaceMeshData : IDisposable
         Vector2 size,
         int direction,
         float waterLevel,
-        bool renderOutsideBorders)
+        bool renderOutsideBorders,
+        float zeta)
     {
         var job = new VerticesJob(
             grid,
@@ -172,7 +176,8 @@ internal class WaterSurfaceMeshData : IDisposable
             translation,
             size,
             waterLevel, 
-            renderOutsideBorders);
+            renderOutsideBorders,
+            zeta);
 
         var handle = job.Schedule(this.size * this.size, 1);
         handle.Complete();
