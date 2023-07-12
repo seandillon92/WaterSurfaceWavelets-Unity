@@ -26,8 +26,6 @@ namespace WaterWaveSurface
         [SerializeField]
         float m_amplitudeMultiplier = 4.0f;
 
-        private float logdt = -0.9f;
-
         private WaveGrid m_grid;
 
         private WaterSurfaceMeshData m_data;
@@ -86,7 +84,7 @@ namespace WaterWaveSurface
             m_mesh.Update();
             m_meshRenderer.Update();
 
-            m_grid.Timestep(m_grid.ClfTimeStep() * (float)Math.Pow(10, logdt), m_updateSimulation);
+            m_grid.Timestep(m_grid.ClfTimeStep() * Time.deltaTime, m_updateSimulation);
         }
         /// <summary>
         /// Add disturbance at a point in all directions
