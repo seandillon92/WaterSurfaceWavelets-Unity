@@ -34,6 +34,8 @@ namespace WaterWaveSurface
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
+        internal WaveGrid.Settings Settings { get { return m_settings; } }
+
         private void Awake()
         {
             m_filter = GetComponent<MeshFilter>();
