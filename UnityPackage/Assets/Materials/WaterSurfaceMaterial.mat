@@ -75,7 +75,7 @@ Material:
     - _DepthIndex: 0.05
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _FresnelExponent: 0.51
+    - _FresnelExponent: 4
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -85,7 +85,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RefractionIndex: 1
+    - _RefractionIndex: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

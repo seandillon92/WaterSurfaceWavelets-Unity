@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Profiling;
 using UnityEngine;
 using WaterWaveSurface;
 
@@ -33,7 +34,9 @@ internal class WaterSurfaceMeshData : IDisposable
         }
         
     }
-
+    static readonly ProfilerMarker marker1 = new ProfilerMarker("Marker_1");
+    static readonly ProfilerMarker marker2 = new ProfilerMarker("Marker_2");
+    static readonly ProfilerMarker marker3 = new ProfilerMarker("Marker_3");
     private struct VerticesJob : IJobParallelFor
     {
         public NativeArray<Vector3> positions;
@@ -46,10 +49,14 @@ internal class WaterSurfaceMeshData : IDisposable
         private float multiplier;
         private Matrix4x4 cameraMatrix;
         private Matrix4x4 projectionMatrix;
+        private Matrix4x4 projectionMatrix_Inverse;
         private Vector2 translation;
         private Vector2 size;
         private float waterLevel;
         private bool renderOutsideBorders;
+        public ProfilerMarker marker1;
+        public ProfilerMarker marker2;
+        public ProfilerMarker marker3;
 
         internal VerticesJob(
             WaveGrid grid, 
@@ -77,11 +84,15 @@ internal class WaterSurfaceMeshData : IDisposable
             this.size = size;
             this.waterLevel = waterLevel;
             this.renderOutsideBorders = renderOutsideBorders;
+            this.marker1 = WaterSurfaceMeshData.marker1;
+            this.marker2 = WaterSurfaceMeshData.marker2;
+            this.marker3 = WaterSurfaceMeshData.marker3;
+            this.projectionMatrix_Inverse = projectionMatrix.inverse;
         }
 
         (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
         {
-            Matrix4x4 trans = cameraMatrix * projectionMatrix.inverse;
+            Matrix4x4 trans = cameraMatrix * projectionMatrix_Inverse;
 
             Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + projectionMatrix.MultiplyPoint(Vector3.forward);
             point = trans.MultiplyPoint(point);
@@ -92,7 +103,7 @@ internal class WaterSurfaceMeshData : IDisposable
 
         public void Execute(int index)
         {
-
+            marker1.Begin();
             int ix = index / (grid_resolution + 1);
             int iy = index % (grid_resolution + 1);
 
@@ -120,6 +131,8 @@ internal class WaterSurfaceMeshData : IDisposable
 
             positions[index] = position;
 
+            marker1.End();
+            marker2.Begin();
             for (int itheta = 0; itheta < 16; itheta++)
             {
                 float theta = API.Grid.idxToPos(grid, itheta, 2);
@@ -131,7 +144,7 @@ internal class WaterSurfaceMeshData : IDisposable
                 else
                     amplitudes[index * 16 + itheta] = 0;
             }
-
+            marker2.End();
         }
     }
 
