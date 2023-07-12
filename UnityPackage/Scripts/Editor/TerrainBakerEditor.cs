@@ -305,6 +305,6 @@ internal class TerrainBakerEditor : Editor
         }
 
         m_preview.OnPreviewGUI(r, background);
-        GUI.Label(r, "Ocean Bed Preview");
+        GUI.Label(r, "Water Terrain Preview");
     }
 }

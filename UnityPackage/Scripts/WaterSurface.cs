@@ -15,6 +15,9 @@ namespace WaterWaveSurface
         private bool m_updateSimulation = true;
 
         [SerializeField]
+        private bool m_renderOutsideBorders = true;
+
+        [SerializeField]
         private int m_visualizationGridResolution = 100;
 
         [SerializeField]
@@ -72,8 +75,10 @@ namespace WaterWaveSurface
                     Camera.main.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)),
                     Camera.main.projectionMatrix,
                     translationXZ,
+                    m_settings.terrain.size,
                     m_directionToShow,
-                    m_settings.terrain.water_level);
+                    m_settings.terrain.water_level,
+                    m_renderOutsideBorders);
             }
 
             m_data.LoadProfile(m_grid.GetProfileBuffer(0));

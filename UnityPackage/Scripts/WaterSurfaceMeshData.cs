@@ -47,7 +47,9 @@ internal class WaterSurfaceMeshData : IDisposable
         private Matrix4x4 cameraMatrix;
         private Matrix4x4 projectionMatrix;
         private Vector2 translation;
+        private Vector2 size;
         private float waterLevel;
+        private bool renderOutsideBorders;
 
         internal VerticesJob(
             WaveGrid grid, 
@@ -59,7 +61,9 @@ internal class WaterSurfaceMeshData : IDisposable
             NativeArray<Vector3> positions,
             NativeArray<float> amplitudes,
             Vector2 translation,
-            float waterLevel)
+            Vector2 size,
+            float waterLevel,
+            bool renderOutsideBorders)
         {
             this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
@@ -70,7 +74,9 @@ internal class WaterSurfaceMeshData : IDisposable
             this.positions = positions;
             this.amplitudes = amplitudes;
             this.translation = translation;
+            this.size = size;
             this.waterLevel = waterLevel;
+            this.renderOutsideBorders = renderOutsideBorders;
         }
 
         (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
@@ -104,6 +110,12 @@ internal class WaterSurfaceMeshData : IDisposable
 
             var position = camPos + t * dir;
 
+            if (!renderOutsideBorders)
+            {
+                position.x = Mathf.Clamp(position.x, translation.x + -size.x, translation.x + size.x);
+                position.z = Mathf.Clamp(position.z, translation.y + - size.y, translation.y + size.y);
+            }
+
             position.y = waterLevel;
 
             positions[index] = position;
@@ -130,8 +142,10 @@ internal class WaterSurfaceMeshData : IDisposable
         Matrix4x4 cameraMatrix,
         Matrix4x4 projectionMatrix,
         Vector2 translation,
+        Vector2 size,
         int direction,
-        float waterLevel)
+        float waterLevel,
+        bool renderOutsideBorders)
     {
         var job = new VerticesJob(
             grid,
@@ -143,7 +157,9 @@ internal class WaterSurfaceMeshData : IDisposable
             this.positions, 
             this.amplitude,
             translation,
-            waterLevel);
+            size,
+            waterLevel, 
+            renderOutsideBorders);
 
         var handle = job.Schedule(this.size * this.size, 1);
         handle.Complete();
