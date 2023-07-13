@@ -110,6 +110,8 @@ internal class TerrainBakerEditor : Editor
         {
 
             Target.Bake(Extends, Target.transform.position);
+            EditorUtility.SetDirty(Terrain);
+
             m_terrain_preview_mesh = null;
 
             m_preview?.Dispose();
