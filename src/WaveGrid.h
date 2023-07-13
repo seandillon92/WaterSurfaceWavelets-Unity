@@ -71,6 +71,10 @@ public:
       LinearBasis,
       PiersonMoskowitz
     } spectrumType = PiersonMoskowitz;
+
+    /** The terrain height map.*/
+    float* terrain;
+    size_t terrain_size;
   };
 
 public:
@@ -152,6 +156,8 @@ public:
    * point.
    */
   void addPointDisturbance(Vec2 pos, Real val);
+
+  void addPointDisturbance(Vec3 pos, Real val);
 
 public:
   /**

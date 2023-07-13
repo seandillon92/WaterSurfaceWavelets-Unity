@@ -1,0 +1,16 @@
+{
+  "name": "com.sean-dillon.water-wave-surfaces",
+  "version": "0.0.1",
+  "displayName": "Water wave surfaces",
+  "description": "This is an example package",
+ "keywords": [
+    "water",
+    "waves",
+    "surface"
+  ],
+  "author": {
+    "name": "Sean Dillon",
+    "email": "sean.daniel.dillon@gmail.com",
+    "url": "sean-dillon.com"
+  }
+}

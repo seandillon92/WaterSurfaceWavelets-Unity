@@ -9,7 +9,7 @@ constexpr int pos_modulo(int n, int d) { return (n % d + d) % d; }
 
 constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
 
-  WaveGrid::WaveGrid(Settings s) : m_spectrum(10),m_enviroment(s.size) {
+  WaveGrid::WaveGrid(Settings s) : m_spectrum(10),m_enviroment(s.size, s.terrain, s.terrain_size) {
 
   m_amplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
   m_newAmplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
@@ -164,6 +164,16 @@ void WaveGrid::addPointDisturbance(const Vec2 pos, const Real val) {
       m_amplitude(ix, iy, itheta, 0) += val;
     }
   }
+}
+
+void WaveGrid::addPointDisturbance(const Vec3 pos, const Real val) {
+  // Find the closest point on the grid to the point `pos`
+    int ix = posToIdx(pos[X], X);
+    int iy = posToIdx(pos[Y], Y);
+    int itheta = posToIdx(pos[Theta], Theta);
+    if (ix >= 0 && ix < gridDim(X) && iy >= 0 && iy < gridDim(Y)) {
+        m_amplitude(ix, iy, itheta, 0) += val;
+    }
 }
 
 void WaveGrid::advectionStep(const Real dt) {

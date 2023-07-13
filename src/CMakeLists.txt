@@ -4,5 +4,6 @@ add_library(WaveGrid WaveGrid.cpp Enviroment.cpp Grid.cpp ProfileBuffer.cpp Spec
 target_link_libraries(WaveGrid Eigen3::Eigen)
 
 add_subdirectory(tests)
+add_subdirectory(api)
 add_subdirectory(visualization)
 
