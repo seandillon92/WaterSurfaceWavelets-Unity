@@ -18,7 +18,7 @@
   #+END_SRC
 
   To build:
-Windows-x64:
+**** Windows-x64:
   #+BEGIN_SRC bash
     mkdir -p build/release
     pushd build/release
@@ -26,7 +26,7 @@ Windows-x64:
     make -j
     popd
   #+END_SRC
-Mac/Linux:
+**** Mac/Linux:
 TBD
 
 
