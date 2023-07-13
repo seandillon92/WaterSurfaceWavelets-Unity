@@ -18,13 +18,18 @@
   #+END_SRC
 
   To build:
+Windows-x64:
   #+BEGIN_SRC bash
     mkdir -p build/release
     pushd build/release
-    cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake 
+    cmake ../.. -DVCPKG_TARGET_TRIPLET=x64-windows -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake 
     make -j
     popd
   #+END_SRC
+Mac/Linux:
+TBD
+
+
 
   And to run an example:
   #+BEGIN_SRC bash
