@@ -58,12 +58,15 @@ internal class WaterSurfaceMeshData : IDisposable
         public ProfilerMarker marker2;
         public ProfilerMarker marker3;
         private float zeta;
+        private Vector3 cameraPos;
+        private Vector3 projMatrixForward;
+        private Matrix4x4 cameraProjInverseMatrix;
 
         internal VerticesJob(
-            WaveGrid grid, 
-            int grid_resolution, 
-            float multiplier, 
-            Matrix4x4 cameraMatrix, 
+            WaveGrid grid,
+            int grid_resolution,
+            float multiplier,
+            Matrix4x4 cameraMatrix,
             Matrix4x4 projectionMatrix,
             int direction,
             NativeArray<Vector3> positions,
@@ -74,6 +77,7 @@ internal class WaterSurfaceMeshData : IDisposable
             bool renderOutsideBorders,
             float zeta)
         {
+            var projInverse = projectionMatrix.inverse;
             this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
             this.multiplier = multiplier;
@@ -89,40 +93,40 @@ internal class WaterSurfaceMeshData : IDisposable
             this.marker1 = WaterSurfaceMeshData.marker1;
             this.marker2 = WaterSurfaceMeshData.marker2;
             this.marker3 = WaterSurfaceMeshData.marker3;
-            this.projectionMatrix_Inverse = projectionMatrix.inverse;
             this.zeta = zeta;
-        }
-
-        (Vector3 dir, Vector3 camPos) CameraRayCast(Vector2 screenPos)
-        {
-            Matrix4x4 trans = cameraMatrix * projectionMatrix_Inverse;
-
-            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + projectionMatrix.MultiplyPoint(Vector3.forward);
-            point = trans.MultiplyPoint(point);
-            Vector3 camPos = cameraMatrix.MultiplyPoint(Vector3.zero);
-            Vector3 dir = (point - camPos).normalized;
-            return (dir, camPos);
+            this.projectionMatrix_Inverse = projInverse;
+            this.cameraPos = cameraMatrix.GetPosition();
+            this.projMatrixForward = projectionMatrix.MultiplyPoint(Vector3.forward);
+            this.cameraProjInverseMatrix = cameraMatrix * projInverse;
         }
 
         public void Execute(int index)
         {
+            const float tau = 6.28318530718f;
+            const float d_theta = tau / 16f;
+
             marker1.Begin();
             int ix = index / (grid_resolution + 1);
             int iy = index % (grid_resolution + 1);
 
+            //Raycast
             Vector2 screenPos = new Vector2(
                 ix * 2f / grid_resolution - 1f,
                 iy * 2f / grid_resolution - 1f);
 
-            var raycast = CameraRayCast(screenPos);
-            var dir = raycast.dir;
-            var camPos = raycast.camPos;
-            var camY = camPos.y - waterLevel;
+            //Matrix4x4 trans = cameraMatrix * projectionMatrix_Inverse;
+
+            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + this.projMatrixForward; //projectionMatrix.MultiplyPoint(Vector3.forward);
+            point = cameraProjInverseMatrix.MultiplyPoint(point);
+            Vector3 dir = (point - cameraPos).normalized;
+            // End Raycast
+
+            var camY = cameraPos.y - waterLevel;
             float t = -camY / dir.y;
 
             t = t < 0 ? 1000 : t;
 
-            var position = camPos + t * dir;
+            var position = cameraPos + t * dir;
 
             if (!renderOutsideBorders)
             {
@@ -133,12 +137,10 @@ internal class WaterSurfaceMeshData : IDisposable
             position.y = waterLevel;
 
             positions[index] = position;
-
-            marker1.End();
-            marker2.Begin();
             for (int itheta = 0; itheta < 16; itheta++)
             {
-                float theta = API.Grid.idxToPos(grid, itheta, 2);
+                float theta = (itheta + 0.5f) * d_theta;
+
                 Vector4 pos4 = 
                     new(position.x - translation.x, position.z - translation.y, theta, zeta);
 
@@ -147,7 +149,7 @@ internal class WaterSurfaceMeshData : IDisposable
                 else
                     amplitudes[index * 16 + itheta] = 0;
             }
-            marker2.End();
+            marker1.End();
         }
     }
 

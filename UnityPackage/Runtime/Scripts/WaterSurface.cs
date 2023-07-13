@@ -36,13 +36,13 @@ namespace WaterWaveSurface
         internal WaveGrid.Settings Settings { get { return m_settings; } }
 
         private float m_zeta;
+        private float m_timeStep;
 
         private void Awake()
         {
             m_filter = GetComponent<MeshFilter>();
             m_renderer = GetComponent<MeshRenderer>();
         }
-
 
         void Start()
         {
@@ -58,6 +58,7 @@ namespace WaterWaveSurface
             transform.localScale = Vector3.one;
             transform.localPosition = Vector3.zero;
             m_zeta = m_settings.min_zeta + 0.5f * (m_settings.max_zeta - m_settings.min_zeta) / m_settings.n_zeta;
+            m_timeStep = m_grid.ClfTimeStep();
         }
 
         void LateUpdate()
@@ -85,8 +86,8 @@ namespace WaterWaveSurface
 
             m_mesh.Update();
             m_meshRenderer.Update();
-
-            m_grid.Timestep(m_grid.ClfTimeStep() * Time.deltaTime, m_updateSimulation);
+            
+            m_grid.Timestep(m_timeStep * Time.deltaTime, m_updateSimulation);
         }
         /// <summary>
         /// Add disturbance at a point in all directions
