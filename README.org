@@ -10,12 +10,15 @@
   #+END_SRC
 
   Install prerequisites(takes couple of minutes):
+**** Windows-x64:
   #+BEGIN_SRC bash
     pushd vcpkg
     ./bootstrap-vcpkg.sh 
-    ./vcpkg install magnum-integration[imgui] eigen3 egl-registry
+    ./vcpkg install magnum-integration[imgui] eigen3 egl-registry --triplet x64-windows
     popd
   #+END_SRC
+**** Other:
+TBD
 
   To build:
 **** Windows-x64:
@@ -26,7 +29,7 @@
     make -j
     popd
   #+END_SRC
-**** Mac/Linux:
+**** Other:
 TBD
 
 
