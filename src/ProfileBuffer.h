@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "math/Math.h"
+#include "Spectrum.h"
 
 namespace WaterWavelets {
 
@@ -39,11 +40,14 @@ public:
    * @param integration_nodes Number of integraion nodes
    */
   template <typename Spectrum>
-  void precompute(Spectrum &spectrum, float time, float zeta_min,
-                  float zeta_max, int resolution = 4096, int periodicity = 2,
-                  int integration_nodes = 100) {
+  void precompute(
+      Spectrum &spectrum, 
+      float time, 
+      int resolution = 4096, 
+      int periodicity = 2) {
+
     m_data.resize(resolution);
-    m_period = periodicity * pow(2, zeta_max);
+    m_period = periodicity * pow(2, m_zeta_max);
 
 #pragma omp parallel for
     for (int i = 0; i < resolution; i++) {
@@ -52,7 +56,7 @@ public:
       float           p   = (i * m_period) / resolution;
 
       m_data[i] =
-          integrate(integration_nodes, zeta_min, zeta_max, [&](float zeta) {
+          integrate_with_step(m_integration_nodes, m_zeta_min, m_zeta_max, [&](float zeta, int step) {
 
             float waveLength = pow(2, zeta);
             float waveNumber = tau / waveLength;
@@ -63,7 +67,7 @@ public:
 
             float weight1 = p / m_period;
             float weight2 = 1 - weight1;
-            return waveLength * spectrum(zeta) *
+            return waveLength * m_spectrum_data[step] *
                    (cubic_bump(weight1) * gerstner_wave(phase1, waveNumber) +
                     cubic_bump(weight2) * gerstner_wave(phase2, waveNumber));
           });
@@ -104,6 +108,14 @@ public:
   float m_period;
 
   std::vector<std::array<float, 4>> m_data;
+private:
+    float m_zeta_min;
+    float m_zeta_max;
+    int m_integration_nodes;
+    std::vector<double> m_spectrum_data;
+    Spectrum& m_spectrum;
+public:
+    ProfileBuffer(float z_min, float z_max, int integration_nodes, Spectrum& spectrum);
 };
 
 }; // namespace WaterWavelets

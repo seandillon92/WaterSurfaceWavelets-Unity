@@ -27,7 +27,12 @@ constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
 
   m_time = s.initial_time;
 
-  m_profileBuffers.resize(s.n_zeta);
+  for (int izeta = 0; izeta < s.n_zeta; izeta++) {
+      Real zeta_min = idxToPos(izeta, Zeta) - 0.5 * dx(Zeta);
+      Real zeta_max = idxToPos(izeta, Zeta) + 0.5 * dx(Zeta);
+      m_profileBuffers.push_back(ProfileBuffer(zeta_min, zeta_max, 100, m_spectrum));
+  }
+
   precomputeGroupSpeeds();
 }
 
@@ -282,13 +287,9 @@ void WaveGrid::diffusionStep(const Real dt) {
 void WaveGrid::precomputeProfileBuffers() {
 
   for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
-
-    Real zeta_min = idxToPos(izeta, Zeta) - 0.5 * dx(Zeta);
-    Real zeta_max = idxToPos(izeta, Zeta) + 0.5 * dx(Zeta);
-
     // define spectrum
 
-    m_profileBuffers[izeta].precompute(m_spectrum, m_time, zeta_min, zeta_max);
+    m_profileBuffers[izeta].precompute(m_spectrum, m_time);
   }
 }
 

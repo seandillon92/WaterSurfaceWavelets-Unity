@@ -35,6 +35,18 @@ float ProfileBuffer::cubic_bump(float x) const {
     return 0.0f;
   else
     return x * x * (2 * abs(x) - 3) + 1;
-};
+}
+ProfileBuffer::ProfileBuffer(float z_min, float z_max, int integration_nodes, Spectrum& spectrum) : m_spectrum(spectrum)
+{
+    m_zeta_min = z_min;
+    m_zeta_max = z_max;
+    m_integration_nodes = integration_nodes;
+    m_spectrum_data.resize(integration_nodes);
+    integrate_with_step(integration_nodes, z_min, z_max, [&](float zeta, int step) {
+        m_spectrum_data[step] = spectrum(zeta);
+        return 0.0f;
+        });
+}
+;
 
 }; // namespace WaterWavelets
