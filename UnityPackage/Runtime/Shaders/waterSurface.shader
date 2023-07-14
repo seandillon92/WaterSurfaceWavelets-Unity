@@ -47,7 +47,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
             #include "waterSurface.cginc"
             samplerCUBE _Skybox;
-            float4 _FoamColor;
             float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
@@ -86,7 +85,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                     i.amplitude4};
                 float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude));
                 
-                fixed4 fragment;
+                fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);
 
                 float3 view = normalize(WorldSpaceViewDir(float4(i.wavePosition, 1.0f)));

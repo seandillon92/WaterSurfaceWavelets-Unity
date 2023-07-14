@@ -47,16 +47,9 @@ internal class WaterSurfaceMeshData : IDisposable
         private IntPtr grid;
         private int grid_resolution;
         private float multiplier;
-        private Matrix4x4 cameraMatrix;
-        private Matrix4x4 projectionMatrix;
-        private Matrix4x4 projectionMatrix_Inverse;
         private Vector2 translation;
         private Vector2 size;
         private float waterLevel;
-        private bool renderOutsideBorders;
-        public ProfilerMarker marker1;
-        public ProfilerMarker marker2;
-        public ProfilerMarker marker3;
         private float zeta;
         private Vector3 cameraPos;
         private Vector3 projMatrixForward;
@@ -81,20 +74,13 @@ internal class WaterSurfaceMeshData : IDisposable
             this.grid = grid.ptr;
             this.grid_resolution = grid_resolution;
             this.multiplier = multiplier;
-            this.cameraMatrix = cameraMatrix;
-            this.projectionMatrix = projectionMatrix;
             this.direction = direction;
             this.positions = positions;
             this.amplitudes = amplitudes;
             this.translation = translation;
             this.size = size;
             this.waterLevel = waterLevel;
-            this.renderOutsideBorders = renderOutsideBorders;
-            this.marker1 = WaterSurfaceMeshData.marker1;
-            this.marker2 = WaterSurfaceMeshData.marker2;
-            this.marker3 = WaterSurfaceMeshData.marker3;
             this.zeta = zeta;
-            this.projectionMatrix_Inverse = projInverse;
             this.cameraPos = cameraMatrix.GetPosition();
             this.projMatrixForward = projectionMatrix.MultiplyPoint(Vector3.forward);
             this.cameraProjInverseMatrix = cameraMatrix * projInverse;
@@ -105,7 +91,6 @@ internal class WaterSurfaceMeshData : IDisposable
             const float tau = 6.28318530718f;
             const float d_theta = tau / 16f;
 
-            marker1.Begin();
             int ix = index / (grid_resolution + 1);
             int iy = index % (grid_resolution + 1);
 
@@ -114,9 +99,7 @@ internal class WaterSurfaceMeshData : IDisposable
                 ix * 2f / grid_resolution - 1f,
                 iy * 2f / grid_resolution - 1f);
 
-            //Matrix4x4 trans = cameraMatrix * projectionMatrix_Inverse;
-
-            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + this.projMatrixForward; //projectionMatrix.MultiplyPoint(Vector3.forward);
+            Vector3 point = new Vector3(screenPos[0], screenPos[1], 0) + this.projMatrixForward; 
             point = cameraProjInverseMatrix.MultiplyPoint(point);
             Vector3 dir = (point - cameraPos).normalized;
             // End Raycast
@@ -127,12 +110,6 @@ internal class WaterSurfaceMeshData : IDisposable
             t = t < 0 ? 1000 : t;
 
             var position = cameraPos + t * dir;
-
-            if (!renderOutsideBorders)
-            {
-                position.x = Mathf.Clamp(position.x, translation.x + -size.x, translation.x + size.x);
-                position.z = Mathf.Clamp(position.z, translation.y + - size.y, translation.y + size.y);
-            }
 
             position.y = waterLevel;
 
@@ -149,7 +126,6 @@ internal class WaterSurfaceMeshData : IDisposable
                 else
                     amplitudes[index * 16 + itheta] = 0;
             }
-            marker1.End();
         }
     }
 
@@ -181,7 +157,7 @@ internal class WaterSurfaceMeshData : IDisposable
             renderOutsideBorders,
             zeta);
 
-        var handle = job.Schedule(this.size * this.size, 1);
+        var handle = job.Schedule(this.size * this.size, this.size);
         handle.Complete();
     }
 

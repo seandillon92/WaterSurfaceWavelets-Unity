@@ -7,7 +7,7 @@ static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
 uniform sampler2D textureData;
 uniform float profilePeriod;
 
-float Ampl(int i, float4 amplitude[NUM]) {
+float Ampl(uint i, float4 amplitude[NUM]) {
     i = i % DIR_NUM;
     
     return amplitude[i/4][i % 4];
@@ -17,7 +17,7 @@ static const float tau = 6.28318530718;
 
 float iAmpl(float angle/*in [0,2pi]*/, float4 amplitude[NUM]) {
     float a = DIR_NUM * angle / tau + DIR_NUM - 0.5;
-    int ia = int(floor(a));
+    uint ia = uint(floor(a));
     float w = a - ia;
     return (1 - w) * Ampl(ia % DIR_NUM, amplitude) + w * Ampl((ia + 1) % DIR_NUM, amplitude);
 }
