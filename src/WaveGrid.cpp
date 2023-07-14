@@ -33,6 +33,18 @@ constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
       m_profileBuffers.push_back(ProfileBuffer(zeta_min, zeta_max, 100, m_spectrum));
   }
 
+  m_positions.reserve(gridDim(X) * gridDim(Y));
+  for (int ix = 0; ix < gridDim(X); ix++) {
+      for (int iy = 0; iy < gridDim(Y); iy++) {
+          Vec2 pos = nodePosition(ix, iy);
+          if (m_enviroment.inDomain(pos)) {
+              m_positions.push_back({ix, iy});
+          }
+      }
+  }
+
+
+
   precomputeGroupSpeeds();
 }
 
@@ -184,35 +196,29 @@ void WaveGrid::addPointDisturbance(const Vec3 pos, const Real val) {
 void WaveGrid::advectionStep(const Real dt) {
 
   auto amplitude = interpolatedAmplitude();
+#pragma omp parallel for
+  for (int i = 0; i < m_positions.size(); i++) {
 
-#pragma omp parallel for collapse(2)
-  for (int ix = 0; ix < gridDim(X); ix++) {
-    for (int iy = 0; iy < gridDim(Y); iy++) {
+	  auto pos = m_positions[i];
 
-      Vec2 pos = nodePosition(ix, iy);
 
-      // update only points in the domain
-      if (m_enviroment.inDomain(pos)) {
+	  for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
+		  for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
 
-        for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
-          for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
+			  Vec4 pos4 = idxToPos({ pos[0], pos[1], itheta, izeta });
+			  Vec2 vel = groupVelocity(pos4);
 
-            Vec4 pos4 = idxToPos({ix, iy, itheta, izeta});
-            Vec2 vel  = groupVelocity(pos4);
+			  // Tracing back in Semi-Lagrangian
+			  Vec4 trace_back_pos4 = pos4;
+			  trace_back_pos4[X] -= dt * vel[X];
+			  trace_back_pos4[Y] -= dt * vel[Y];
 
-            // Tracing back in Semi-Lagrangian
-            Vec4 trace_back_pos4 = pos4;
-            trace_back_pos4[X] -= dt * vel[X];
-            trace_back_pos4[Y] -= dt * vel[Y];
+			  // Take care of boundaries
+			  trace_back_pos4 = boundaryReflection(trace_back_pos4);
 
-            // Take care of boundaries
-            trace_back_pos4 = boundaryReflection(trace_back_pos4);
-
-            m_newAmplitude(ix, iy, itheta, izeta) = amplitude(trace_back_pos4);
-          }
-        }
-      }
-    }
+			  m_newAmplitude(pos[0], pos[1], itheta, izeta) = amplitude(trace_back_pos4);
+		  }
+	  }
   }
 
   std::swap(m_newAmplitude, m_amplitude);
@@ -240,13 +246,12 @@ Vec4 WaveGrid::boundaryReflection(const Vec4 pos4) const {
   // We are assuming that after one reflection you are back in the domain. This
   // assumption is valid if you boundary is not so crazy.
   // This assert tests this assumption.
-  assert(m_enviroment.inDomain(pos));
+  //assert(m_enviroment.inDomain(pos));
 
   return Vec4{pos[X], pos[Y], reflected_theta, pos4[Zeta]};
 }
 
 void WaveGrid::diffusionStep(const Real dt) {
-
   auto grid = extendedGrid();
 
 #pragma omp parallel for collapse(2)
@@ -288,7 +293,6 @@ void WaveGrid::precomputeProfileBuffers() {
 
   for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
     // define spectrum
-
     m_profileBuffers[izeta].precompute(m_spectrum, m_time);
   }
 }

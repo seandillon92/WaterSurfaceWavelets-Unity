@@ -272,6 +272,9 @@ public:
   Real m_time;
 
   Environment m_enviroment;
+
+private:
+    std::vector<Vec2Int> m_positions;
 };
 
 } // namespace WaterWavelets
