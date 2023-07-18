@@ -4,9 +4,11 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Profiling;
 using UnityEngine;
+using WaveGrid;
 using WaterWaveSurface;
+using ProfileBuffer;
 
-internal class WaterSurfaceMeshData : IDisposable
+internal class WaveGridCPUData: IDisposable
 {
 
     internal int size { get; private set; } = 10;
@@ -17,23 +19,12 @@ internal class WaterSurfaceMeshData : IDisposable
     internal float profileBufferPeriod { get; private set; }  
     internal bool hasProfileData => profileBufferData?.Length > 0;
 
-    internal delegate void WaterSurfaceMeshDelegate(Vector3[] v, float[][] amplitudes, int index);
-    internal WaterSurfaceMeshData(int size)
+    internal WaveGridCPUData(int size)
     {
         Init(size);
     }
 
-    public unsafe void LoadProfile(IntPtr buffer)
-    {
-        this.profileBufferPeriod = API.ProfileBuffer.profileBufferPeriod(buffer);
-        this.profileBufferData = new float[API.ProfileBuffer.profileBufferDataSize(buffer) * 4];
-
-        fixed (float* array = this.profileBufferData)
-        {
-            API.ProfileBuffer.copyProfileBufferData(buffer, this.profileBufferData);
-        }
-        
-    }
+    
     static readonly ProfilerMarker marker1 = new ProfilerMarker("Marker_1");
     static readonly ProfilerMarker marker2 = new ProfilerMarker("Marker_2");
     static readonly ProfilerMarker marker3 = new ProfilerMarker("Marker_3");
@@ -56,7 +47,7 @@ internal class WaterSurfaceMeshData : IDisposable
         private Matrix4x4 cameraProjInverseMatrix;
 
         internal VerticesJob(
-            WaveGrid grid,
+            WaveGridCPU grid,
             int grid_resolution,
             float multiplier,
             Matrix4x4 cameraMatrix,
@@ -71,7 +62,7 @@ internal class WaterSurfaceMeshData : IDisposable
             float zeta)
         {
             var projInverse = projectionMatrix.inverse;
-            this.grid = grid.ptr;
+            this.grid = grid.Ptr;
             this.grid_resolution = grid_resolution;
             this.multiplier = multiplier;
             this.direction = direction;
@@ -130,7 +121,7 @@ internal class WaterSurfaceMeshData : IDisposable
     }
 
     internal void SetVertices(
-        WaveGrid grid, 
+        WaveGridCPU grid, 
         int grid_resolution,
         float multiplier,
         Matrix4x4 cameraMatrix,
@@ -197,5 +188,11 @@ internal class WaterSurfaceMeshData : IDisposable
     {
         this.positions.Dispose();
         this.amplitude.Dispose();
+    }
+
+    public void LoadProfileBufferData(ProfileBufferCPU buffer)
+    {
+        this.profileBufferPeriod = buffer.Period;
+        this.profileBufferData = buffer.Data;
     }
 }

@@ -1,15 +1,15 @@
 using System;
 using UnityEngine;
 
-internal class WaterSurfaceMeshRenderer
+internal class WaveGridCPURenderer
 {
-    private WaterSurfaceMeshData m_data;
+    private WaveGridCPUData m_data;
     private Material m_material;
     private int m_profile_period_id;
     private int m_texture_data_id;
     private Texture2D m_textureData;
     
-    internal WaterSurfaceMeshRenderer(WaterSurfaceMeshData surfaceData, Material material)
+    internal WaveGridCPURenderer(WaveGridCPUData surfaceData, Material material)
     {
         m_data = surfaceData;
         m_material = material;

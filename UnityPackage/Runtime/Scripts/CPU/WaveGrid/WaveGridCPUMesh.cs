@@ -2,14 +2,14 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-internal class WaterSurfaceMesh
+internal class WaveGridCPUMesh
 {
     internal Mesh mesh { get; private set; }
     private Vertex[] m_vertices;
     private int m_count;
-    private WaterSurfaceMeshData m_data;
+    private WaveGridCPUData m_data;
 
-    internal WaterSurfaceMesh(WaterSurfaceMeshData data)
+    internal WaveGridCPUMesh(WaveGridCPUData data)
     {
         m_data = data;
 

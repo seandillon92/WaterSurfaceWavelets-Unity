@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System;
+using WaveGrid;
 
 [CustomEditor(typeof(TerrainBaker))]
 [CanEditMultipleObjects]
@@ -15,7 +16,7 @@ internal class TerrainBakerEditor : Editor
     private Material m_volume_material;
     private MeshPreview m_preview;
 
-    private Mesh GenerateWaterTerrainMesh(int visualizationSize, Vector2Int terrainSize, WaveGrid grid)
+    private Mesh GenerateWaterTerrainMesh(int visualizationSize, Vector2Int terrainSize, WaveGridCPU grid)
     {
         var mesh = new Mesh();
         var side = visualizationSize;
@@ -178,10 +179,10 @@ internal class TerrainBakerEditor : Editor
     {
         if (m_terrain_preview_mesh == null)
         {
-            var settings = new WaveGrid.Settings();
+            var settings = new Settings();
             settings.terrain = Terrain;
             var extends = Extends;
-            using (var grid = new WaveGrid(settings))
+            using (var grid = new WaveGridCPU(settings))
             {
                 m_terrain_preview_mesh = GenerateWaterTerrainMesh(100, new Vector2Int(extends.x, extends.z), grid);
             }
