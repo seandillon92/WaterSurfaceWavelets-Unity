@@ -15,5 +15,6 @@ namespace WaveGrid
         public int spectrum_type = 1;
         public WaterTerrain terrain;
         public int visualizationResolution = 100;
+        public Camera camera;
     }
 }

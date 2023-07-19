@@ -54,7 +54,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
             v2f vert (appdata v)
             {
                 v2f o;
-                float3 pos = v.vertex.xyz;
+                float3 pos = gridPos(v.vertex.xy);
                 float4 amplitude[NUM] =
                 {
                     v.amplitude1,
@@ -63,7 +63,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                     v.amplitude4
                 };
     
-                pos += wavePosition(pos, amplitude);
+                //pos += wavePosition(pos, amplitude);
     
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);

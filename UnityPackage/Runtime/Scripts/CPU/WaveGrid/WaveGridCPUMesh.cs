@@ -65,7 +65,7 @@ internal class WaveGridCPUMesh
         }
 
         mesh.SetVertexBufferData(m_vertices, 0, 0, m_count);
-        mesh.RecalculateBounds();
+        mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 10000);
     }
 
 }

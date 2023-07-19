@@ -16,7 +16,6 @@ namespace WaveGrid
 
         public bool updateSimulation = true;
         public float amplitudeMultiplier = 4f;
-        public Camera camera;
 
         public int direction = -1;
         public bool renderOutsideBorders = true;

@@ -19,6 +19,7 @@ namespace WaveGrid
         private Vector2 m_terrain_translation;
         private Vector2 m_terrain_size;
         private float m_waterLevel;
+        private Camera m_camera;
 
 
         private List<ProfileBufferCPU> m_buffers = new List<ProfileBufferCPU>();
@@ -49,7 +50,7 @@ namespace WaveGrid
 
             m_data = new WaveGridCPUData(settings.visualizationResolution);
             m_mesh = new WaveGridCPUMesh(m_data);
-            m_renderer = new WaveGridCPURenderer(m_data, material);
+            m_renderer = new WaveGridCPURenderer(m_data, material, settings.camera, settings.terrain.water_level);
             m_visualizationResolution = settings.visualizationResolution;
             m_zeta = settings.min_zeta + 0.5f * (settings.max_zeta - settings.min_zeta) / settings.n_zeta;
 
@@ -58,6 +59,8 @@ namespace WaveGrid
             m_terrain_translation = new Vector2(terrainPosition.x, terrainPosition.z);
             m_terrain_size = settings.terrain.size;
             m_waterLevel = settings.terrain.water_level;
+
+            m_camera = settings.camera;
             if (filter != null)
             {
                 filter.sharedMesh = m_mesh.mesh;
@@ -91,8 +94,8 @@ namespace WaveGrid
                 this,
                 m_visualizationResolution,
                 s.amplitudeMultiplier,
-                s.camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)),
-                s.camera.projectionMatrix,
+                m_camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)),
+                m_camera.projectionMatrix,
                 m_terrain_translation,
                 m_terrain_size,
                 s.direction,

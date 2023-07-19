@@ -104,7 +104,6 @@ internal class WaveGridCPUData: IDisposable
 
             position.y = waterLevel;
 
-            positions[index] = position;
             for (int itheta = 0; itheta < 16; itheta++)
             {
                 float theta = (itheta + 0.5f) * d_theta;
@@ -163,7 +162,7 @@ internal class WaveGridCPUData: IDisposable
         {
             for (var j = 0; j < this.size; j++)
             {
-                positions[i * this.size + j] = new Vector3(-1f + i * delta, 0f,-1f + j * delta);
+                positions[i * this.size + j] = new Vector3(-1f + i * delta, -1f + j * delta, 0f);
             }
         }
 

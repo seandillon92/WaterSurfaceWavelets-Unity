@@ -7,6 +7,33 @@ static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
 uniform sampler2D textureData;
 uniform float profilePeriod;
 
+uniform float waterLevel;
+uniform float3 cameraPos;
+uniform float3 cameraProjectionForward;
+uniform float4x4 cameraInverseProjection;
+
+
+float3 mulPoint(float4x4 m, float3 p)
+{
+    float4 p4 = mul(m, float4(p, 1));
+    return p4.xyz / p4.w;
+}
+
+float3 gridPos(float2 pos)
+{
+    float3 p = float3(pos.xy, 0) + cameraProjectionForward;
+    p  = mulPoint(cameraInverseProjection, p);
+    
+    float3 dir = normalize(p - cameraPos);
+    float camY = cameraPos.y - waterLevel;
+    float t = -camY / dir.y;
+    
+    t = t < 0 || isnan(t) ? 1000 : t;
+    p = cameraPos + t * dir;
+    p.y = waterLevel;
+    return p;
+}
+
 float Ampl(uint i, float4 amplitude[NUM]) {
     i = i % DIR_NUM;
     
