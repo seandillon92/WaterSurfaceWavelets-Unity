@@ -1,7 +1,7 @@
 namespace ProfileBuffer
 {
-    internal interface IProfileBuffer
+    public interface IProfileBuffer
     {
-        internal void Update();
+       void Update();
     }
 }
