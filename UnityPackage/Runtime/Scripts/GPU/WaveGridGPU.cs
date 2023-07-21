@@ -86,6 +86,7 @@ namespace WaveGrid
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
             m_shader.SetFloat("groupSpeed", m_profileBuffers[0].groupSpeed);
+            m_shader.SetFloat("inverse_dx", (settings.terrain.size.x * 2f / settings.n_x));
 
             m_init_kernel = m_shader.FindKernel("SetDefaulAmplitude");
             
