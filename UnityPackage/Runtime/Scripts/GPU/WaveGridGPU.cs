@@ -14,7 +14,8 @@ namespace WaveGrid
 
         private RenderTexture m_amplitude;
         private RenderTexture m_newAmplitude;
-        private Texture2D m_environment;
+        private Texture2D m_environmentHeights;
+        private Texture2D m_environmentGradients;
 
         private WaveGridGPUMesh m_mesh;
 
@@ -44,7 +45,6 @@ namespace WaveGrid
                 float zeta_min = idxToPosZeta(izeta) - 0.5f * m_dz;
                 float zeta_max = idxToPosZeta(izeta) + 0.5f * m_dz;
                 m_profileBuffers.Add(new ProfileBufferGPU(zeta_min, zeta_max, new Spectrum(10), settings.initial_time));
-
             }
 
             // Create amplitude render textures
@@ -76,12 +76,30 @@ namespace WaveGrid
                 Debug.LogError("Could not create new amplitude texture");
             }
 
-            //Create the environment texture
+            //Create the environment textures
             var heightsSize = Mathf.RoundToInt(Mathf.Sqrt(settings.terrain.heights.Length));
-            m_environment =
+            m_environmentHeights =
                 new Texture2D(heightsSize, heightsSize, TextureFormat.RFloat, false, true);
-            m_environment.SetPixelData(settings.terrain.heights, 0);
-            m_environment.Apply();
+            m_environmentHeights.SetPixelData(settings.terrain.heights, 0);
+            m_environmentHeights.Apply();
+
+            m_environmentGradients = new Texture2D(heightsSize - 1, heightsSize - 1, TextureFormat.RGFloat, false, true);
+            var gradients = new float[(heightsSize - 1) * (heightsSize - 1) * 2];
+            for (int i = 0; i < heightsSize - 1; i++)
+            {
+                for (int j = 0; j < heightsSize - 1; j++)
+                {
+                    var height = settings.terrain.heights[i*heightsSize + j];
+                    var height_x = settings.terrain.heights[i*heightsSize + j + 1];
+                    var height_y = settings.terrain.heights[(i + 1)*heightsSize + j];
+                    Vector2 gradient = new Vector2(height_x - height, height_y - height).normalized;
+
+                    gradients[(i * (heightsSize - 1) + j) * 2] = gradient.x;
+                    gradients[(i*(heightsSize - 1) + j) * 2 + 1] = gradient.y;
+                }
+            }
+            m_environmentGradients.SetPixelData(gradients,0);
+            m_environmentGradients.Apply();
 
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
@@ -93,7 +111,8 @@ namespace WaveGrid
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
             m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
-            m_shader.SetTexture(m_advection_kernel, "heights", m_environment);
+            m_shader.SetTexture(m_advection_kernel, "heights", m_environmentHeights);
+            m_shader.SetTexture(m_advection_kernel, "gradients", m_environmentGradients);
 
             m_copy_kernel = m_shader.FindKernel("Copy");
             m_shader.SetTexture(m_copy_kernel, "Read", m_newAmplitude);
@@ -177,7 +196,7 @@ namespace WaveGrid
 
         void SetDefaultAmplitudes()
         {
-            float[] defaultValues = { 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
+            float[] defaultValues = { 0.1f, 0.1f, 0.1f, 0.1f, 1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f};
             m_shader.SetTexture(m_init_kernel, "Write", m_amplitude);
             SetFloats(m_shader, "Default", defaultValues);
             m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y,out uint z);

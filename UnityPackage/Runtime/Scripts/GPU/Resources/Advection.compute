@@ -5,6 +5,7 @@
 
 Texture3D<float> Read;
 Texture2D<float> heights;
+Texture2D<float2> gradients;
 RWTexture3D<float> Write;
 float Default[16];
 float deltaTime;
@@ -19,16 +20,16 @@ float iTheta2Theta(uint itheta)
     return (itheta + 0.5) * theta_dx;
 }
 
+uint Theta2iTheta(float theta)
+{
+    return round((theta / theta_dx) - 0.5);
+}
+
 float2 groupVelocity(uint3 id)
 {
     float cg = groupSpeed;
     float theta = iTheta2Theta(id.z);
     return cg * float2(cos(theta), sin(theta));
-}
-
-float3 boundaryReflection(float3 pos)
-{
-    return pos;
 }
 
 float getHeight(float2 pos)
@@ -38,9 +39,39 @@ float getHeight(float2 pos)
     float height =
         heights.SampleLevel(
             linearClampSampler,
-            float2((pos.x + 0.5) / x, (pos.y + 0.5) / y), 0);
-    return height;
+            float2((pos.y + 0.5) / y, (pos.x + 0.5) / x), 0);
+    return height/inverse_dx;
 }
+
+float2 getGradient(float2 pos)
+{
+    uint x, y, z;
+    Write.GetDimensions(x, y, z);
+    float2 gradient =
+        gradients.SampleLevel(
+            linearClampSampler,
+            float2((pos.y + 0.5) / y, (pos.x + 0.5) / x), 0);
+    return gradient;
+}
+
+float3 boundaryReflection(float3 pos)
+{
+    float height = getHeight(pos.xy);
+    if (height >= 0)
+    {
+        return pos;
+    }
+    
+    float2 n = getGradient(pos.xy);
+    float2 kdir = float2(cos(iTheta2Theta(pos.z)), sin(iTheta2Theta(pos.z)));
+    pos.xy = pos.xy - 2.0 * height * n;
+    kdir = kdir - 2.0 * (kdir * n) * n;
+    float reflected_theta = atan2(kdir.y, kdir.x);
+    uint reflected_itheta = Theta2iTheta(reflected_theta);
+    return float3(pos.xy, reflected_itheta);
+}
+
+
 
 [numthreads(2, 2, 8)]
 void SetDefaulAmplitude(uint3 id : SV_DispatchThreadID)
