@@ -1,4 +1,5 @@
 // Each #kernel tells which function to compile; you can have many kernels
+#pragma enable_d3d11_debug_symbols
 #pragma kernel CSMain
 
 RWTexture2D<float4> Result;
@@ -12,6 +13,14 @@ float z_max;
 static uint integration_nodes = 100;
 static float tau = 6.28318530718;
 static float g = 9.81;
+static float windSpeed = 10.0f;
+
+float spectrum(float zeta)
+{
+    float A = pow(1.1, 1.5 * zeta);
+    float B = exp(-1.8038897788076411f * pow(4, zeta) / pow(windSpeed, 4));
+    return 0.139098f * sqrt(A * B);
+}
 
 float4 gerstner_wave(float phase, float knum){
     float s = sin(phase);
@@ -42,16 +51,17 @@ float4 func(float zeta, float p, uint i)
 
     float weight1 = p / period;
     float weight2 = 1 - weight1;
-    return waveLength * Spectrum[uint2(i,0)] *
+    return waveLength * 
+                   spectrum(zeta) *
                    (cubic_bump(weight1) * gerstner_wave(phase1, waveNumber) +
                     cubic_bump(weight2) * gerstner_wave(phase2, waveNumber));
 }
 
 float4 integrate(float p)
 {
-    double dz = (z_max - z_min) / integration_nodes;
-    double z = z_min + 0.5 * dz;
-    double result = dz * func(z, p, 0);
+    float dz = (z_max - z_min) / integration_nodes;
+    float z = z_min + 0.5 * dz;
+    float4 result = dz * func(z, p, 0);
     for (uint i = 1; i < integration_nodes; i++)
     {
         z += dz;
@@ -61,7 +71,7 @@ float4 integrate(float p)
     return result;
 }
 
-[numthreads(8,8,1)]
+[numthreads(8,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
     uint i = id.x;

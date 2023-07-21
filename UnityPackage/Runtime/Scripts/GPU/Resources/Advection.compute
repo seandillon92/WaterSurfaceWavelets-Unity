@@ -1,0 +1,60 @@
+#pragma enable_d3d11_debug_symbols
+#pragma kernel Advection
+#pragma kernel SetDefaulAmplitude
+#pragma kernel Copy
+
+Texture3D<float> Read;
+RWTexture3D<float> Write;
+float Default[16];
+float deltaTime;
+float groupSpeed;
+SamplerState linearClampSampler;
+
+float2 groupVelocity(uint3 id)
+{
+    float cg = groupSpeed;
+    float theta = id.z;
+    return cg * float2(cos(theta), sin(theta));
+}
+
+float3 boundaryReflection(float3 pos)
+{
+    return pos;
+}
+
+[numthreads(2, 2, 8)]
+void SetDefaulAmplitude(uint3 id : SV_DispatchThreadID)
+{
+    uint x, y, z;
+    Write.GetDimensions(x, y, z);
+    if (id.x == 0 || id.y == 0 || id.x == x -1 || id.y == y-1)
+    {
+        Write[id] = Default[id.z];
+    }
+    else
+    {
+        Write[id] = 0.0f;
+    }
+}
+
+[numthreads(8,8,8)]
+void Advection (uint3 id : SV_DispatchThreadID)
+{
+    id.x += 1;
+    id.y += 1;
+    
+    float2 vel = groupVelocity(id);
+    float3 trace_back = id;
+    trace_back.x -= deltaTime * vel.x;
+    trace_back.y -= deltaTime * vel.y;
+    trace_back = boundaryReflection(trace_back);
+    Write[id] = Read.SampleLevel(linearClampSampler, trace_back, 0);
+}
+
+[numthreads(8,8,8)]
+void Copy(uint3 id : SV_DispatchThreadID)
+{
+    id.x += 1;
+    id.y += 1;
+    Write[id] = Read[id];
+}

@@ -28,7 +28,7 @@ namespace WaterWaveSurface
 
         void Start()
         {
-            m_grid = new WaveGridCPU(m_settings, m_renderer.sharedMaterial, m_filter);
+            m_grid = new WaveGridGPU(m_settings, m_renderer.sharedMaterial, m_filter);
             transform.localScale = Vector3.one;
             transform.localPosition = Vector3.zero;
         }
@@ -56,6 +56,10 @@ namespace WaterWaveSurface
             //m_grid.AddPointDisturbance(pos, value);
         }
 
+        private void OnValidate()
+        {
+            m_settings.OnValidate();
+        }
 
         void OnDestroy()
         {

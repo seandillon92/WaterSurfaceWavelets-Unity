@@ -12,6 +12,13 @@ uniform float3 cameraPos;
 uniform float3 cameraProjectionForward;
 uniform float4x4 cameraInverseProjection;
 
+uniform sampler3D amplitude;
+
+uniform float2 xmin;
+uniform float2 dx;
+uniform float2 translation;
+uniform uint nx;
+
 
 float3 mulPoint(float4x4 m, float3 p)
 {
@@ -19,7 +26,20 @@ float3 mulPoint(float4x4 m, float3 p)
     return p4.xyz / p4.w;
 }
 
-float3 gridPos(float2 pos)
+float2 gridToAmpl(float2 pos)
+{
+    pos = pos - translation; // account for terrain translation
+    pos = (pos - xmin) * dx - float2(0.5, 0.5); // transfer to simulation space
+    return pos;
+}
+
+float gridAmplitude(float2 pos, uint itheta)
+{
+    float3 samplingPos = float3((pos + float2(1, 1)) / nx, itheta / 16.0f);
+    return tex3Dlod(amplitude, float4(samplingPos, 0)).x;
+}
+
+float3 posToGrid(float2 pos)
 {
     float3 p = float3(pos.xy, 0) + cameraProjectionForward;
     p  = mulPoint(cameraInverseProjection, p);

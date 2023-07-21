@@ -8,6 +8,8 @@ namespace WaveGrid
     {
         public float max_zeta = Mathf.Log(10, 2);
         public float min_zeta = Mathf.Log(0.03f, 2);
+
+        [Delayed]
         public int n_x = 100;
         public int n_theta = 16;
         public int n_zeta = 1;
@@ -16,5 +18,10 @@ namespace WaveGrid
         public WaterTerrain terrain;
         public int visualizationResolution = 100;
         public Camera camera;
+
+        public void OnValidate()
+        {
+            n_x = Mathf.ClosestPowerOfTwo(n_x);
+        }
     }
 }
