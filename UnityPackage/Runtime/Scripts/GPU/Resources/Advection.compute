@@ -9,11 +9,18 @@ float Default[16];
 float deltaTime;
 float groupSpeed;
 SamplerState linearClampSampler;
+static float tau = 6.28318530718;
+static float theta_dx = tau / 16;
+
+float iTheta2Theta(uint itheta)
+{
+    return (itheta + 0.5) * theta_dx;
+}
 
 float2 groupVelocity(uint3 id)
 {
     float cg = groupSpeed;
-    float theta = id.z;
+    float theta = iTheta2Theta(id.z);
     return cg * float2(cos(theta), sin(theta));
 }
 
@@ -43,12 +50,18 @@ void Advection (uint3 id : SV_DispatchThreadID)
     id.x += 1;
     id.y += 1;
     
+    uint x, y, z;
+    Write.GetDimensions(x, y, z);
     float2 vel = groupVelocity(id);
     float3 trace_back = id;
     trace_back.x -= deltaTime * vel.x;
     trace_back.y -= deltaTime * vel.y;
     trace_back = boundaryReflection(trace_back);
-    Write[id] = Read.SampleLevel(linearClampSampler, trace_back, 0);
+    float read = 
+        Read.SampleLevel(
+            linearClampSampler,
+            float3((trace_back.x + 0.5) / x, (trace_back.y + 0.5) / y, (trace_back.z + 0.5) / z), 0);
+    Write[id] = read;
 }
 
 [numthreads(8,8,8)]

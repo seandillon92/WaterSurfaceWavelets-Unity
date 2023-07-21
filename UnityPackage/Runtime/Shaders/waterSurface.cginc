@@ -35,7 +35,7 @@ float2 gridToAmpl(float2 pos)
 
 float gridAmplitude(float2 pos, uint itheta)
 {
-    float3 samplingPos = float3((pos + float2(1, 1)) / nx, itheta / 16.0f);
+    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5f) / 16.0f);
     return tex3Dlod(amplitude, float4(samplingPos, 0)).x;
 }
 

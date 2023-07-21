@@ -158,7 +158,7 @@ namespace WaveGrid
             m_material.SetMatrix(m_cameraInverseProjection_id,
                 m_camera.transform.localToWorldMatrix * m_camera.projectionMatrix.inverse);
 
-            m_shader.SetFloat(m_deltaTime_id, Time.deltaTime*10000);
+            m_shader.SetFloat(m_deltaTime_id, Time.deltaTime);
 
             if (settings.updateSimulation)
             {
@@ -185,7 +185,7 @@ namespace WaveGrid
 
         void AdvectionStep()
         {
-            //SetDefaultAmplitudes();
+            
             {
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
                 m_shader.Dispatch(m_advection_kernel, (int)(m_settings.n_x/x), (int)(m_settings.n_x/y), (int)(16 / z));
