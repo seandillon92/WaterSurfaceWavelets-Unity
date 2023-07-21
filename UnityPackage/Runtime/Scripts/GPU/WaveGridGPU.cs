@@ -76,6 +76,13 @@ namespace WaveGrid
                 Debug.LogError("Could not create new amplitude texture");
             }
 
+            //Create the environment texture
+            var heightsSize = Mathf.RoundToInt(Mathf.Sqrt(settings.terrain.heights.Length));
+            m_environment =
+                new Texture2D(heightsSize, heightsSize, TextureFormat.RFloat, false, true);
+            m_environment.SetPixelData(settings.terrain.heights, 0);
+            m_environment.Apply();
+
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
             m_shader.SetFloat("groupSpeed", m_profileBuffers[0].groupSpeed);
@@ -85,6 +92,7 @@ namespace WaveGrid
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
             m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
+            m_shader.SetTexture(m_advection_kernel, "heights", m_environment);
 
             m_copy_kernel = m_shader.FindKernel("Copy");
             m_shader.SetTexture(m_copy_kernel, "Read", m_newAmplitude);
@@ -93,11 +101,6 @@ namespace WaveGrid
             //Set the default amplitude
             SetDefaultAmplitudes();
 
-            //Create the environment texture
-            m_environment = 
-                new Texture2D(settings.terrain.size.x, settings.terrain.size.y, TextureFormat.RFloat, false, true);
-            m_environment.SetPixelData(settings.terrain.heights, 0);
-            m_environment.Apply();
 
             //Create the Mesh
             m_mesh = new WaveGridGPUMesh(settings);

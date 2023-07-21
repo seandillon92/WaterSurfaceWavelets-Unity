@@ -4,6 +4,7 @@
 #pragma kernel Copy
 
 Texture3D<float> Read;
+Texture2D<float> heights;
 RWTexture3D<float> Write;
 float Default[16];
 float deltaTime;
@@ -19,7 +20,7 @@ float iTheta2Theta(uint itheta)
 
 float2 groupVelocity(uint3 id)
 {
-    float cg = groupSpeed;
+    float cg = groupSpeed * 10;
     float theta = iTheta2Theta(id.z);
     return cg * float2(cos(theta), sin(theta));
 }
@@ -27,6 +28,17 @@ float2 groupVelocity(uint3 id)
 float3 boundaryReflection(float3 pos)
 {
     return pos;
+}
+
+float getHeight(float2 pos)
+{
+    uint x, y, z;
+    Write.GetDimensions(x, y, z);
+    float height =
+        heights.SampleLevel(
+            linearClampSampler,
+            float2((pos.x + 0.5) / x, (pos.y + 0.5) / y), 0);
+    return height;
 }
 
 [numthreads(2, 2, 8)]
@@ -49,19 +61,23 @@ void Advection (uint3 id : SV_DispatchThreadID)
 {
     id.x += 1;
     id.y += 1;
+    float height = getHeight(id.xy);
+    if (height > 0)
+    {
     
-    uint x, y, z;
-    Write.GetDimensions(x, y, z);
-    float2 vel = groupVelocity(id);
-    float3 trace_back = id;
-    trace_back.x -= deltaTime * vel.x;
-    trace_back.y -= deltaTime * vel.y;
-    trace_back = boundaryReflection(trace_back);
-    float read = 
+        uint x, y, z;
+        Write.GetDimensions(x, y, z);
+        float2 vel = groupVelocity(id);
+        float3 trace_back = id;
+        trace_back.x -= deltaTime * vel.x;
+        trace_back.y -= deltaTime * vel.y;
+        trace_back = boundaryReflection(trace_back);
+        float read =
         Read.SampleLevel(
             linearClampSampler,
             float3((trace_back.x + 0.5) / x, (trace_back.y + 0.5) / y, (trace_back.z + 0.5) / z), 0);
-    Write[id] = read;
+        Write[id] = read;
+    }
 }
 
 [numthreads(8,8,8)]
