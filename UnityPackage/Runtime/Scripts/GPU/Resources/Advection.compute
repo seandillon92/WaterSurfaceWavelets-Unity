@@ -13,16 +13,16 @@ float groupSpeed;
 SamplerState linearClampSampler;
 static float tau = 6.28318530718;
 static float theta_dx = tau / 16;
-float inverse_dx;
+float dx;
 
 float iTheta2Theta(uint itheta)
 {
-    return (itheta + 0.5) * theta_dx;
+    return (itheta) * theta_dx;
 }
 
 uint Theta2iTheta(float theta)
 {
-    return round((theta / theta_dx) - 0.5);
+    return round((theta / theta_dx));
 }
 
 float2 groupVelocity(uint3 id)
@@ -39,8 +39,9 @@ float getHeight(float2 pos)
     float height =
         heights.SampleLevel(
             linearClampSampler,
-            float2((pos.y + 0.5) / y, (pos.x + 0.5) / x), 0);
-    return height/inverse_dx;
+            float2((pos.y + 0.5) / (y - 2), (pos.x + 0.5) / (x - 2)),
+    0);
+    return height * dx;
 }
 
 float2 getGradient(float2 pos)
@@ -50,7 +51,7 @@ float2 getGradient(float2 pos)
     float2 gradient =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((pos.y + 0.5) / y, (pos.x + 0.5) / x), 0);
+            float2((pos.y + 0.5) / (y - 2), (pos.x + 0.5) / (x - 2)), 0);
     return gradient;
 }
 
@@ -92,20 +93,28 @@ void SetDefaulAmplitude(uint3 id : SV_DispatchThreadID)
 void Advection (uint3 id : SV_DispatchThreadID)
 {
     float height = getHeight(id.xy);
-    if (height > 0)
+    if (height >= 0)
     {
     
         uint x, y, z;
         Write.GetDimensions(x, y, z);
         float2 vel = groupVelocity(id);
         float3 trace_back = id;
-        trace_back.x -= deltaTime * vel.x * inverse_dx;
-        trace_back.y -= deltaTime * vel.y * inverse_dx;
-        trace_back = boundaryReflection(trace_back);
-        float read =
+        trace_back.xy *= dx;
+        trace_back.x -= deltaTime * vel.x / (dx);
+        trace_back.y -= deltaTime * vel.y / (dx);
+        //trace_back = boundaryReflection(trace_back);
+        float3 samplingCoords =
+            float3(
+                (trace_back.x / dx + 1.5) / x,
+                (trace_back.y / dx + 1.5) / y,
+                (trace_back.z + 0.5) / z);
+        
+        float read = 
         Read.SampleLevel(
             linearClampSampler,
-            float3((trace_back.x + 1.5) / x, (trace_back.y + 1.5) / y, (trace_back.z + 0.5) / z), 0);
+            samplingCoords, 0);
+        
         Write[id + uint3(1, 1, 0)] = read;
     }
 }

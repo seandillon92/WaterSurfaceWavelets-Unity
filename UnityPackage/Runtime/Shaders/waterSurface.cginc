@@ -18,6 +18,7 @@ uniform float2 xmin;
 uniform float2 dx;
 uniform float2 translation;
 uniform uint nx;
+uniform uint direction;
 
 
 float3 mulPoint(float4x4 m, float3 p)
@@ -55,9 +56,17 @@ float3 posToGrid(float2 pos)
 }
 
 float Ampl(uint i, float4 amplitude[NUM]) {
-    i = i % DIR_NUM;
+    if (direction == -1 || i == direction)
+    {
     
-    return amplitude[i/4][i % 4];
+        i = i % DIR_NUM;
+    
+        return amplitude[i / 4][i % 4];
+    }
+    else
+    {
+        return 0.0f;
+    }
 }
 
 static const float tau = 6.28318530718;
