@@ -6,6 +6,7 @@ namespace WaveGrid
     internal interface IWaveGrid : IDisposable
     {
         internal void Update(UpdateSettings settings);
+        internal Mesh Mesh { get; }
     }
 
     [Serializable]

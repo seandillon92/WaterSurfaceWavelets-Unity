@@ -1,10 +1,15 @@
+using System.Linq;
 using UnityEngine;
 using WaveGrid;
 
 namespace WaterWaveSurface
 {
-    [RequireComponent(typeof(MeshFilter))]
-    [RequireComponent (typeof(MeshRenderer))]
+    public enum Implementation
+    {
+        CPU,
+        GPU
+    }
+
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]
@@ -18,6 +23,16 @@ namespace WaterWaveSurface
         private MeshFilter m_filter;
         private MeshRenderer m_renderer;
 
+        [SerializeField]
+        private Implementation m_implementation;
+
+        private Material m_material;
+
+        private RenderParams m_renderParams;
+
+        [SerializeField]
+        private Texture m_skybox;
+
         internal Settings Settings { get { return m_settings; } }
 
         private void Awake()
@@ -26,11 +41,34 @@ namespace WaterWaveSurface
             m_renderer = GetComponent<MeshRenderer>();
         }
 
+        private void Update()
+        {
+            Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
+        }
+
         void Start()
         {
-            m_grid = new WaveGridGPU(m_settings, m_renderer.sharedMaterial, m_filter);
-            transform.localScale = Vector3.one;
-            transform.localPosition = Vector3.zero;
+            switch (m_implementation)
+            {
+                case Implementation.CPU:
+                    m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurfaceCPU"));
+                    m_grid = new WaveGridCPU(m_settings, m_material);
+                    
+                    break;
+                case Implementation.GPU:
+                    m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurfaceGPU"));
+                    m_grid = new WaveGridGPU(m_settings, m_material);
+                    
+                    break;
+            }
+
+            m_renderParams = new RenderParams(m_material);
+
+            m_renderParams.camera = m_settings.camera;
+            m_material.SetTexture("_Skybox", m_skybox);
+            m_material.SetFloat("_FresnelExponent", 1.0f);
+            m_material.SetFloat("_RefractionIndex", 1.0f);
+            m_material.name = "WaterSurfaceMaterial";
         }
 
         void LateUpdate()

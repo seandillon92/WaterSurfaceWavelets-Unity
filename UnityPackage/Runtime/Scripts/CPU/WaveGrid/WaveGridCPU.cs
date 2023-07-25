@@ -11,6 +11,8 @@ namespace WaveGrid
         private IntPtr m_ptr;
         internal IntPtr Ptr => m_ptr;
 
+        Mesh IWaveGrid.Mesh => m_mesh.mesh;
+
         private WaveGridCPUMesh m_mesh;
         private WaveGridCPUData m_data;
         private WaveGridCPURenderer m_renderer;
@@ -25,7 +27,7 @@ namespace WaveGrid
         private List<ProfileBufferCPU> m_buffers = new List<ProfileBufferCPU>();
         private float m_timeStep = 0;
 
-        internal WaveGridCPU(Settings settings, Material material = null, MeshFilter filter = null)
+        internal WaveGridCPU(Settings settings, Material material = null)
         {
             m_ptr = API.Grid.createGrid(
                 settings.terrain.size.x,
@@ -61,10 +63,6 @@ namespace WaveGrid
             m_waterLevel = settings.terrain.water_level;
 
             m_camera = settings.camera;
-            if (filter != null)
-            {
-                filter.sharedMesh = m_mesh.mesh;
-            }
         }
 
         internal void AddPointDisturbance(Vector3 pos, float value)

@@ -24,10 +24,11 @@ namespace WaveGrid
         private int m_cameraPos_id;
         private int m_cameraProjectionForward_id;
         private int m_cameraInverseProjection_id;
-        private int m_deltaTime_id;
         private Camera m_camera;
 
-        internal WaveGridGPU(Settings settings, Material mat, MeshFilter filter)
+        Mesh IWaveGrid.Mesh => m_mesh.mesh;
+
+        internal WaveGridGPU(Settings settings, Material mat)
         {
             m_camera = settings.camera;
             //Create Profile buffers
@@ -48,7 +49,6 @@ namespace WaveGrid
             
             //Create the Mesh
             m_mesh = new WaveGridGPUMesh(settings);
-            filter.sharedMesh = m_mesh.mesh;
 
             //Update the material
             m_material = mat;
@@ -97,11 +97,8 @@ namespace WaveGrid
 
             if (settings.updateSimulation)
             {
-                for (int i = 0;i < 50;i++)
                 //Advection step
                 m_advection.Update();
-
-                settings.updateSimulation = false;
             }
 
             //Precompute step
