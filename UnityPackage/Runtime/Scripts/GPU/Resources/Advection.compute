@@ -11,18 +11,31 @@ float Default[16];
 float deltaTime;
 float groupSpeed;
 SamplerState linearClampSampler;
-static float tau = 6.28318530718;
+static double tau = 6.28318530718;
 static float theta_dx = tau / 16;
 float dx;
+float x_min;
+float env_dx;
 
-float iTheta2Theta(uint itheta)
+float2 idxToPos(float2 idx)
 {
-    return (itheta) * theta_dx;
+    return float2(x_min, x_min) + (idx + float2(0.5, 0.5)) * dx;
+}
+
+float2 posToGrid(float2 pos)
+{
+    return (pos - float2(x_min, x_min)) / dx - float2(0.5, 0.5);
+}
+
+
+float iTheta2Theta(float itheta)
+{
+    return (itheta + 0.5f) * theta_dx;
 }
 
 uint Theta2iTheta(float theta)
 {
-    return round((theta / theta_dx));
+    return round((theta / theta_dx) - 0.5);
 }
 
 float2 groupVelocity(uint3 id)
@@ -34,25 +47,36 @@ float2 groupVelocity(uint3 id)
 
 float getHeight(float2 pos)
 {
-    uint x, y, z;
-    Write.GetDimensions(x, y, z);
+    uint x, y;
+    heights.GetDimensions(x, y);
+    float2 gridPos = pos / env_dx - float2(0.5, 0.5) + float2(x/2, y/2);
     float height =
         heights.SampleLevel(
             linearClampSampler,
-            float2((pos.y + 0.5) / (y - 2), (pos.x + 0.5) / (x - 2)),
+            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x),
     0);
     return height * dx;
 }
 
 float2 getGradient(float2 pos)
 {
-    uint x, y, z;
-    Write.GetDimensions(x, y, z);
-    float2 gradient =
+    uint x, y;
+    float2 gradient;
+    gradients.GetDimensions(x, y);
+    
+    float2 gridPos = pos / env_dx - float2(1, 0.5) + float2(x / 2, y / 2);
+    gradient.x =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((pos.y + 0.5) / (y - 2), (pos.x + 0.5) / (x - 2)), 0);
-    return gradient;
+            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).r;
+    
+    gridPos = pos / env_dx - float2(0.5, 1) + float2(x / 2, y / 2);
+    gradient.y = 
+        gradients.SampleLevel(
+            linearClampSampler,
+            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).g;
+    
+    return normalize(gradient.yx);
 }
 
 float3 boundaryReflection(float3 pos)
@@ -65,8 +89,8 @@ float3 boundaryReflection(float3 pos)
     
     float2 n = getGradient(pos.xy);
     float2 kdir = float2(cos(iTheta2Theta(pos.z)), sin(iTheta2Theta(pos.z)));
-    pos.xy = pos.xy - 2.0 * height * n;
-    kdir = kdir - 2.0 * (kdir * n) * n;
+    pos.xy = pos.xy - 2.0f * height * n;
+    kdir = kdir - 2.0f * (kdir * n) * n;
     float reflected_theta = atan2(kdir.y, kdir.x);
     uint reflected_itheta = Theta2iTheta(reflected_theta);
     return float3(pos.xy, reflected_itheta);
@@ -89,32 +113,34 @@ void SetDefaulAmplitude(uint3 id : SV_DispatchThreadID)
     }
 }
 
+
 [numthreads(8,8,8)]
 void Advection (uint3 id : SV_DispatchThreadID)
 {
-    float height = getHeight(id.xy);
+    float3 pos = id;
+    pos.xy = idxToPos(id.xy);
+    float height = getHeight(pos.xy);
     if (height >= 0)
     {
     
         uint x, y, z;
         Write.GetDimensions(x, y, z);
         float2 vel = groupVelocity(id);
-        float3 trace_back = id;
-        trace_back.xy *= dx;
-        trace_back.x -= deltaTime * vel.x / (dx);
-        trace_back.y -= deltaTime * vel.y / (dx);
-        //trace_back = boundaryReflection(trace_back);
+        pos.x -= deltaTime * vel.x;
+        pos.y -= deltaTime * vel.y;
+        pos = boundaryReflection(pos);
+        float2 gridPos = posToGrid(pos.xy);
         float3 samplingCoords =
             float3(
-                (trace_back.x / dx + 1.5) / x,
-                (trace_back.y / dx + 1.5) / y,
-                (trace_back.z + 0.5) / z);
+                (gridPos.x + 1.5) / x,
+                (gridPos.y + 1.5) / y,
+                (pos.z + 0.5) / z);
         
         float read = 
         Read.SampleLevel(
             linearClampSampler,
             samplingCoords, 0);
-        
+
         Write[id + uint3(1, 1, 0)] = read;
     }
 }

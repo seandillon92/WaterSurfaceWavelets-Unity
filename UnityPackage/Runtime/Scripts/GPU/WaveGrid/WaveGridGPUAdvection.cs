@@ -70,6 +70,8 @@ namespace WaveGrid
             m_copy_kernel = m_shader.FindKernel("Copy");
             m_shader.SetTexture(m_copy_kernel, "Read", m_newAmplitude);
             m_shader.SetTexture(m_copy_kernel, "Write", amplitude);
+            m_shader.SetFloat("x_min", -settings.terrain.size.x);
+            m_shader.SetFloat("env_dx", settings.terrain.size.x * 2.0f / environment.heights.width);
 
             m_deltaTime_id = Shader.PropertyToID("deltaTime");
 
@@ -107,9 +109,8 @@ namespace WaveGrid
 
         internal void Update()
         {
-            m_shader.SetFloat(m_deltaTime_id, cflTimestep() 
-                //* Time.deltaTime
-                );
+            var ts = cflTimestep();
+            m_shader.SetFloat(m_deltaTime_id, cflTimestep() * Time.deltaTime);
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);

@@ -2,9 +2,9 @@ Shader"Unlit/WaterWaveSurfaces/waterSurfaceCPU"
 {
     Properties
     {
-        _Skybox("Skybox", Cube) = ""{}
-		[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
-        _RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
+        //_Skybox("Skybox", Cube) = ""{}
+		//[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
+        //_RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
     }
     SubShader
     {
@@ -47,7 +47,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurfaceCPU"
 
             #include "waterSurface.cginc"
             samplerCUBE _Skybox;
-            float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
 

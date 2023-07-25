@@ -41,7 +41,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurfaceGPU"
 
             #include "waterSurface.cginc"
             samplerCUBE _Skybox;
-            float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
 
