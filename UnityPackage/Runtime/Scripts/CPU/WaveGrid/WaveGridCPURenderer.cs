@@ -1,4 +1,5 @@
 using UnityEngine;
+using WaveGrid;
 
 internal class WaveGridCPURenderer
 {
@@ -31,7 +32,7 @@ internal class WaveGridCPURenderer
         m_waterLevel_id = Shader.PropertyToID("waterLevel");
     }
 
-    internal void Update()
+    internal void Update(UpdateSettings settings)
     {
         if (m_data.hasProfileData)
         {
@@ -53,6 +54,7 @@ internal class WaveGridCPURenderer
             m_textureData.Apply();
             m_material.SetTexture(m_texture_data_id, m_textureData);
             m_material.SetFloat(m_waterLevel_id, m_waterLevel);
+            m_material.SetFloat("direction", settings.direction);
         }
     }
 

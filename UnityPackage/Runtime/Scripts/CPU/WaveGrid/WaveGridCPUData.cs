@@ -103,6 +103,7 @@ internal class WaveGridCPUData: IDisposable
             var position = cameraPos + t * dir;
 
             position.y = waterLevel;
+            positions[index] = position;
 
             for (int itheta = 0; itheta < 16; itheta++)
             {

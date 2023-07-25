@@ -107,7 +107,7 @@ namespace WaveGrid
 
             m_buffers[0].Update();
             m_mesh.Update();
-            m_renderer.Update();
+            m_renderer.Update(s);
             API.Grid.timeStep(m_ptr, s.dt * m_timeStep, s.updateSimulation);
         }
     }

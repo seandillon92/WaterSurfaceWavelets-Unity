@@ -54,7 +54,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurfaceCPU"
             v2f vert (appdata v)
             {
                 v2f o;
-                float3 pos = posToGrid(v.vertex.xy);
+                float3 pos = v.vertex;
                 float4 amplitude[NUM] =
                 {
                     v.amplitude1,
