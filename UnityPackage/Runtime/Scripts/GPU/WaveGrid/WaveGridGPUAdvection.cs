@@ -80,7 +80,7 @@ namespace WaveGrid
 
         void SetDefaultAmplitudes(Settings settings)
         {
-            float[] defaultValues = { 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+            float[] defaultValues = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
             m_shader.SetTexture(m_init_kernel, "Write", amplitude);
             SetFloats(m_shader, "Default", defaultValues);
             m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);

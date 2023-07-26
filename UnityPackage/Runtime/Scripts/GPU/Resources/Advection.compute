@@ -33,9 +33,12 @@ float iTheta2Theta(float itheta)
     return (itheta + 0.5f) * theta_dx;
 }
 
-uint Theta2iTheta(float theta)
+float Theta2iTheta(float theta)
 {
-    return round((theta / theta_dx) - 0.5);
+    float r = (theta / theta_dx) - 0.5;
+    if(r < 0)
+        return 16 + r;
+    return r;
 }
 
 float2 groupVelocity(uint3 id)
@@ -90,9 +93,9 @@ float3 boundaryReflection(float3 pos)
     float2 n = getGradient(pos.xy);
     float2 kdir = float2(cos(iTheta2Theta(pos.z)), sin(iTheta2Theta(pos.z)));
     pos.xy = pos.xy - 2.0f * height * n;
-    kdir = kdir - 2.0f * (kdir * n) * n;
+    kdir = kdir - 2.0f * dot(kdir, n) * n;
     float reflected_theta = atan2(kdir.y, kdir.x);
-    uint reflected_itheta = Theta2iTheta(reflected_theta);
+    float reflected_itheta = Theta2iTheta(reflected_theta);
     return float3(pos.xy, reflected_itheta);
 }
 

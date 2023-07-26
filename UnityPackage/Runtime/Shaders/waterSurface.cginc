@@ -39,7 +39,7 @@ float2 gridToAmpl(float2 pos)
 
 float gridAmplitude(float2 pos, uint itheta)
 {
-    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta - 0.5) / 16.0f);
+    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5) / 16.0f);
     return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x;
 }
 
