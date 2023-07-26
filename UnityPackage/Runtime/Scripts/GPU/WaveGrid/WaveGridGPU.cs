@@ -94,6 +94,7 @@ namespace WaveGrid
             m_material.SetVector(m_cameraProjectionForward_id, m_camera.projectionMatrix.MultiplyPoint(Vector3.forward));
             m_material.SetMatrix(m_cameraInverseProjection_id,
                 m_camera.transform.localToWorldMatrix * m_camera.projectionMatrix.inverse);
+            m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
 
             if (settings.updateSimulation)
             {

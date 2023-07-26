@@ -142,7 +142,7 @@ void Advection (uint3 id : SV_DispatchThreadID)
         float read = 
         Read.SampleLevel(
             linearClampSampler,
-            samplingCoords, 0);
+            samplingCoords, 0).r;
 
         Write[id + uint3(1, 1, 0)] = read;
     }

@@ -127,7 +127,7 @@ namespace ProfileBuffer
             double dz = (m_zmax - m_zmin) / m_integration_nodes;
             double z = m_zmin + 0.5 * dz;
             (double, double) result = (0,0);
-            var ret = func(0);
+            var ret = func(z);
             result.Item1 = ret.Item1 * dz;
             result.Item2 = ret.Item2 * dz;
             for (uint i = 1; i < m_integration_nodes; i++)
