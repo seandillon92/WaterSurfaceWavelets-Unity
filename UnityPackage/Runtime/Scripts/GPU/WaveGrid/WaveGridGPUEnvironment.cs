@@ -1,4 +1,5 @@
 using UnityEngine;
+using WaterWaveSurface;
 
 namespace WaveGrid
 {
@@ -13,9 +14,11 @@ namespace WaveGrid
             var heightsSize = Mathf.RoundToInt(Mathf.Sqrt(settings.terrain.heights.Length));
             heights =
                 new Texture2D(heightsSize, heightsSize, TextureFormat.RFloat, false, true);
+            heights.wrapMode = TextureWrapMode.Clamp;
+            heights.filterMode = FilterMode.Bilinear;
             heights.SetPixelData(settings.terrain.heights, 0);
-            heights.Apply();
-
+            heights.Apply(updateMipmaps:false);
+            
             this.gradients = new Texture2D(heightsSize, heightsSize, TextureFormat.RGFloat, false, true);
             var gradients = new float[(heightsSize) * (heightsSize) * 2];
             for (int i = 0; i < heightsSize - 1; i++)
@@ -32,7 +35,9 @@ namespace WaveGrid
                 }
             }
             this.gradients.SetPixelData(gradients, 0);
-            this.gradients.Apply();
+            this.gradients.wrapMode = TextureWrapMode.Clamp;
+            this.gradients.filterMode = FilterMode.Bilinear;
+            this.gradients.Apply(updateMipmaps:false);
         }
 
     }

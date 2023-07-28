@@ -9,7 +9,6 @@ namespace WaveGrid
     internal class WaveGridCPU : IWaveGrid
     {
         private IntPtr m_ptr;
-        internal IntPtr Ptr => m_ptr;
 
         Mesh IWaveGrid.Mesh => m_mesh.mesh;
 
@@ -22,7 +21,6 @@ namespace WaveGrid
         private Vector2 m_terrain_size;
         private float m_waterLevel;
         private Camera m_camera;
-
 
         private List<ProfileBufferCPU> m_buffers = new List<ProfileBufferCPU>();
         private float m_timeStep = 0;
@@ -50,9 +48,9 @@ namespace WaveGrid
 
             m_timeStep = API.Grid.clfTimeStep(m_ptr);
 
-            m_data = new WaveGridCPUData(settings.visualizationResolution);
+            m_data = new WaveGridCPUData(settings);
             m_mesh = new WaveGridCPUMesh(m_data);
-            m_renderer = new WaveGridCPURenderer(m_data, material, settings.camera, settings.terrain.water_level);
+            m_renderer = new WaveGridCPURenderer(m_data, settings, material);
             m_visualizationResolution = settings.visualizationResolution;
             m_zeta = settings.min_zeta + 0.5f * (settings.max_zeta - settings.min_zeta) / settings.n_zeta;
 
@@ -80,31 +78,26 @@ namespace WaveGrid
             return API.Grid.levelSet(m_ptr, pos);
         }
 
+        internal unsafe void GetAmplitudeData(float[] amplitudes)
+        {
+            fixed (float* array = amplitudes)
+            {
+                API.Grid.amplitudeData(m_ptr, amplitudes);
+            }
+        }
+
         public void Dispose()
         {
             API.Grid.destroyGrid(m_ptr);
-            m_data.Dispose();
         }
 
-        void IWaveGrid.Update(UpdateSettings s)
+        unsafe void IWaveGrid.Update(UpdateSettings s)
         {
-            m_data.SetVertices(
-                this,
-                m_visualizationResolution,
-                s.amplitudeMultiplier,
-                m_camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)),
-                m_camera.projectionMatrix,
-                m_terrain_translation,
-                m_terrain_size,
-                s.direction,
-                m_waterLevel,
-                s.renderOutsideBorders,
-                m_zeta);
-
             m_data.LoadProfileBufferData(m_buffers[0]);
-
             m_buffers[0].Update();
-            m_mesh.Update();
+
+            m_data.LoadAmplitudeData(this);
+
             m_renderer.Update(s);
             API.Grid.timeStep(m_ptr, s.dt * m_timeStep, s.updateSimulation);
         }

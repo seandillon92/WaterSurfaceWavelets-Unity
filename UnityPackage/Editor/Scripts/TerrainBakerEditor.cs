@@ -287,6 +287,8 @@ internal class TerrainBakerEditor : Editor
 
     public override void OnPreviewGUI(Rect r, GUIStyle background)
     {
+        return;
+        //TODO: FIX
         GenerateTerrainPreview();
 
         if (m_preview == null)

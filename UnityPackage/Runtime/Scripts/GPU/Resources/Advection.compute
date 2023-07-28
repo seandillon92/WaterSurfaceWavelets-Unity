@@ -1,6 +1,5 @@
 #pragma enable_d3d11_debug_symbols
 #pragma kernel Advection
-#pragma kernel SetDefaulAmplitude
 #pragma kernel Copy
 
 Texture3D<float> Read;
@@ -11,6 +10,7 @@ float Default[16];
 float deltaTime;
 float groupSpeed;
 SamplerState linearClampSampler;
+SamplerState pointClampSampler;
 static double tau = 6.28318530718;
 static float theta_dx = tau / 16;
 float dx;
@@ -30,7 +30,7 @@ float2 posToGrid(float2 pos)
 
 float iTheta2Theta(float itheta)
 {
-    return (itheta + 0.5f) * theta_dx;
+    return (itheta + 0.5) * theta_dx;
 }
 
 float Theta2iTheta(float theta)
@@ -57,8 +57,8 @@ float getHeight(float2 pos)
         heights.SampleLevel(
             linearClampSampler,
             float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x),
-    0);
-    return height * dx;
+    0).r;
+    return height * env_dx;
 }
 
 float2 getGradient(float2 pos)
@@ -101,21 +101,34 @@ float3 boundaryReflection(float3 pos)
 
 
 
-[numthreads(2, 2, 8)]
-void SetDefaulAmplitude(uint3 id : SV_DispatchThreadID)
+float sample(float3 coord)
 {
-    uint x, y, z;
-    Write.GetDimensions(x, y, z);
-    if (id.x == 0 || id.y == 0 || id.x == x -1 || id.y == y-1)
-    {
-        Write[id] = Default[id.z];
-    }
-    else
-    {
-        Write[id] = 0.0f;
-    }
+    float2 pos = coord.xy;
+    float2 pivot = floor(pos);
+    float2 s = frac(pos);
+    float2 direction = sign(pos - pivot);
+    
+    //TODO use a weight mask
+    float w_s =   getHeight(idxToPos(pivot)) < 0.0f ? 0.0f : 1.0f;
+    float w_x = getHeight(idxToPos(pivot + float2(direction.x, 0))) < 0.0f ? 0.0f : 1.0f;
+    float w_y = getHeight(idxToPos(pivot + float2(0, direction.y))) < 0.0f ? 0.0f : 1.0f;
+    float w_xy = getHeight(idxToPos(pivot + direction)) < 0.0f ? 0.0f : 1.0f;
+    
+    uint x, y, z, levels;
+    Read.GetDimensions(0, x, y, z, levels);
+    
+    // bilinear interpolation
+    float v_s = Read.SampleLevel(pointClampSampler, float3((pivot.x + 0.5) / x, (pivot.y + 0.5) / y, (coord.z + 0.5) / z), 0);
+    float v_x = Read.SampleLevel(pointClampSampler, float3((pivot.x + direction.x + 0.5) / x, (pivot.y + 0.5) / y, (coord.z + 0.5) / z), 0);
+    float v_y = Read.SampleLevel(pointClampSampler, float3((pivot.x + 0.5) / x, (pivot.y + direction.y + 0.5) / y, (coord.z + 0.5) / z), 0);
+    float v_xy = Read.SampleLevel(pointClampSampler, float3((pivot.x + direction.x + 0.5) / x, (pivot.y + direction.y + 0.5) / y, (coord.z + 0.5) / z), 0);
+    
+    float v_h1 = lerp(v_s, v_y, w_y * s.y);
+    float v_h2 = lerp(v_x, v_xy, w_xy * s.y);
+    float v = lerp(v_h1, v_h2, w_x * s.x);
+    
+    return v;
 }
-
 
 [numthreads(8,8,8)]
 void Advection (uint3 id : SV_DispatchThreadID)
@@ -125,33 +138,44 @@ void Advection (uint3 id : SV_DispatchThreadID)
     float height = getHeight(pos.xy);
     if (height >= 0)
     {
-    
         uint x, y, z;
         Write.GetDimensions(x, y, z);
         float2 vel = groupVelocity(id);
         pos.x -= deltaTime * vel.x;
         pos.y -= deltaTime * vel.y;
         pos = boundaryReflection(pos);
-        float2 gridPos = posToGrid(pos.xy);
-        float3 samplingCoords =
-            float3(
-                (gridPos.x + 1.5) / x,
-                (gridPos.y + 1.5) / y,
-                (pos.z + 0.5) / z);
+        height = getHeight(pos.xy);
+        if (height >= 0)
+        {
         
-        float read = 
-        Read.SampleLevel(
-            linearClampSampler,
-            samplingCoords, 0).r;
+            float2 gridPos = posToGrid(pos.xy);
 
-        Write[id + uint3(1, 1, 0)] = read;
+            
+            if (gridPos.x < 0 ||
+                gridPos.x > x - 1||
+                gridPos.y < 0 ||
+                gridPos.y > y - 1)
+            {
+                Write[id] = Default[id.z];
+            }
+            else
+            {                
+                float read = sample(float3(gridPos.xy, pos.z));
+                Write[id] = read;
+            }
+
+        }
+        else
+        {
+        
+            Write[id] = Read[id];
+        }
+        
     }
 }
 
 [numthreads(8,8,8)]
 void Copy(uint3 id : SV_DispatchThreadID)
 {
-    id.x += 1;
-    id.y += 1;
     Write[id] = Read[id];
 }

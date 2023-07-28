@@ -58,6 +58,9 @@ namespace WaterWaveSurface
 
             [DllImport(name)]
             public static extern float levelSet(IntPtr grid, Vector2 pos);
+
+            [DllImport(name)]
+            public static extern void amplitudeData(IntPtr grid, float[] dest);
         }
 
         public class ProfileBuffer

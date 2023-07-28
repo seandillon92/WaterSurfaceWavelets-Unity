@@ -9,7 +9,6 @@ namespace WaveGrid
 
         private ComputeShader m_shader;
         private int m_advection_kernel;
-        private int m_init_kernel;
         private int m_copy_kernel;
 
         private RenderTexture m_newAmplitude;
@@ -28,13 +27,15 @@ namespace WaveGrid
             // Create amplitude render textures
             RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
             renderTextureDescriptor.useMipMap = false;
-            renderTextureDescriptor.width = settings.n_x + 2;
-            renderTextureDescriptor.height = settings.n_x + 2;
+            renderTextureDescriptor.width = settings.n_x;
+            renderTextureDescriptor.height = settings.n_x;
             renderTextureDescriptor.volumeDepth = 16;
             renderTextureDescriptor.enableRandomWrite = true;
             renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
             renderTextureDescriptor.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
             renderTextureDescriptor.msaaSamples = 1;
+            renderTextureDescriptor.sRGB = false;
+            renderTextureDescriptor.autoGenerateMips = false;
 
             amplitude = new RenderTexture(renderTextureDescriptor);
             amplitude.wrapMode = TextureWrapMode.Clamp;
@@ -59,8 +60,6 @@ namespace WaveGrid
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
             m_shader.SetFloat("dx",settings.terrain.size.x * 2f / settings.n_x);
 
-            m_init_kernel = m_shader.FindKernel("SetDefaulAmplitude");
-
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", amplitude);
             m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
@@ -81,13 +80,7 @@ namespace WaveGrid
         void SetDefaultAmplitudes(Settings settings)
         {
             float[] defaultValues = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-            m_shader.SetTexture(m_init_kernel, "Write", amplitude);
             SetFloats(m_shader, "Default", defaultValues);
-            m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_init_kernel, (int)((settings.n_x + 2) / x), (int)((settings.n_x + 2) / y), (int)(16 / z));
-
-            m_shader.SetTexture(m_init_kernel, "Write", m_newAmplitude);
-            m_shader.Dispatch(m_init_kernel, (int)((settings.n_x + 2) / x), (int)((settings.n_x + 2) / y), (int)(16 / z));
         }
 
 

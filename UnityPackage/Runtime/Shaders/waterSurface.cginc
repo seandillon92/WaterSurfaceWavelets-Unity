@@ -23,6 +23,7 @@ uniform float2 translation;
 uniform uint nx;
 uniform uint direction;
 uniform float amp_mult;
+uniform float directions[DIR_NUM];
 
 
 float3 mulPoint(float4x4 m, float3 p)
@@ -38,9 +39,9 @@ float2 gridToAmpl(float2 pos)
     return pos;
 }
 
-float gridAmplitude(float2 pos, uint itheta)
+float gridAmplitude(float2 pos, float itheta)
 {
-    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5) / 16.0f);
+    float3 samplingPos = float3((pos + float2(0.5, 0.5)) / nx, (itheta + 0.5) / 16.0f);
     return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x * amp_mult;
 }
 
@@ -60,7 +61,7 @@ float3 posToGrid(float2 pos)
 }
 
 float Ampl(uint i, float4 amplitude[NUM]) {
-    if ((direction == -1 || i == direction))
+    if (directions[i] == 1.0f)
     {
     
         i = i % DIR_NUM;

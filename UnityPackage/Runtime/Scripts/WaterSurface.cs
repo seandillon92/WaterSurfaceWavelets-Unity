@@ -20,9 +20,6 @@ namespace WaterWaveSurface
 
         private IWaveGrid m_grid;
 
-        private MeshFilter m_filter;
-        private MeshRenderer m_renderer;
-
         [SerializeField]
         private Implementation m_implementation;
 
@@ -35,12 +32,6 @@ namespace WaterWaveSurface
 
         internal Settings Settings { get { return m_settings; } }
 
-        private void Awake()
-        {
-            m_filter = GetComponent<MeshFilter>();
-            m_renderer = GetComponent<MeshRenderer>();
-        }
-
         private void Update()
         {
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
@@ -48,15 +39,16 @@ namespace WaterWaveSurface
 
         void Start()
         {
+            m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurface"));
+
             switch (m_implementation)
             {
                 case Implementation.CPU:
-                    m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurfaceCPU"));
+                    
                     m_grid = new WaveGridCPU(m_settings, m_material);
                     
                     break;
                 case Implementation.GPU:
-                    m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurfaceGPU"));
                     m_grid = new WaveGridGPU(m_settings, m_material);
                     
                     break;
@@ -97,11 +89,14 @@ namespace WaterWaveSurface
         private void OnValidate()
         {
             m_settings.OnValidate();
+            m_updateSettings.OnValidate();
         }
 
         void OnDestroy()
         {
             m_grid.Dispose();
         }
+
+        public Texture Amplitude;
     }
 }
