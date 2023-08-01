@@ -82,8 +82,7 @@ namespace WaveGrid
 
         void SetDefaultAmplitudes(Settings settings)
         {
-            float[] defaultValues = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-            SetFloats(m_shader, "Default", defaultValues);
+            SetFloats(m_shader, "Default", settings.defaultAmplitude.ToArray());
         }
 
 

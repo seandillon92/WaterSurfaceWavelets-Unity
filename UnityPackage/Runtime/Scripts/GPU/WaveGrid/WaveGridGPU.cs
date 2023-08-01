@@ -67,6 +67,7 @@ namespace WaveGrid
             var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
             m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
 
+            m_material.SetFloatArray("defaultAmplitude", settings.defaultAmplitude);
 
             m_cameraPos_id = Shader.PropertyToID("cameraPos");
             m_cameraProjectionForward_id = Shader.PropertyToID("cameraProjectionForward");

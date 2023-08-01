@@ -27,7 +27,8 @@ namespace WaterWaveSurface
                 float initial_time,
                 int spectumType,
                 float[] terrain,
-                long terrain_size);
+                long terrain_size,
+                float[] defaultAmplitude);
 
             [DllImport(name)]
             public static extern void destroyGrid(IntPtr grid);

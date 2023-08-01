@@ -37,7 +37,8 @@ namespace WaveGrid
                 settings.initial_time,
                 settings.spectrum_type,
                 settings.terrain.heights,
-                settings.terrain.heights.Length);
+                settings.terrain.heights.Length,
+                settings.defaultAmplitude.ToArray());
 
             var buffersNum = API.Grid.profileBuffersSize(m_ptr);
             for (int i = 0; i < buffersNum; i++)

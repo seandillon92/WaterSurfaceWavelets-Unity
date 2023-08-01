@@ -39,6 +39,7 @@ internal class WaveGridCPURenderer
         var terrainPosition = settings.terrain.transform.GetPosition();
         var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
         m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
+        m_material.SetFloatArray("defaultAmplitude", settings.defaultAmplitude);
     }
 
     internal void Update(UpdateSettings settings)

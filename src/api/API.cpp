@@ -18,7 +18,8 @@ API WaterWavelets::WaveGrid* createGrid(
     Real initial_time,
     int spectumType,
     void* terrain,
-    size_t terrain_size) {
+    size_t terrain_size,
+    void* defaultAmplitude) {
 
 
     auto settings = WaterWavelets::WaveGrid::Settings{
@@ -31,7 +32,8 @@ API WaterWavelets::WaveGrid* createGrid(
         initial_time,
         static_cast<WaterWavelets::WaveGrid::Settings::SpectrumType>(spectumType),
         static_cast<float*>(terrain),
-        terrain_size
+        terrain_size,
+        static_cast<float*>(defaultAmplitude)
     };
 
 	return new WaterWavelets::WaveGrid(settings);
