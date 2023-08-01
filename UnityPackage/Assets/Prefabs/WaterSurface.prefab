@@ -64,6 +64,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d14276f221d84674c8ad8acdcf9b7abc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_material: {fileID: 2100000, guid: 938ca63ed5c2b5b41bb5bc4a9ea14c96, type: 2}
   m_settings:
     max_zeta: 3.321928
     min_zeta: -5.0588937
@@ -75,11 +76,94 @@ MonoBehaviour:
     terrain: {fileID: 11400000, guid: 13cea57186aa41f42bfbff410b809c0c, type: 2}
     visualizationResolution: 100
     camera: {fileID: 0}
+    defaultAmplitude:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0.1
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
   m_updateSettings:
     dt: 0
     updateSimulation: 1
     amplitudeMultiplier: 4
-    direction: -1
+    amplitudeTracks:
+      data:
+      - name: Track 1
+        mode: 0
+      - name: Track 2
+        mode: 0
+      - name: Track 3
+        mode: 0
+      - name: Track 4
+        mode: 0
+      - name: Track 5
+        mode: 0
+      - name: Track 6
+        mode: 0
+      - name: Track 7
+        mode: 0
+      - name: Track 8
+        mode: 0
+      - name: Track 9
+        mode: 0
+      - name: Track 10
+        mode: 0
+      - name: Track 11
+        mode: 0
+      - name: Track 12
+        mode: 0
+      - name: Track 13
+        mode: 0
+      - name: Track 14
+        mode: 0
+      - name: Track 15
+        mode: 0
+      - name: Track 16
+        mode: 0
+      tracks:
+      - name: Track 1
+        mode: 0
+      - name: Track 2
+        mode: 0
+      - name: Track 3
+        mode: 0
+      - name: Track 4
+        mode: 0
+      - name: Track 5
+        mode: 0
+      - name: Track 6
+        mode: 0
+      - name: Track 7
+        mode: 0
+      - name: Track 8
+        mode: 0
+      - name: Track 9
+        mode: 0
+      - name: Track 10
+        mode: 0
+      - name: Track 11
+        mode: 0
+      - name: Track 12
+        mode: 0
+      - name: Track 13
+        mode: 0
+      - name: Track 14
+        mode: 0
+      - name: Track 15
+        mode: 0
+      - name: Track 16
+        mode: 0
     renderOutsideBorders: 1
   m_implementation: 0
   m_skybox: {fileID: 0}

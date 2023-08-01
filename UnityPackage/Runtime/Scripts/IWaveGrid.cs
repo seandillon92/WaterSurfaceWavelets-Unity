@@ -38,6 +38,7 @@ namespace WaveGrid
                     data.Add(new AmplitudeTrack());
                 }
                 Rename();
+                SetIncludeValues();
             }
 
             [HideInInspector]

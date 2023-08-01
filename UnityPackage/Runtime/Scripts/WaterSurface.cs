@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using WaveGrid;
 
@@ -13,6 +12,9 @@ namespace WaterWaveSurface
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]
+        private Material m_material;
+
+        [SerializeField]
         private Settings m_settings;
 
         [SerializeField]
@@ -22,8 +24,6 @@ namespace WaterWaveSurface
 
         [SerializeField]
         private Implementation m_implementation;
-
-        private Material m_material;
 
         private RenderParams m_renderParams;
 
@@ -39,8 +39,6 @@ namespace WaterWaveSurface
 
         void Start()
         {
-            m_material = new Material(Shader.Find("Unlit/WaterWaveSurfaces/waterSurface"));
-
             switch (m_implementation)
             {
                 case Implementation.CPU:
@@ -96,7 +94,5 @@ namespace WaterWaveSurface
         {
             m_grid.Dispose();
         }
-
-        public Texture Amplitude;
     }
 }

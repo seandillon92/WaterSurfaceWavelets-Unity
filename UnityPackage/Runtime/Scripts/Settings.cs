@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace WaveGrid
@@ -20,18 +21,15 @@ namespace WaveGrid
         public int visualizationResolution = 100;
         public Camera camera;
 
-        public List<float> defaultAmplitude = new List<float>(16);
+        public List<float> defaultAmplitude;
 
         public void OnValidate()
         {
             n_x = Mathf.ClosestPowerOfTwo(n_x);
 
-            if(defaultAmplitude == null)
-            {
-                defaultAmplitude = new List<float>(16);
-            }
+            defaultAmplitude ??= new List<float>();
 
-            while(defaultAmplitude.Count < 16)
+            while (defaultAmplitude.Count < 16)
             {
                 defaultAmplitude.Add(0);
             }
