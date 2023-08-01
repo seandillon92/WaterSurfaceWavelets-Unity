@@ -11,6 +11,10 @@ constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
 
   WaveGrid::WaveGrid(Settings s) : m_spectrum(10),m_enviroment(s.size, s.terrain, s.terrain_size) {
 
+  for (int i = 0; i < 16; i++) {
+      m_defaultAmplitudes.push_back(s.defaultAmplitude[i]);
+  }
+
   m_amplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
   m_newAmplitude.resize(s.n_x, s.n_x, s.n_theta, s.n_zeta);
 
@@ -32,6 +36,18 @@ constexpr Real tau = 6.28318530718; // https://tauday.com/tau-manifesto
       Real zeta_max = idxToPos(izeta, Zeta) + 0.5 * dx(Zeta);
       m_profileBuffers.push_back(ProfileBuffer(zeta_min, zeta_max, 100, m_spectrum));
   }
+
+  m_positions.reserve(gridDim(X) * gridDim(Y));
+  for (int ix = 0; ix < gridDim(X); ix++) {
+      for (int iy = 0; iy < gridDim(Y); iy++) {
+          Vec2 pos = nodePosition(ix, iy);
+          if (m_enviroment.inDomain(pos)) {
+              m_positions.push_back({ix, iy});
+          }
+      }
+  }
+
+
 
   precomputeGroupSpeeds();
 }
@@ -184,35 +200,29 @@ void WaveGrid::addPointDisturbance(const Vec3 pos, const Real val) {
 void WaveGrid::advectionStep(const Real dt) {
 
   auto amplitude = interpolatedAmplitude();
+#pragma omp parallel for
+  for (int i = 0; i < m_positions.size(); i++) {
 
-#pragma omp parallel for collapse(2)
-  for (int ix = 0; ix < gridDim(X); ix++) {
-    for (int iy = 0; iy < gridDim(Y); iy++) {
+	  auto pos = m_positions[i];
 
-      Vec2 pos = nodePosition(ix, iy);
+	  for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
+		  for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
 
-      // update only points in the domain
-      if (m_enviroment.inDomain(pos)) {
+			  Vec4 pos4 = idxToPos({ pos[0], pos[1], itheta, izeta });
+			  Vec2 vel = groupVelocity(pos4);
 
-        for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
-          for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
+			  // Tracing back in Semi-Lagrangian
+			  Vec4 trace_back_pos4 = pos4;
+			  trace_back_pos4[X] -= dt * vel[X];
+			  trace_back_pos4[Y] -= dt * vel[Y];
 
-            Vec4 pos4 = idxToPos({ix, iy, itheta, izeta});
-            Vec2 vel  = groupVelocity(pos4);
-
-            // Tracing back in Semi-Lagrangian
-            Vec4 trace_back_pos4 = pos4;
-            trace_back_pos4[X] -= dt * vel[X];
-            trace_back_pos4[Y] -= dt * vel[Y];
-
-            // Take care of boundaries
-            trace_back_pos4 = boundaryReflection(trace_back_pos4);
-
-            m_newAmplitude(ix, iy, itheta, izeta) = amplitude(trace_back_pos4);
-          }
-        }
-      }
-    }
+			  // Take care of boundaries
+			  trace_back_pos4 = boundaryReflection(trace_back_pos4);
+              if (m_enviroment.inDomain(Vec2{ trace_back_pos4[X], trace_back_pos4[Y] })) {
+                  m_newAmplitude(pos[0], pos[1], itheta, izeta) = amplitude(trace_back_pos4);
+              }
+		  }
+	  }
   }
 
   std::swap(m_newAmplitude, m_amplitude);
@@ -233,20 +243,20 @@ Vec4 WaveGrid::boundaryReflection(const Vec4 pos4) const {
   // Reflect point and wave-vector direction around boundary
   // Here we rely that `ls` is equal to the signed distance from the boundary
   pos  = pos - 2.0 * ls * n;
-  kdir = kdir - 2.0 * (kdir * n) * n;
+  Real dot = kdir * n;
+  kdir = kdir - 2.0 * dot * n;
 
   Real reflected_theta = atan2(kdir[Y], kdir[X]);
 
   // We are assuming that after one reflection you are back in the domain. This
   // assumption is valid if you boundary is not so crazy.
   // This assert tests this assumption.
-  assert(m_enviroment.inDomain(pos));
+  //assert(m_enviroment.inDomain(pos));
 
   return Vec4{pos[X], pos[Y], reflected_theta, pos4[Zeta]};
 }
 
 void WaveGrid::diffusionStep(const Real dt) {
-
   auto grid = extendedGrid();
 
 #pragma omp parallel for collapse(2)
@@ -288,7 +298,6 @@ void WaveGrid::precomputeProfileBuffers() {
 
   for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
     // define spectrum
-
     m_profileBuffers[izeta].precompute(m_spectrum, m_time);
   }
 }

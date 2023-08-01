@@ -18,7 +18,8 @@ API WaterWavelets::WaveGrid* createGrid(
     Real initial_time,
     int spectumType,
     void* terrain,
-    size_t terrain_size) {
+    size_t terrain_size,
+    void* defaultAmplitude) {
 
 
     auto settings = WaterWavelets::WaveGrid::Settings{
@@ -31,7 +32,8 @@ API WaterWavelets::WaveGrid* createGrid(
         initial_time,
         static_cast<WaterWavelets::WaveGrid::Settings::SpectrumType>(spectumType),
         static_cast<float*>(terrain),
-        terrain_size
+        terrain_size,
+        static_cast<float*>(defaultAmplitude)
     };
 
 	return new WaterWavelets::WaveGrid(settings);
@@ -71,6 +73,10 @@ API void addPointDisturbance(WaterWavelets::WaveGrid* grid, Vec2 pos, Real distu
 
 API void addPointDisturbanceDirection(WaterWavelets::WaveGrid* grid, Vec3 pos, float disturbance) {
     grid->addPointDisturbance(pos, disturbance);
+}
+
+API void amplitudeData(WaterWavelets::WaveGrid* buffer, void* dest) {
+    memcpy(dest, buffer->m_amplitude.m_data.data(), buffer->m_amplitude.m_data.size() * sizeof(float));
 }
 
 #pragma endregion

@@ -75,6 +75,9 @@ public:
     /** The terrain height map.*/
     float* terrain;
     size_t terrain_size;
+
+    /** The amplitude for values outside the terrain**/
+    float* defaultAmplitude;
   };
 
 public:
@@ -272,6 +275,10 @@ public:
   Real m_time;
 
   Environment m_enviroment;
+
+private:
+    std::vector<Vec2Int> m_positions;
+    std::vector<float> m_defaultAmplitudes;
 };
 
 } // namespace WaterWavelets

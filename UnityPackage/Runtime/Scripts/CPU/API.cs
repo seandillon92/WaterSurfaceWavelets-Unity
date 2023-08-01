@@ -27,7 +27,8 @@ namespace WaterWaveSurface
                 float initial_time,
                 int spectumType,
                 float[] terrain,
-                long terrain_size);
+                long terrain_size,
+                float[] defaultAmplitude);
 
             [DllImport(name)]
             public static extern void destroyGrid(IntPtr grid);
@@ -58,6 +59,9 @@ namespace WaterWaveSurface
 
             [DllImport(name)]
             public static extern float levelSet(IntPtr grid, Vector2 pos);
+
+            [DllImport(name)]
+            public static extern void amplitudeData(IntPtr grid, float[] dest);
         }
 
         public class ProfileBuffer

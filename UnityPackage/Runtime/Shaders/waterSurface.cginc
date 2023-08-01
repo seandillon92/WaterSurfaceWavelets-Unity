@@ -4,20 +4,87 @@
 static const int NUM = DIR_NUM / 4;
 static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
 
-uniform sampler2D textureData;
+uniform Texture2D textureData;
 uniform float profilePeriod;
 
-float Ampl(int i, float4 amplitude[NUM]) {
-    i = i % DIR_NUM;
+uniform float waterLevel;
+uniform float3 cameraPos;
+uniform float3 cameraProjectionForward;
+uniform float4x4 cameraInverseProjection;
+
+uniform Texture3D amplitude;
+
+uniform SamplerState linear_clamp_sampler;
+uniform SamplerState linear_repeat_sampler;
+
+uniform float2 xmin;
+uniform float2 dx;
+uniform float2 translation;
+uniform uint nx;
+uniform uint direction;
+uniform float amp_mult;
+uniform float directions[DIR_NUM];
+uniform float defaultAmplitude[DIR_NUM];
+
+
+float3 mulPoint(float4x4 m, float3 p)
+{
+    float4 p4 = mul(m, float4(p, 1));
+    return p4.xyz / p4.w;
+}
+
+float2 gridToAmpl(float2 pos)
+{
+    pos = pos - translation; // account for terrain translation
+    pos = (pos - xmin) * dx - float2(0.5, 0.5); // transfer to simulation space
+    return pos;
+}
+
+float gridAmplitude(float2 pos, float itheta)
+{
+    if (pos.x < 0 || pos.x > nx - 1 || pos.y < 0 || pos.y > nx - 1)
+    {
+        return defaultAmplitude[itheta];
+    }
     
-    return amplitude[i/4][i % 4];
+    float3 samplingPos = float3((pos + float2(0.5, 0.5)) / nx, (itheta + 0.5) / 16.0f);
+    return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x * amp_mult;
+}
+
+float3 posToGrid(float2 pos)
+{
+    float3 p = float3(pos.xy, 0) + cameraProjectionForward;
+    p  = mulPoint(cameraInverseProjection, p);
+    
+    float3 dir = normalize(p - cameraPos);
+    float camY = cameraPos.y - waterLevel;
+    float t = -camY / dir.y;
+    
+    t = t < 0 || isnan(t) ? 1000 : t;
+    p = cameraPos + t * dir;
+    p.y = waterLevel;
+    return p;
+}
+
+float Ampl(uint i, float4 amplitude[NUM]) {
+    if (directions[i] == 1.0f)
+    {
+    
+        i = i % DIR_NUM;
+    
+        return amplitude[i / 4][i % 4];
+    }
+    else
+    {
+        return 0.0f;
+    }
 }
 
 static const float tau = 6.28318530718;
 
 float iAmpl(float angle/*in [0,2pi]*/, float4 amplitude[NUM]) {
     float a = DIR_NUM * angle / tau + DIR_NUM - 0.5;
-    int ia = int(floor(a));
+    uint ia = uint(floor(a));
     float w = a - ia;
     return (1 - w) * Ampl(ia % DIR_NUM, amplitude) + w * Ampl((ia + 1) % DIR_NUM, amplitude);
 }
@@ -37,7 +104,7 @@ float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
+        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
 
         result.xz += kdir * tt.x;
         result.y += tt.y;
@@ -60,7 +127,7 @@ float3 waveNormal(float3 pos, float4 amplitude[NUM]) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
+        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
 
         tx.xz += kdir.x * tt.zw;
         ty.yz += kdir.y * tt.zw;

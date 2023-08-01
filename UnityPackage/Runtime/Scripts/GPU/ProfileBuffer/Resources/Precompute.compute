@@ -1,0 +1,83 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma enable_d3d11_debug_symbols
+#pragma kernel CSMain
+
+RWTexture2D<float4> Result;
+Texture2D<float> Spectrum;
+
+float period;
+float resolution;
+float time;
+float z_min;
+float z_max;
+static uint integration_nodes = 100;
+static float tau = 6.28318530718;
+static float g = 9.81;
+static float windSpeed = 10.0f;
+
+float spectrum(float zeta)
+{
+    float A = pow(1.1, 1.5 * zeta);
+    float B = exp(-1.8038897788076411f * pow(4, zeta) / pow(windSpeed, 4));
+    return 0.139098f * sqrt(A * B);
+}
+
+float4 gerstner_wave(float phase, float knum){
+    float s = sin(phase);
+    float c = cos(phase);
+    return float4(-s, c, -knum * c, -knum * s);
+}
+
+//TODO precompute cubic bump in CPU
+float cubic_bump(float x)
+{
+    if (abs(x) >= 1)
+        return 0.0f;
+    else
+        return x * x * (2 * abs(x) - 3) + 1;
+}
+
+float dispersionRelation(float k){
+  return sqrt(k * g);
+}
+
+float4 func(float zeta, float p, uint i)
+{
+    
+    float waveLength = pow(2, zeta);
+    float waveNumber = tau / waveLength;
+    float phase1 = waveNumber * p - dispersionRelation(waveNumber) * time;
+    float phase2 = waveNumber * (p - period) - dispersionRelation(waveNumber) * time;
+
+    float weight1 = p / period;
+    float weight2 = 1 - weight1;
+    return waveLength * 
+                   spectrum(zeta) *
+                   (cubic_bump(weight1) * gerstner_wave(phase1, waveNumber) +
+                    cubic_bump(weight2) * gerstner_wave(phase2, waveNumber));
+}
+
+float4 integrate(float p)
+{
+    float dz = (z_max - z_min) / integration_nodes;
+    float z = z_min + 0.5 * dz;
+    float4 result = dz * func(z, p, 0);
+    for (uint i = 1; i < integration_nodes; i++)
+    {
+        z += dz;
+        result += dz * func(z, p, i);
+    }
+    
+    return result;
+}
+
+[numthreads(8,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    float p = (i * period) / resolution;
+    
+    Result[id.xy] = integrate(p);
+}
+
+

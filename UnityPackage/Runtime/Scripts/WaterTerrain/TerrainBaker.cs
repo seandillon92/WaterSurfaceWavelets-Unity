@@ -20,8 +20,8 @@ internal class TerrainBaker : MonoBehaviour
         m_terrain.heights = new float[(m_samples.x + 1) * (m_samples.y + 1)];
         var heights = m_terrain.heights;
 
-        float dx = 2f / m_samples.x;
-        float dz = 2f / m_samples.y;
+        float dx = 2f / (m_samples.x);
+        float dz = 2f / (m_samples.y);
 
         int index = 0;
         for (float x = -1f ; x <= 1f; x+= dx)

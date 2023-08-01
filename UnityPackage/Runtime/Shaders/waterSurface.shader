@@ -24,13 +24,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
             struct appdata
             {
-                float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
-                
-                float4 amplitude1 : TEXCOORD1;
-                float4 amplitude2 : TEXCOORD2;
-                float4 amplitude3 : TEXCOORD3;
-                float4 amplitude4 : TEXCOORD4;
             };
 
             struct v2f
@@ -47,32 +41,51 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
             #include "waterSurface.cginc"
             samplerCUBE _Skybox;
-            float4 _FoamColor;
-            float3 _FresnelColor;
             float _FresnelExponent;
             float _RefractionIndex;
 
             v2f vert (appdata v)
             {
                 v2f o;
-                float3 pos = v.vertex.xyz;
+                float3 pos = posToGrid(v.uv);
+                float2 amplitudePos = gridToAmpl(pos.xz);
                 float4 amplitude[NUM] =
                 {
-                    v.amplitude1,
-                    v.amplitude2,
-                    v.amplitude3,
-                    v.amplitude4
+                    float4(
+                        gridAmplitude(amplitudePos, 0),
+                        gridAmplitude(amplitudePos, 1),
+                        gridAmplitude(amplitudePos, 2),
+                        gridAmplitude(amplitudePos, 3)),
+                    
+                    float4(
+                        gridAmplitude(amplitudePos, 4),
+                        gridAmplitude(amplitudePos, 5),
+                        gridAmplitude(amplitudePos, 6),
+                        gridAmplitude(amplitudePos, 7)),
+                    
+                    float4(
+                        gridAmplitude(amplitudePos, 8),
+                        gridAmplitude(amplitudePos, 9),
+                        gridAmplitude(amplitudePos, 10),
+                        gridAmplitude(amplitudePos, 11)),
+
+                    float4(
+                        gridAmplitude(amplitudePos, 12),
+                        gridAmplitude(amplitudePos, 13),
+                        gridAmplitude(amplitudePos, 14),
+                        gridAmplitude(amplitudePos, 15)),
+
                 };
     
-                pos += wavePosition(pos, amplitude);
+                //pos += wavePosition(pos, amplitude);
     
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);
 
-                o.amplitude1 = v.amplitude1;
-                o.amplitude2 = v.amplitude2;
-                o.amplitude3 = v.amplitude3;
-                o.amplitude4 = v.amplitude4;
+                o.amplitude1 = amplitude[0];
+                o.amplitude2 = amplitude[1];
+                o.amplitude3 = amplitude[2];
+                o.amplitude4 = amplitude[3];
                 o.wavePosition = pos;
                 return o;
             }
@@ -86,7 +99,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                     i.amplitude4};
                 float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude));
                 
-                fixed4 fragment;
+                fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);
 
                 float3 view = normalize(WorldSpaceViewDir(float4(i.wavePosition, 1.0f)));
