@@ -1,6 +1,6 @@
 #pragma enable_d3d11_debug_symbols
 #pragma kernel Advection
-#pragma kernel Copy
+#pragma kernel Diffusion
 
 Texture3D<float> Read;
 Texture2D<float> heights;
@@ -32,6 +32,11 @@ float2 posToGrid(float2 pos)
 float iTheta2Theta(float itheta)
 {
     return (itheta + 0.5) * theta_dx;
+}
+
+uint posModuloItheta(float itheta)
+{
+    return (itheta % 16 + 16) % 16;
 }
 
 float Theta2iTheta(float theta)
@@ -134,6 +139,26 @@ float sample(float3 coord)
 }
 
 [numthreads(8, 8, 8)]
+void Diffusion(uint3 id : SV_DispatchThreadID)
+{
+    float ls = getHeight(idxToPos(float2(id.x, id.y)));
+    float gamma = 2 * 0.025 * groupSpeed * deltaTime / dx;
+          // do diffusion only if you are 2 grid nodes away from boudnary
+    if (ls >= 4 * dx)
+    {
+        Write[id] =
+                (1 - gamma) * Read[id] +
+                gamma * 0.5 *
+                    (Read[uint3(id.xy, posModuloItheta(id.z + 1))] +
+                     Read[uint3(id.xy, posModuloItheta(id.z - 1))]);
+    }
+    else
+    {
+        Write[id] = Read[id];
+    }
+}
+
+[numthreads(8, 8, 8)]
 void Advection(uint3 id : SV_DispatchThreadID)
 {
     float3 pos = id;
@@ -173,10 +198,4 @@ void Advection(uint3 id : SV_DispatchThreadID)
         }
         
     }
-}
-
-[numthreads(8, 8, 8)]
-void Copy(uint3 id : SV_DispatchThreadID)
-{
-    Write[id] = Read[id];
 }
