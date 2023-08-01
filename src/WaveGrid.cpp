@@ -201,7 +201,6 @@ void WaveGrid::advectionStep(const Real dt) {
 
 	  auto pos = m_positions[i];
 
-
 	  for (int itheta = 0; itheta < gridDim(Theta); itheta++) {
 		  for (int izeta = 0; izeta < gridDim(Zeta); izeta++) {
 
@@ -215,8 +214,9 @@ void WaveGrid::advectionStep(const Real dt) {
 
 			  // Take care of boundaries
 			  trace_back_pos4 = boundaryReflection(trace_back_pos4);
-
-			  m_newAmplitude(pos[0], pos[1], itheta, izeta) = amplitude(trace_back_pos4);
+              if (m_enviroment.inDomain(Vec2{ trace_back_pos4[X], trace_back_pos4[Y] })) {
+                  m_newAmplitude(pos[0], pos[1], itheta, izeta) = amplitude(trace_back_pos4);
+              }
 		  }
 	  }
   }
@@ -239,7 +239,8 @@ Vec4 WaveGrid::boundaryReflection(const Vec4 pos4) const {
   // Reflect point and wave-vector direction around boundary
   // Here we rely that `ls` is equal to the signed distance from the boundary
   pos  = pos - 2.0 * ls * n;
-  kdir = kdir - 2.0 * (kdir * n) * n;
+  Real dot = kdir * n;
+  kdir = kdir - 2.0 * dot * n;
 
   Real reflected_theta = atan2(kdir[Y], kdir[X]);
 

@@ -73,6 +73,10 @@ API void addPointDisturbanceDirection(WaterWavelets::WaveGrid* grid, Vec3 pos, f
     grid->addPointDisturbance(pos, disturbance);
 }
 
+API void amplitudeData(WaterWavelets::WaveGrid* buffer, void* dest) {
+    memcpy(dest, buffer->m_amplitude.m_data.data(), buffer->m_amplitude.m_data.size() * sizeof(float));
+}
+
 #pragma endregion
 
 #pragma region Profile Buffer

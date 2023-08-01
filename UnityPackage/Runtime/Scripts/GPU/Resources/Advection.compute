@@ -6,6 +6,7 @@ Texture3D<float> Read;
 Texture2D<float> heights;
 Texture2D<float2> gradients;
 RWTexture3D<float> Write;
+
 float Default[16];
 float deltaTime;
 float groupSpeed;
@@ -24,7 +25,7 @@ float2 idxToPos(float2 idx)
 
 float2 posToGrid(float2 pos)
 {
-    return (pos - float2(x_min, x_min)) / dx - float2(0.5, 0.5);
+    return ((pos - float2(x_min, x_min))) / dx - float2(0.5, 0.5);
 }
 
 
@@ -36,7 +37,7 @@ float iTheta2Theta(float itheta)
 float Theta2iTheta(float theta)
 {
     float r = (theta / theta_dx) - 0.5;
-    if(r < 0)
+    if (r < 0)
         return 16 + r;
     return r;
 }
@@ -52,7 +53,7 @@ float getHeight(float2 pos)
 {
     uint x, y;
     heights.GetDimensions(x, y);
-    float2 gridPos = pos / env_dx - float2(0.5, 0.5) + float2(x/2, y/2);
+    float2 gridPos = pos / env_dx - float2(0.5, 0.5) + float2(x / 2, y / 2);
     float height =
         heights.SampleLevel(
             linearClampSampler,
@@ -74,12 +75,12 @@ float2 getGradient(float2 pos)
             float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).r;
     
     gridPos = pos / env_dx - float2(0.5, 1) + float2(x / 2, y / 2);
-    gradient.y = 
+    gradient.y =
         gradients.SampleLevel(
             linearClampSampler,
             float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).g;
     
-    return normalize(gradient.yx);
+    return length(gradient) == 0 ? gradient : normalize(gradient.yx);
 }
 
 float3 boundaryReflection(float3 pos)
@@ -103,35 +104,37 @@ float3 boundaryReflection(float3 pos)
 
 float sample(float3 coord)
 {
-    float2 pos = coord.xy;
-    float2 pivot = floor(pos);
-    float2 s = frac(pos);
-    float2 direction = sign(pos - pivot);
+    float2 pixel = coord.xy + float2(0.5, 0.5);
+    float2 center = floor(pixel) + float2(0.5, 0.5);
+    float2 fract = frac(abs(pixel - center));
+    float2 centerGrid = center - float2(0.5f, 0.5f); // center in grid coordinates
+    
+    float2 direction = sign(pixel - center);
     
     //TODO use a weight mask
-    float w_s =   getHeight(idxToPos(pivot)) < 0.0f ? 0.0f : 1.0f;
-    float w_x = getHeight(idxToPos(pivot + float2(direction.x, 0))) < 0.0f ? 0.0f : 1.0f;
-    float w_y = getHeight(idxToPos(pivot + float2(0, direction.y))) < 0.0f ? 0.0f : 1.0f;
-    float w_xy = getHeight(idxToPos(pivot + direction)) < 0.0f ? 0.0f : 1.0f;
+    float w_s = getHeight(idxToPos(centerGrid)) < 0.0f ? 0.0f : 1.0f;
+    float w_x = getHeight(idxToPos(centerGrid + float2(direction.x, 0))) < 0.0f ? 0.0f : 1.0f;
+    float w_y = getHeight(idxToPos(centerGrid + float2(0, direction.y))) < 0.0f ? 0.0f : 1.0f;
+    float w_xy = getHeight(idxToPos(centerGrid + direction)) < 0.0f ? 0.0f : 1.0f;
     
     uint x, y, z, levels;
     Read.GetDimensions(0, x, y, z, levels);
     
     // bilinear interpolation
-    float v_s = Read.SampleLevel(pointClampSampler, float3((pivot.x + 0.5) / x, (pivot.y + 0.5) / y, (coord.z + 0.5) / z), 0);
-    float v_x = Read.SampleLevel(pointClampSampler, float3((pivot.x + direction.x + 0.5) / x, (pivot.y + 0.5) / y, (coord.z + 0.5) / z), 0);
-    float v_y = Read.SampleLevel(pointClampSampler, float3((pivot.x + 0.5) / x, (pivot.y + direction.y + 0.5) / y, (coord.z + 0.5) / z), 0);
-    float v_xy = Read.SampleLevel(pointClampSampler, float3((pivot.x + direction.x + 0.5) / x, (pivot.y + direction.y + 0.5) / y, (coord.z + 0.5) / z), 0);
+    float v_s = Read.SampleLevel(pointClampSampler, float3(center.x / x, center.y/ y, (coord.z + 0.5) / z), 0);
+    float v_x = Read.SampleLevel(pointClampSampler, float3((center.x + direction.x) / x, center.y / y, (coord.z + 0.5) / z), 0);
+    float v_y = Read.SampleLevel(pointClampSampler, float3(center.x / x, (center.y + direction.y) / y, (coord.z + 0.5) / z), 0);
+    float v_xy = Read.SampleLevel(pointClampSampler, float3((center.x + direction.x) / x, (center.y + direction.y) / y, (coord.z + 0.5) / z), 0);
     
-    float v_h1 = lerp(v_s, v_y, w_y * s.y);
-    float v_h2 = lerp(v_x, v_xy, w_xy * s.y);
-    float v = lerp(v_h1, v_h2, w_x * s.x);
+    float v_h1 = lerp(v_s, v_y, w_y * fract.y);
+    float v_h2 = lerp(v_x, v_xy, w_xy * fract.y);
+    float v = lerp(v_h1, v_h2, w_x * fract.x);
     
     return v;
 }
 
-[numthreads(8,8,8)]
-void Advection (uint3 id : SV_DispatchThreadID)
+[numthreads(8, 8, 8)]
+void Advection(uint3 id : SV_DispatchThreadID)
 {
     float3 pos = id;
     pos.xy = idxToPos(id.xy);
@@ -149,17 +152,15 @@ void Advection (uint3 id : SV_DispatchThreadID)
         {
         
             float2 gridPos = posToGrid(pos.xy);
-
-            
             if (gridPos.x < 0 ||
-                gridPos.x > x - 1||
+                gridPos.x > x - 1 ||
                 gridPos.y < 0 ||
                 gridPos.y > y - 1)
             {
                 Write[id] = Default[id.z];
             }
             else
-            {                
+            {
                 float read = sample(float3(gridPos.xy, pos.z));
                 Write[id] = read;
             }
@@ -174,7 +175,7 @@ void Advection (uint3 id : SV_DispatchThreadID)
     }
 }
 
-[numthreads(8,8,8)]
+[numthreads(8, 8, 8)]
 void Copy(uint3 id : SV_DispatchThreadID)
 {
     Write[id] = Read[id];
