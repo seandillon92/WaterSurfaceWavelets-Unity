@@ -91,7 +91,6 @@ namespace WaveGrid
         void IWaveGrid.Update(UpdateSettings settings)
         {
             m_material.SetFloatArray("directions", settings.amplitudeTracks.IncludeValues.Select(x => x ? 1.0f : 0.0f).ToArray());
-            //m_material.SetInt("direction", settings.direction);
             m_material.SetVector(m_cameraPos_id, m_camera.transform.position);
             m_material.SetVector(m_cameraProjectionForward_id, m_camera.projectionMatrix.MultiplyPoint(Vector3.forward));
             m_material.SetMatrix(m_cameraInverseProjection_id,
@@ -102,10 +101,11 @@ namespace WaveGrid
             {
                 //Advection step
                 m_advection.Update();
+                m_profileBuffers[0].Update();
+
             }
 
             //Precompute step
-            m_profileBuffers[0].Update();
         }
     }
 }

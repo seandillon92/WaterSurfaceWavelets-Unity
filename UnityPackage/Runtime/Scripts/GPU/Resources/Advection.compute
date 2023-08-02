@@ -1,6 +1,8 @@
 #pragma enable_d3d11_debug_symbols
 #pragma kernel Advection
 #pragma kernel Diffusion
+#pragma kernel Init
+#pragma kernel Copy
 
 Texture3D<float> Read;
 Texture2D<float> heights;
@@ -198,4 +200,21 @@ void Advection(uint3 id : SV_DispatchThreadID)
         }
         
     }
+}
+
+[numthreads(1, 1, 8)]
+void Init(uint3 id : SV_DispatchThreadID)
+{
+    uint x, y, z;
+    Write.GetDimensions(x, y, z);
+    if (id.x == 0 || id.x == x - 1 || id.y == 0 || id.y == y - 1)
+    {
+        Write[id] = Default[id.z];
+    }
+}
+
+[numthreads(8, 8, 8)]
+void Copy(uint3 id : SV_DispatchThreadID)
+{
+    Write[id + uint3(1, 1, 0)] = Read[id];
 }

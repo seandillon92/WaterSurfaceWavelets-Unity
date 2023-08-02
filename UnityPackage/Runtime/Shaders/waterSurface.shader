@@ -18,9 +18,17 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
-            #pragma enable_d3d11_debug_symbols 
+            #pragma enable_d3d11_debug_symbols
+
+            //shader model 6
+            #pragma require WaveBasic	
+            #pragma require WaveVote
+            #pragma require WaveBallot
+            #pragma require WaveMath
+            #pragma require WaveMultiPrefix 
 
             #include "UnityCG.cginc"
+            #include "waterSurface.cginc"
 
             struct appdata
             {
@@ -32,11 +40,11 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 UNITY_FOG_COORDS(1)
                 float4 position : SV_POSITION;
                 float3 wavePosition : POSITION1;
-                float2 amplitudePosition : POSITION2;
+                float amplitude[DIR_NUM] : POSITION2;
             };
 
 
-            #include "waterSurface.cginc"
+
             samplerCUBE _Skybox;
             float _FresnelExponent;
             float _RefractionIndex;
@@ -49,16 +57,33 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 //pos += wavePosition(pos, amplitude);
     
                 o.position = UnityObjectToClipPos(pos);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                UNITY_TRANSFER_FOG(o,pos);
 
                 o.wavePosition = pos;
-                o.amplitudePosition = amplitudePos;
+                o.amplitude[0] = gridAmplitude(amplitudePos, 0);
+                o.amplitude[1] = gridAmplitude(amplitudePos, 1);
+                o.amplitude[2] = gridAmplitude(amplitudePos, 2);
+                o.amplitude[3] = gridAmplitude(amplitudePos, 3);
+                o.amplitude[4] = gridAmplitude(amplitudePos, 4);
+                o.amplitude[5] = gridAmplitude(amplitudePos, 5);
+                o.amplitude[6] = gridAmplitude(amplitudePos, 6);
+                o.amplitude[7] = gridAmplitude(amplitudePos, 7);
+                o.amplitude[8] = gridAmplitude(amplitudePos, 8);
+                o.amplitude[9] = gridAmplitude(amplitudePos, 9);
+                o.amplitude[10] = gridAmplitude(amplitudePos, 10);
+                o.amplitude[11] = gridAmplitude(amplitudePos, 11);
+                o.amplitude[12] = gridAmplitude(amplitudePos, 12);
+                o.amplitude[13] = gridAmplitude(amplitudePos, 13);
+                o.amplitude[14] = gridAmplitude(amplitudePos, 14);
+                o.amplitude[15] = gridAmplitude(amplitudePos, 15);
+                
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, i.amplitudePosition));
+
+                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, i.amplitude));
                 fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);
 
