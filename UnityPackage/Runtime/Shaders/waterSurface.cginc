@@ -66,13 +66,10 @@ float3 posToGrid(float2 pos)
     return p;
 }
 
-float Ampl(uint i, float4 amplitude[NUM]) {
+float Ampl(uint i, float2 pos) {
     if (directions[i] == 1.0f)
     {
-    
-        i = i % DIR_NUM;
-    
-        return amplitude[i / 4][i % 4];
+        return gridAmplitude(pos, i);
     }
     else
     {
@@ -82,16 +79,16 @@ float Ampl(uint i, float4 amplitude[NUM]) {
 
 static const float tau = 6.28318530718;
 
-float iAmpl(float angle/*in [0,2pi]*/, float4 amplitude[NUM]) {
+float iAmpl(float angle/*in [0,2pi]*/, float2 pos) {
     float a = DIR_NUM * angle / tau + DIR_NUM - 0.5;
     uint ia = uint(floor(a));
     float w = a - ia;
-    return (1 - w) * Ampl(ia % DIR_NUM, amplitude) + w * Ampl((ia + 1) % DIR_NUM, amplitude);
+    return (1 - w) * Ampl(ia % DIR_NUM, pos) + w * Ampl((ia + 1) % DIR_NUM, pos);
 }
 
 static const int seed = 40234324;
 
-float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
+float3 wavePosition(float3 pos) {
     float3 result = float3(0.0, 0.0, 0.0);
 
     const int N = NUM_INTEGRATION_NODES;
@@ -104,7 +101,7 @@ float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
+        float4 tt = dx * iAmpl(angle, pos.xz) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
 
         result.xz += kdir * tt.x;
         result.y += tt.y;
@@ -112,7 +109,7 @@ float3 wavePosition(float3 pos, float4 amplitude[NUM]) {
     return result;
 }
 
-float3 waveNormal(float3 pos, float4 amplitude[NUM]) {
+float3 waveNormal(float3 pos, float2 amplitudePos) {
 
     float3 tx = float3(1.0, 0.0, 0.0);
     float3 ty = float3(0.0, 1.0, 0.0);
@@ -127,7 +124,7 @@ float3 waveNormal(float3 pos, float4 amplitude[NUM]) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
+        float4 tt = dx * iAmpl(angle, amplitudePos) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
 
         tx.xz += kdir.x * tt.zw;
         ty.yz += kdir.y * tt.zw;

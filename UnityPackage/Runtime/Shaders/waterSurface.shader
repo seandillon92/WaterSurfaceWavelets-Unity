@@ -30,12 +30,9 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
             struct v2f
             {
                 UNITY_FOG_COORDS(1)
-                float4 amplitude1 : TEXCOORD1;
-                float4 amplitude2 : TEXCOORD2;
-                float4 amplitude3 : TEXCOORD3;
-                float4 amplitude4 : TEXCOORD4;
                 float4 position : SV_POSITION;
-                float3 wavePosition : TEXCOORD5;
+                float3 wavePosition : POSITION1;
+                float2 amplitudePosition : POSITION2;
             };
 
 
@@ -49,56 +46,19 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 v2f o;
                 float3 pos = posToGrid(v.uv);
                 float2 amplitudePos = gridToAmpl(pos.xz);
-                float4 amplitude[NUM] =
-                {
-                    float4(
-                        gridAmplitude(amplitudePos, 0),
-                        gridAmplitude(amplitudePos, 1),
-                        gridAmplitude(amplitudePos, 2),
-                        gridAmplitude(amplitudePos, 3)),
-                    
-                    float4(
-                        gridAmplitude(amplitudePos, 4),
-                        gridAmplitude(amplitudePos, 5),
-                        gridAmplitude(amplitudePos, 6),
-                        gridAmplitude(amplitudePos, 7)),
-                    
-                    float4(
-                        gridAmplitude(amplitudePos, 8),
-                        gridAmplitude(amplitudePos, 9),
-                        gridAmplitude(amplitudePos, 10),
-                        gridAmplitude(amplitudePos, 11)),
-
-                    float4(
-                        gridAmplitude(amplitudePos, 12),
-                        gridAmplitude(amplitudePos, 13),
-                        gridAmplitude(amplitudePos, 14),
-                        gridAmplitude(amplitudePos, 15)),
-
-                };
-    
                 //pos += wavePosition(pos, amplitude);
     
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o,o.vertex);
 
-                o.amplitude1 = amplitude[0];
-                o.amplitude2 = amplitude[1];
-                o.amplitude3 = amplitude[2];
-                o.amplitude4 = amplitude[3];
                 o.wavePosition = pos;
+                o.amplitudePosition = amplitudePos;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float4 amplitude[NUM] = { 
-                    i.amplitude1,
-                    i.amplitude2,
-                    i.amplitude3,
-                    i.amplitude4};
-                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, amplitude));
-                
+                float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, i.amplitudePosition));
                 fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);
 
