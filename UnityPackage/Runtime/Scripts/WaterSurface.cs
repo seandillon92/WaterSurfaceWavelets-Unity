@@ -87,7 +87,6 @@ namespace WaterWaveSurface
         private void OnValidate()
         {
             m_settings.OnValidate();
-            m_updateSettings.OnValidate();
         }
 
         void OnDestroy()

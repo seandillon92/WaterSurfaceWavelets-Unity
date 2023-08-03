@@ -43,7 +43,7 @@ namespace ProfileBuffer
             Spectrum spectrum,
             float initial_time,
             int resolution = 4096, 
-            int integrationNodes = 100, 
+            int integrationNodes = 96, 
             int periodicity = 2)
         {
             period = periodicity * Mathf.Pow(2, zmax);

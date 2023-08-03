@@ -149,6 +149,7 @@ internal class WaveGridCPURenderer
         }
 
         m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
+        m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ?1.0f: 0.0f);
     }
 
     private void SetProfileBuffer()

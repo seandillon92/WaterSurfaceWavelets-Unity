@@ -2,7 +2,7 @@
 #define DIR_NUM 16
 
 static const int NUM = DIR_NUM / 4;
-static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
+static const int NUM_INTEGRATION_NODES = 4 * DIR_NUM;
 
 uniform Texture2D textureData;
 uniform float profilePeriod;
@@ -24,6 +24,7 @@ uniform float2 translation;
 uniform uint nx;
 uniform uint direction;
 uniform float amp_mult;
+uniform bool renderOutsideBorders;
 
 
 float3 mulPoint(float4x4 m, float3 p)
@@ -49,7 +50,6 @@ float3 posToGrid(float2 pos)
 {
     float3 p = float3(pos.xy, 0) + cameraProjectionForward;
     p  = mulPoint(cameraInverseProjection, p);
-    
     float3 dir = normalize(p - cameraPos);
     float camY = cameraPos.y - waterLevel;
     float t = -camY / dir.y;
@@ -57,6 +57,16 @@ float3 posToGrid(float2 pos)
     t = t < 0 || isnan(t) ? 1000 : t;
     p = cameraPos + t * dir;
     p.y = waterLevel;
+    
+    if (!renderOutsideBorders)
+    {
+        p.xz = 
+            clamp(
+                p.xz, 
+                translation - float2(nx * 2, nx * 2), 
+                translation + float2(nx * 2, nx * 2));
+    }
+
     return p;
 }
 
@@ -104,11 +114,9 @@ float3 waveNormal(float3 pos, float amplitude[DIR_NUM]) {
 
         float angle = a * tau;
         float2 kdir = float2(cos(angle), sin(angle));
-        float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
+        float kdir_x = dot(pos.xz, kdir) + tau * sin(a * seed);
         float w = kdir_x / profilePeriod;
-
-        float4 freq = textureData.Sample(linear_repeat_sampler, float2(w, 0));
-        float4 tt = dx * iAmpl(angle, amplitude) * freq;
+        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(linear_repeat_sampler, float2(w, 0));
 
         tx.xz += kdir.x * tt.zw;
         ty.yz += kdir.y * tt.zw;
