@@ -27,7 +27,6 @@ namespace ProfileBuffer
 
         private ComputeShader m_shader;
         private int m_kernelIndex;
-        private Texture2D m_spectrum_data;
         private int m_integration_nodes;
         private float m_zmin;
         private float m_zmax;
@@ -62,7 +61,8 @@ namespace ProfileBuffer
             descriptor.height = 1;
             descriptor.useMipMap = false;
             descriptor.volumeDepth = 1;
-            descriptor.graphicsFormat = UnityEngine.Experimental.Rendering.GraphicsFormat.R32G32B32A32_SFloat;
+            descriptor.colorFormat = RenderTextureFormat.ARGBHalf;
+            descriptor.sRGB = false;
             descriptor.enableRandomWrite = true;
             descriptor.msaaSamples = 1;
             descriptor.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
@@ -75,11 +75,6 @@ namespace ProfileBuffer
                 Debug.LogError("Could not create ProfileBuffer");
             }
 
-            //Create spectrum texture
-            m_spectrum_data = new Texture2D(m_integration_nodes, 1, TextureFormat.RGBA32, false, true);
-            m_spectrum_data.wrapMode = TextureWrapMode.Repeat;
-            m_spectrum_data.filterMode = FilterMode.Bilinear;
-            InitializeSpectrumData(spectrum);
             InitializeGroupSpeed(spectrum);
 
             // Set shader uniforms
@@ -87,29 +82,11 @@ namespace ProfileBuffer
             m_kernelIndex = m_shader.FindKernel("CSMain");
             
             m_shader.SetTexture(m_kernelIndex, Shader.PropertyToID("Result"), data);
-            m_shader.SetTexture(m_kernelIndex, Shader.PropertyToID("Spectrum"), m_spectrum_data);
             m_shader.SetFloat(Shader.PropertyToID("period"), period);
             m_shader.SetFloat(Shader.PropertyToID("resolution"), resolution);
             m_shader.SetFloat(Shader.PropertyToID("z_min"), zmin);
             m_shader.SetFloat(Shader.PropertyToID("z_max"), zmax);
         }
-
-        void InitializeSpectrumData(Spectrum spectrum)
-        {
-            double[] data = new double[m_integration_nodes];
-            double dz = (m_zmax - m_zmax) / m_integration_nodes;
-            double z = m_zmin + 0.5 * dz;
-            for (uint i = 1; i < m_integration_nodes; i++)
-            {
-                z += dz;
-                data[i] =  spectrum.calculcate(z);
-            }
-
-            m_spectrum_data.SetPixelData(data, 0);
-            m_spectrum_data.Apply();
-        }
-
-        
 
         void InitializeGroupSpeed(Spectrum spectrum)
         {
@@ -149,7 +126,6 @@ namespace ProfileBuffer
 
         public void Dispose()
         {
-            UnityEngine.Object.Destroy(this.m_spectrum_data);
             UnityEngine.Object.Destroy(this.data);
         }
     }
