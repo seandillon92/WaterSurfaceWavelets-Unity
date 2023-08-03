@@ -84,7 +84,7 @@ float3 wavePosition(float3 pos, float amplitude[DIR_NUM]) {
         float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * textureData.Sample(point_repeat_sampler, float2(w, 0));
+        float4 tt = dx * iAmpl(angle, amplitude) * textureData.SampleLevel(point_repeat_sampler, float2(w, 0), 0);
 
         result.xz += kdir * tt.x;
         result.y += tt.y;
