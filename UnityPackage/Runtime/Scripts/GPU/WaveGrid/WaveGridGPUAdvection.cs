@@ -76,14 +76,14 @@ namespace WaveGrid
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
             m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
-            m_shader.SetTexture(m_advection_kernel, "heights", environment.heights);
+            m_shader.SetTexture(m_advection_kernel, "heights", settings.environment);
             m_shader.SetTexture(m_advection_kernel, "gradients", environment.gradients);
 
 
             m_diffusion_kernel = m_shader.FindKernel("Diffusion");
             m_shader.SetTexture(m_diffusion_kernel, "Read", m_newAmplitude);
             m_shader.SetTexture(m_diffusion_kernel, "Write", m_amplitude);
-            m_shader.SetTexture(m_diffusion_kernel, "heights", environment.heights);
+            m_shader.SetTexture(m_diffusion_kernel, "heights", settings.environment);
             m_shader.SetTexture(m_diffusion_kernel, "gradients", environment.gradients);
 
             m_init_kernel = m_shader.FindKernel("Init");

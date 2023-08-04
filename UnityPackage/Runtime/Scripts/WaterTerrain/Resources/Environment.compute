@@ -1,0 +1,11 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+Texture2D<float> Depth;
+RWTexture2D<float> Write;
+ 
+[numthreads(32, 32, 1)]
+void CSMain(uint3 uv : SV_DispatchThreadID)
+{
+    Write[uv.xy] = (1 - Depth[uv.xy]) * 553.7958 - 103.5465;
+}

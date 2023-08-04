@@ -15,6 +15,9 @@ namespace WaterWaveSurface
         private Material m_material;
 
         [SerializeField]
+        private Material m_depth_material;
+
+        [SerializeField]
         private Settings m_settings;
 
         [SerializeField]
@@ -32,13 +35,35 @@ namespace WaterWaveSurface
 
         internal Settings Settings { get { return m_settings; } }
 
+        
+        ComputeShader shader;
         private void Update()
         {
+            var cam = Settings.environmentCamera;
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
+            cam.depthTextureMode = DepthTextureMode.Depth;
+            cam.RenderWithShader(m_depth_material.shader, "");
+
+
+
+            int kernelHandle = shader.FindKernel("CSMain");
+            shader.SetTexture(kernelHandle, "Depth", cam.targetTexture);
+            shader.SetTexture(kernelHandle, "Write", m_settings.environment);
+            shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
         }
 
         void Start()
         {
+            {
+                var cam = m_settings.environmentCamera;
+                var env = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+                env.enableRandomWrite = true;
+                env.Create();
+                m_settings.environment = env;
+
+                shader = (ComputeShader)Resources.Load("Environment");
+            }
+
             switch (m_implementation)
             {
                 case Implementation.CPU:
@@ -59,6 +84,8 @@ namespace WaterWaveSurface
             m_material.SetFloat("_FresnelExponent", 1.0f);
             m_material.SetFloat("_RefractionIndex", 1.0f);
             m_material.name = "WaterSurfaceMaterial";
+
+
         }
 
         void LateUpdate()

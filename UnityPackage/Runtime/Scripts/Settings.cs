@@ -20,6 +20,8 @@ namespace WaveGrid
         public WaterTerrain terrain;
         public int visualizationResolution = 100;
         public Camera camera;
+        public Camera environmentCamera;
+        public RenderTexture environment;
 
         public List<float> defaultAmplitude;
 
