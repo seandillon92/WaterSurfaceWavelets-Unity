@@ -17,8 +17,8 @@ internal class TerrainBaker : MonoBehaviour
 
     public void Bake(Vector3Int extends, Vector3 position)
     {
-        m_terrain.heights = new float[(m_samples.x + 1) * (m_samples.y + 1)];
-        var heights = m_terrain.heights;
+        m_terrain.heightsData = new float[(m_samples.x + 1) * (m_samples.y + 1)];
+        var heights = m_terrain.heightsData;
 
         float dx = 2f / (m_samples.x);
         float dz = 2f / (m_samples.y);

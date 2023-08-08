@@ -1,11 +1,38 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSMain
+#pragma kernel Heights
+#pragma kernel Gradients
 
-Texture2D<float> Depth;
-RWTexture2D<float> Write;
+Texture2D<float> Read;
+RWTexture2D<float2> Write;
+
+float waterLevel;
+float position;
+float size;
  
 [numthreads(32, 32, 1)]
-void CSMain(uint3 uv : SV_DispatchThreadID)
+void Heights(uint3 id : SV_DispatchThreadID)
 {
-    Write[uv.xy] = 103.5465 - lerp(-553 * 0.5, 553 * 0.5, (Depth[uv.xy]));
+    Write[id.xy] = waterLevel - lerp(-size + position, size + position, (Read[id.xy]));
+}
+
+[numthreads(32, 32, 1)]
+void Gradients(uint3 id : SV_DispatchThreadID)
+{
+    uint h, w;
+    Write.GetDimensions(w, h);
+    if (id.x == w - 1 || id.y == h - 1)
+    {
+        return;
+    }
+    
+    float height = Read[id.xy];
+    float height_x = Read[id.xy + uint2(1,0)];
+    float height_y = Read[id.xy + uint2(0,1)];
+    float2 grad = float2(height_x - height, height_y - height);
+    if (length(grad) != 0)
+    {
+        grad = normalize(grad);
+    }
+
+    Write[id.xy].xy = grad;
 }

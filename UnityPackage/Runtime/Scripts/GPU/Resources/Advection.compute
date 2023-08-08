@@ -79,15 +79,15 @@ float2 getGradient(float2 pos)
     gradient.x =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).r;
+            float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y), 0).r;
     
     gridPos = pos / env_dx - float2(0.5, 1) + float2(x / 2, y / 2);
     gradient.y =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).g;
+            float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y), 0).g;
     
-    return length(gradient) == 0 ? gradient : normalize(gradient.yx);
+    return length(gradient) == 0 ? gradient : normalize(gradient.xy);
 }
 
 float3 boundaryReflection(float3 pos)
@@ -143,8 +143,6 @@ float sample(float3 coord)
 [numthreads(8, 8, 8)]
 void Diffusion(uint3 id : SV_DispatchThreadID)
 {
-    Write[id] = Read[id];
-    return;
     float ls = getHeight(idxToPos(float2(id.x, id.y)));
     float gamma = 2 * 0.025 * groupSpeed * deltaTime / dx;
           // do diffusion only if you are 2 grid nodes away from boudnary
@@ -175,7 +173,7 @@ void Advection(uint3 id : SV_DispatchThreadID)
         float2 vel = groupVelocity(id);
         pos.x -= deltaTime * vel.x;
         pos.y -= deltaTime * vel.y;
-        //pos = boundaryReflection(pos);
+        pos = boundaryReflection(pos);
         height = getHeight(pos.xy);
         if (height >= 0)
         {

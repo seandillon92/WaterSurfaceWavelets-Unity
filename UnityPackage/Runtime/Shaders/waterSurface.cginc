@@ -2,7 +2,7 @@
 #define DIR_NUM 16
 
 static const int NUM = DIR_NUM / 4;
-static const int NUM_INTEGRATION_NODES = 4 * DIR_NUM;
+static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
 
 uniform Texture2D textureData;
 uniform float profilePeriod;
@@ -42,6 +42,10 @@ float2 gridToAmpl(float2 pos)
 
 float gridAmplitude(float2 pos, float itheta)
 {
+    /*if (itheta == 5)
+    {
+        return 0;
+    }*/
     float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5) / 16.0f);
     return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x * amp_mult;
 }

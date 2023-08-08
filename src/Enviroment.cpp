@@ -41,19 +41,19 @@ auto igrid_dy = InterpolationDimWise(LinearInterpolation,
 auto grid = [](Vec2 pos, float dx, size_t N, float* data) -> float {
   pos *= 1 / dx;
   pos += Vec2{N / 2 - 0.5f, N / 2 - 0.5f};
-  return igrid(pos[0], pos[1], N, data) * dx;
+  return igrid(pos[1], pos[0], N, data) * dx;
 };
 
 auto grid_dx = [](Vec2 pos, float dx, size_t N, float* data) -> float {
   pos *= 1 / dx;
   pos += Vec2{N / 2 - 1.0f, N / 2 - 0.5f};
-  return igrid_dx(pos[0], pos[1], N, data);
+  return igrid_dx(pos[1], pos[0], N, data);
 };
 
 auto grid_dy = [](Vec2 pos, float dx, size_t N, float* data) -> float {
   pos *= 1 / dx;
   pos += Vec2{N / 2 - 0.5f, N / 2 - 1.0f};
-  return igrid_dy(pos[0], pos[1], N, data);
+  return igrid_dy(pos[1], pos[0], N, data);
 };
 
 Environment::Environment(float size, float* data, size_t data_size) {
@@ -68,7 +68,7 @@ bool Environment::inDomain(Vec2 pos) const { return levelset(pos) >= 0; }
 Real Environment::levelset(Vec2 pos) const { return grid(pos, _dx, N, _data); }
 
 Vec2 Environment::levelsetGrad(Vec2 pos) const {
-  Vec2 grad = Vec2{grid_dx(pos, _dx, N, _data), grid_dy(pos, _dx, N, _data)};
+  Vec2 grad = Vec2{grid_dy(pos, _dx, N, _data), grid_dx(pos, _dx, N, _data)};
   return normalized(grad);
 }
 

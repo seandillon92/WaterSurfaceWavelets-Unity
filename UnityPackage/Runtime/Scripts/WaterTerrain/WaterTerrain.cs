@@ -5,7 +5,9 @@ using UnityEngine;
 internal class WaterTerrain : ScriptableObject
 {
     public Vector2Int size;
-    public float[] heights;
+    public float[] heightsData;
     public Matrix4x4 transform;
     public float water_level;
+    public RenderTexture heights;
+    public RenderTexture gradients;
 }
