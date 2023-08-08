@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace WaveGrid
 {
     [Serializable]
-    internal class Settings
+    public class VisualizationSettings
+    {
+        public int resolution = 100;
+        public Camera camera;
+    }
+
+    [Serializable]
+    public class SimulationSettings
     {
         public float max_zeta = Mathf.Log(10, 2);
         public float min_zeta = Mathf.Log(0.03f, 2);
@@ -17,10 +23,6 @@ namespace WaveGrid
         public int n_zeta = 1;
         public float initial_time = 100;
         public int spectrum_type = 1;
-        public WaterTerrain terrain;
-        public int visualizationResolution = 100;
-        public Camera camera;
-        public Camera environmentCamera;
 
         public List<float> defaultAmplitude;
 
@@ -34,10 +36,22 @@ namespace WaveGrid
             {
                 defaultAmplitude.Add(0);
             }
-            while(defaultAmplitude.Count > 16)
+            while (defaultAmplitude.Count > 16)
             {
                 defaultAmplitude.RemoveAt(defaultAmplitude.Count - 1);
             }
+        }
+    }
+
+    [Serializable]
+    public class Settings
+    {
+        public SimulationSettings simulation;
+        public EnvironmentSettings environment;
+        public VisualizationSettings visualization;
+        internal void OnValidate()
+        {
+            simulation.OnValidate();
         }
     }
 }

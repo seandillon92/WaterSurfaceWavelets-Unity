@@ -11,12 +11,12 @@ namespace WaveGrid
         internal WaveGridGPUEnvironment(Settings settings)
         {
             //Create the environment textures
-            var heightsSize = Mathf.RoundToInt(Mathf.Sqrt(settings.terrain.heightsData.Length));
+            var heightsSize = Mathf.RoundToInt(Mathf.Sqrt(settings.environment.heightsData.Length));
             heights =
                 new Texture2D(heightsSize, heightsSize, TextureFormat.RFloat, false, true);
             heights.wrapMode = TextureWrapMode.Clamp;
             heights.filterMode = FilterMode.Bilinear;
-            heights.SetPixelData(settings.terrain.heightsData, 0);
+            heights.SetPixelData(settings.environment.heightsData, 0);
             heights.Apply(updateMipmaps:false);
             
             this.gradients = new Texture2D(heightsSize, heightsSize, TextureFormat.RGFloat, false, true);
@@ -25,9 +25,9 @@ namespace WaveGrid
             {
                 for (int j = 0; j < heightsSize - 1; j++)
                 {
-                    var height = settings.terrain.heightsData[i * heightsSize + j];
-                    var height_x = settings.terrain.heightsData[i * heightsSize + j + 1];
-                    var height_y = settings.terrain.heightsData[(i + 1) * heightsSize + j];
+                    var height = settings.environment.heightsData[i * heightsSize + j];
+                    var height_x = settings.environment.heightsData[i * heightsSize + j + 1];
+                    var height_y = settings.environment.heightsData[(i + 1) * heightsSize + j];
                     Vector2 gradient = new Vector2(height_x - height, height_y - height).normalized;
 
                     gradients[(i * heightsSize + j) * 2] = gradient.x;

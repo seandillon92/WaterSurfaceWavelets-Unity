@@ -19,7 +19,5 @@ namespace WaveGrid
         public float amplitudeMultiplier = 4f;
 
         public bool renderOutsideBorders = true;
-
-        public Texture environment;
     }
 }

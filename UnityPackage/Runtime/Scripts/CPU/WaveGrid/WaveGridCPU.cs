@@ -20,25 +20,24 @@ namespace WaveGrid
         private Vector2 m_terrain_translation;
         private Vector2 m_terrain_size;
         private float m_waterLevel;
-        private Camera m_camera;
 
         private List<ProfileBufferCPU> m_buffers = new List<ProfileBufferCPU>();
         private float m_timeStep = 0;
 
-        internal WaveGridCPU(Settings settings, Material material = null)
+        internal WaveGridCPU(Settings s, Material material = null)
         {
             m_ptr = API.Grid.createGrid(
-                settings.terrain.size.x,
-                settings.max_zeta,
-                settings.min_zeta,
-                settings.n_x,
-                settings.n_theta,
-                settings.n_zeta,
-                settings.initial_time,
-                settings.spectrum_type,
-                settings.terrain.heightsData,
-                settings.terrain.heightsData.Length,
-                settings.defaultAmplitude.ToArray());
+                s.environment.size.x,
+                s.simulation.max_zeta,
+                s.simulation.min_zeta,
+                s.simulation.n_x,
+                s.simulation.n_theta,
+                s.simulation.n_zeta,
+                s.simulation.initial_time,
+                s.simulation.spectrum_type,
+                s.environment.heightsData,
+                s.environment.heightsData.Length,
+                s.simulation.defaultAmplitude.ToArray());
 
             var buffersNum = API.Grid.profileBuffersSize(m_ptr);
             for (int i = 0; i < buffersNum; i++)
@@ -49,19 +48,18 @@ namespace WaveGrid
 
             m_timeStep = API.Grid.clfTimeStep(m_ptr);
 
-            m_data = new WaveGridCPUData(settings);
+            m_data = new WaveGridCPUData(s);
             m_mesh = new WaveGridCPUMesh(m_data);
-            m_renderer = new WaveGridCPURenderer(m_data, settings, material);
-            m_visualizationResolution = settings.visualizationResolution;
-            m_zeta = settings.min_zeta + 0.5f * (settings.max_zeta - settings.min_zeta) / settings.n_zeta;
+            m_renderer = new WaveGridCPURenderer(m_data, s, material);
+            m_visualizationResolution = s.visualization.resolution;
+            m_zeta = 
+                s.simulation.min_zeta + 0.5f * (s.simulation.max_zeta - s.simulation.min_zeta) / s.simulation.n_zeta;
 
-            var terrainPosition = settings.terrain.transform.GetPosition();
+            var terrainPosition = s.environment.transform.GetPosition();
 
             m_terrain_translation = new Vector2(terrainPosition.x, terrainPosition.z);
-            m_terrain_size = settings.terrain.size;
-            m_waterLevel = settings.terrain.water_level;
-
-            m_camera = settings.camera;
+            m_terrain_size = s.environment.size;
+            m_waterLevel = s.environment.water_level;
         }
 
         internal void AddPointDisturbance(Vector3 pos, float value)

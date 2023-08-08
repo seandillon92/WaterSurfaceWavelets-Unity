@@ -1,13 +1,16 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "WaterTerrain", menuName = "WaterSurface/Terrain", order = 1)]
-internal class WaterTerrain : ScriptableObject
+[Serializable]
+public class EnvironmentSettings
 {
     public Vector2Int size;
-    public float[] heightsData;
     public Matrix4x4 transform;
     public float water_level;
+    public Camera camera;
+
+    //TODO remove the following out of this class
+    public float[] heightsData;
     public RenderTexture heights;
     public RenderTexture gradients;
 }

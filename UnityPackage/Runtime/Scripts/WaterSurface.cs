@@ -12,6 +12,9 @@ namespace WaterWaveSurface
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]
+        private LayerMask m_layers;
+
+        [SerializeField]
         private Material m_material;
 
         [SerializeField]
@@ -37,7 +40,7 @@ namespace WaterWaveSurface
         
         private void CreateEnvironmentMaps()
         {
-            var cam = m_settings.environmentCamera;
+            var cam = m_settings.environment.camera;
             var heights = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
             heights.enableRandomWrite = true;
             if (!heights.Create())
@@ -51,25 +54,25 @@ namespace WaterWaveSurface
             {
                 Debug.LogError("Could not create height gradients texture");
             }
-            m_settings.terrain.heights = heights;
-            m_settings.terrain.gradients = gradients;
+            m_settings.environment.heights = heights;
+            m_settings.environment.gradients = gradients;
 
             var shader = (ComputeShader)Resources.Load("Environment");
-            shader.SetFloat("waterLevel", m_settings.terrain.water_level);
-            shader.SetFloat("position", m_settings.terrain.transform.GetPosition().y);
-            shader.SetFloat("size", m_settings.terrain.size.x);
+            shader.SetFloat("waterLevel", m_settings.environment.water_level);
+            shader.SetFloat("position", m_settings.environment.transform.GetPosition().y);
+            shader.SetFloat("size", m_settings.environment.size.x);
 
             cam.depthTextureMode = DepthTextureMode.Depth;
             cam.RenderWithShader(m_depth_material.shader, "");
 
             int kernelHandle = shader.FindKernel("Heights");
             shader.SetTexture(kernelHandle, "Read", cam.targetTexture);
-            shader.SetTexture(kernelHandle, "Write", m_settings.terrain.heights);
+            shader.SetTexture(kernelHandle, "Write", m_settings.environment.heights);
             shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
 
             kernelHandle = shader.FindKernel("Gradients");
-            shader.SetTexture(kernelHandle, "Read", m_settings.terrain.heights);
-            shader.SetTexture(kernelHandle, "Write", m_settings.terrain.gradients);
+            shader.SetTexture(kernelHandle, "Read", m_settings.environment.heights);
+            shader.SetTexture(kernelHandle, "Write", m_settings.environment.gradients);
             shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
 
             Texture2D tex = new Texture2D(heights.width, heights.height, TextureFormat.RFloat, false);
@@ -77,11 +80,19 @@ namespace WaterWaveSurface
             tex.ReadPixels(new Rect(0, 0, heights.width, heights.height), 0, 0);
             tex.Apply();
 
-            Settings.terrain.heightsData = tex.GetPixelData<float>(0).ToArray();
+            Settings.environment.heightsData = tex.GetPixelData<float>(0).ToArray();
+            Destroy(tex);
         }
 
         void Start()
         {
+            m_settings.environment.size =
+                new Vector2Int(
+                    Mathf.RoundToInt(transform.localScale.x / 2),
+                    Mathf.RoundToInt(transform.localScale.z / 2));
+
+            m_settings.environment.transform = transform.localToWorldMatrix;
+
             CreateEnvironmentMaps();
 
             switch (m_implementation)
@@ -99,7 +110,7 @@ namespace WaterWaveSurface
 
             m_renderParams = new RenderParams(m_material);
 
-            m_renderParams.camera = m_settings.camera;
+            m_renderParams.camera = m_settings.visualization.camera;
             m_material.SetTexture("_Skybox", m_skybox);
             m_material.SetFloat("_FresnelExponent", 1.0f);
             m_material.SetFloat("_RefractionIndex", 1.0f);

@@ -30,16 +30,16 @@ namespace WaveGrid
 
         internal WaveGridGPU(Settings settings, Material mat)
         {
-            m_camera = settings.camera;
+            m_camera = settings.visualization.camera;
             //Create Profile buffers
-            m_dz = (settings.max_zeta - settings.min_zeta)/settings.n_zeta;
+            m_dz = (settings.simulation.max_zeta - settings.simulation.min_zeta)/settings.simulation.n_zeta;
             m_settings = settings;
             m_profileBuffers = new List<ProfileBufferGPU>();
-            for (int izeta = 0; izeta < settings.n_zeta; izeta++)
+            for (int izeta = 0; izeta < settings.simulation.n_zeta; izeta++)
             {
                 float zeta_min = idxToPosZeta(izeta) - 0.5f * m_dz;
                 float zeta_max = idxToPosZeta(izeta) + 0.5f * m_dz;
-                m_profileBuffers.Add(new ProfileBufferGPU(zeta_min, zeta_max, new Spectrum(10), settings.initial_time));
+                m_profileBuffers.Add(new ProfileBufferGPU(zeta_min, zeta_max, new Spectrum(10), settings.simulation.initial_time));
             }
 
             // Create environment and advection
@@ -52,21 +52,21 @@ namespace WaveGrid
 
             //Update the material
             m_material = mat;
-            m_material.SetFloat(Shader.PropertyToID("waterLevel"), settings.terrain.water_level);
+            m_material.SetFloat(Shader.PropertyToID("waterLevel"), settings.environment.water_level);
             m_material.SetTexture(Shader.PropertyToID("amplitude"), m_advection.amplitude);
-            var size = new Vector2(settings.terrain.size.x, settings.terrain.size.y);
+            var size = new Vector2(settings.environment.size.x, settings.environment.size.y);
             m_material.SetVector(Shader.PropertyToID("xmin"), -size);
-            var idx = new Vector2(1f/(size.x * 2f / settings.n_x),1f/ (size.x * 2f / settings.n_x));
+            var idx = new Vector2(1f/(size.x * 2f / settings.simulation.n_x),1f/ (size.x * 2f / settings.simulation.n_x));
             m_material.SetVector(Shader.PropertyToID("dx"), idx);
             m_material.SetTexture(Shader.PropertyToID("textureData"), m_profileBuffers[0].data);
             m_material.SetFloat(Shader.PropertyToID("profilePeriod"), m_profileBuffers[0].period);
-            m_material.SetFloat(Shader.PropertyToID("nx"), settings.n_x);
+            m_material.SetFloat(Shader.PropertyToID("nx"), settings.simulation.n_x);
             
-            var terrainPosition = settings.terrain.transform.GetPosition();
+            var terrainPosition = settings.environment.transform.GetPosition();
             var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
             m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
 
-            m_material.SetFloatArray("defaultAmplitude", settings.defaultAmplitude);
+            m_material.SetFloatArray("defaultAmplitude", settings.simulation.defaultAmplitude);
 
             m_cameraPos_id = Shader.PropertyToID("cameraPos");
             m_cameraProjectionForward_id = Shader.PropertyToID("cameraProjectionForward");
@@ -75,7 +75,7 @@ namespace WaveGrid
 
         private float idxToPosZeta(int idx)
         {
-            return m_settings.min_zeta + (idx + 0.5f) * m_dz;
+            return m_settings.simulation.min_zeta + (idx + 0.5f) * m_dz;
         }
 
         void IDisposable.Dispose()

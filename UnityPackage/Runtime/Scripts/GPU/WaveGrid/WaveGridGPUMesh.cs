@@ -11,7 +11,7 @@ namespace WaveGrid
         internal WaveGridGPUMesh(Settings settings)
         {
             //Set Vertex Buffer Params
-            var resolution = settings.visualizationResolution;
+            var resolution = settings.visualization.resolution;
             var count = resolution * resolution;
             
             mesh = new Mesh();

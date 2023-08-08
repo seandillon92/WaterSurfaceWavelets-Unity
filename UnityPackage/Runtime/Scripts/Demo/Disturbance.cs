@@ -36,12 +36,11 @@ internal class Disturbance : MonoBehaviour
         if (Input.GetMouseButton(0))
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            var waterLevel = m_waterSurface.Settings.terrain.water_level;
+            var waterLevel = m_waterSurface.Settings.environment.water_level;
             var posY = ray.origin.y - waterLevel;
             float t = -posY / ray.direction.y;
             var pos = ray.origin + t * ray.direction;
-            var terrain = m_waterSurface.Settings.terrain;
-            var terrainPos = terrain.transform.GetPosition();
+            var terrainPos = m_waterSurface.Settings.environment.transform.GetPosition();
             pos.x -= terrainPos.x;
             pos.z -= terrainPos.z;
 
@@ -68,9 +67,8 @@ internal class Disturbance : MonoBehaviour
         if (!m_enableRain)
             return;
 
-        var terrain = m_waterSurface.Settings.terrain;
-        var size = terrain.size;
-        var offset = terrain.transform.GetPosition();
+        var size = m_waterSurface.Settings.environment.size;
+        var offset = m_waterSurface.Settings.environment.transform.GetPosition();
         var point = new Vector2(
             Random.Range(offset.x - size.x, offset.x + size.x),
             Random.Range(offset.z - size.y, offset.z + size.y));

@@ -1,62 +1,17 @@
 using UnityEngine;
 using UnityEditor;
-using System;
-using WaveGrid;
+using WaterWaveSurface;
 
-[CustomEditor(typeof(TerrainBaker))]
+[CustomEditor(typeof(WaterSurface))]
 [CanEditMultipleObjects]
-internal class TerrainBakerEditor : Editor
+internal class WaterSurfaceEditor : Editor
 {
-    private TerrainBaker Target => (TerrainBaker)this.target;
+    private WaterSurface Target => (WaterSurface)this.target;
 
     private Mesh m_waterLevel_mesh;
     private Mesh m_bakingVolume_mesh;
-    private Mesh m_terrain_preview_mesh;
 
     private Material m_volume_material;
-    private MeshPreview m_preview;
-
-    private Mesh GenerateWaterTerrainMesh(int visualizationSize, Vector2Int terrainSize, WaveGridCPU grid)
-    {
-        var mesh = new Mesh();
-        var side = visualizationSize;
-        var positions = new Vector3[side * side];
-        var indices = new int[(side - 1) * (side - 1) * 4];
-        var size = terrainSize;
-        for (int i = 0; i < side * side; i++)
-        {
-            float x = i / (side);
-            x = Mathf.Lerp(-1, 1, x / side);
-
-            float y = i % side;
-            y = Mathf.Lerp(-1, 1, y / side);
-
-            x *= 0.99f * size.x;
-            y *= 0.99f * size.y;
-            positions[i] =
-                new Vector3(x, -grid.GetTerrainHeight(new Vector2(x, y)), y);
-        }
-
-        for (var i = 0; i < side - 1; i++)
-        {
-            for (var j = 0; j < side - 1; j++)
-            {
-                indices[i * (side - 1) * 4 + j * 4] = i * side + j;
-                indices[i * (side - 1) * 4 + j * 4 + 1] = i * side + j + 1;
-                indices[i * (side - 1) * 4 + j * 4 + 2] = (i + 1) * side + j + 1;
-                indices[i * (side - 1) * 4 + j * 4 + 3] = (i + 1) * side + j;
-            }
-        }
-
-        mesh.vertices = positions;
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        mesh.SetIndices(indices, MeshTopology.Quads, 0);
-        mesh.RecalculateBounds();
-        mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
-
-        return mesh;
-    }
 
     private Vector3Int Extends
     {
@@ -71,14 +26,15 @@ internal class TerrainBakerEditor : Editor
         }
     }
 
+    SerializedProperty settings;
+    SerializedProperty environment;
     SerializedProperty waterLevel;
-    SerializedProperty terrain;
 
     void OnEnable()
     {
-        waterLevel = serializedObject.FindProperty("m_waterLevel");
-        terrain = serializedObject.FindProperty("m_terrain");
-
+        settings = serializedObject.FindProperty("m_settings");
+        environment = settings.FindPropertyRelative("environment");
+        waterLevel = environment.FindPropertyRelative("water_level");
         SceneView.duringSceneGui -= CustomSceneGUI;
         SceneView.duringSceneGui += CustomSceneGUI;
     }
@@ -86,39 +42,12 @@ internal class TerrainBakerEditor : Editor
     void OnDisable()
     {
         SceneView.duringSceneGui -= CustomSceneGUI;
-        m_preview?.Dispose();
     }
 
     private float WaterLevel
     {
         get => waterLevel.floatValue;
         set => waterLevel.floatValue = value;
-    }
-
-    private WaterTerrain Terrain
-    {
-        get => terrain.objectReferenceValue as WaterTerrain;
-        set => terrain.objectReferenceValue = value;
-    }
-
-
-    public override void OnInspectorGUI()
-    {
-        serializedObject.Update();
-        DrawDefaultInspector();
-
-        if (GUILayout.Button("Bake"))
-        {
-
-            Target.Bake(Extends, Target.transform.position);
-            EditorUtility.SetDirty(Terrain);
-
-            m_terrain_preview_mesh = null;
-
-            m_preview?.Dispose();
-            m_preview = null;
-        }
-        serializedObject.ApplyModifiedProperties();
     }
 
     private void DrawSceneObjects()
@@ -175,19 +104,6 @@ internal class TerrainBakerEditor : Editor
         return m_volume_material;
     }
 
-    private void GenerateTerrainPreview()
-    {
-        if (m_terrain_preview_mesh == null)
-        {
-            var settings = new Settings();
-            settings.terrain = Terrain;
-            var extends = Extends;
-            using (var grid = new WaveGridCPU(settings))
-            {
-                m_terrain_preview_mesh = GenerateWaterTerrainMesh(100, new Vector2Int(extends.x, extends.z), grid);
-            }
-        }
-    }
 
     private int m_last_frame;
     private bool GetAndUpdateShouldDraw()
@@ -270,46 +186,5 @@ internal class TerrainBakerEditor : Editor
             Matrix4x4.Scale(Vector3.right * Extends.x * 2 + Vector3.forward * Extends.z * 2);
 
         Graphics.DrawMesh(m_waterLevel_mesh, matrix, GetVolumeMaterial(), 0);
-    }
-
-    public override void OnPreviewSettings()
-    {
-        base.OnPreviewSettings();
-
-        if (m_preview != null)
-            m_preview.OnPreviewSettings();
-    }
-
-    public override bool HasPreviewGUI()
-    {
-        return true;
-    }
-
-    public override void OnPreviewGUI(Rect r, GUIStyle background)
-    {
-        return;
-        //TODO: FIX
-        GenerateTerrainPreview();
-
-        if (m_preview == null)
-        {
-            var bound = m_terrain_preview_mesh.bounds;
-            var max = Mathf.Max(Math.Max(bound.extents.x, bound.extents.y), bound.extents.z);
-            var normalized = Instantiate(m_terrain_preview_mesh);
-            var positions = normalized.vertices;
-
-            for (var i = 0; i < normalized.vertexCount; i++)
-            {
-                positions[i] /= max;
-            }
-            normalized.vertices = positions;
-            normalized.RecalculateBounds();
-            normalized.RecalculateTangents();
-            normalized.RecalculateNormals();
-            m_preview = new MeshPreview(normalized);
-        }
-
-        m_preview.OnPreviewGUI(r, background);
-        GUI.Label(r, "Water Terrain Preview");
     }
 }
