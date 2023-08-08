@@ -26,6 +26,16 @@ namespace WaveGrid
 
         internal WaveGridCPU(Settings s, Material material = null)
         {
+            // Convert height data from render texture to float array
+            var env = s.environment;
+            Texture2D tex = new Texture2D(env.heights.width, env.heights.height, TextureFormat.RFloat, false);
+            RenderTexture.active = env.heights;
+            tex.ReadPixels(new Rect(0, 0, env.heights.width, env.heights.height), 0, 0);
+            tex.Apply();
+
+            var heightsData = tex.GetPixelData<float>(0).ToArray();
+            GameObject.Destroy(tex);
+
             m_ptr = API.Grid.createGrid(
                 s.environment.size.x,
                 s.simulation.max_zeta,
@@ -35,8 +45,8 @@ namespace WaveGrid
                 s.simulation.n_zeta,
                 s.simulation.initial_time,
                 s.simulation.spectrum_type,
-                s.environment.heightsData,
-                s.environment.heightsData.Length,
+                heightsData,
+                heightsData.Length,
                 s.simulation.defaultAmplitude.ToArray());
 
             var buffersNum = API.Grid.profileBuffersSize(m_ptr);

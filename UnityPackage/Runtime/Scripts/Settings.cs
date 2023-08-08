@@ -5,6 +5,35 @@ using UnityEngine;
 namespace WaveGrid
 {
     [Serializable]
+    public class EnvironmentSettings
+    {
+        [HideInInspector]
+        public Vector2Int size;
+        [HideInInspector]
+        public Matrix4x4 transform;
+
+        public float water_level;
+        [Delayed]
+        public int resolution = 1024;
+
+        [SerializeField]
+        public LayerMask cullingMask;
+#if !DEBUG
+        [HideInInspector]
+#endif
+        public RenderTexture heights;
+#if !DEBUG
+        [HideInInspector]
+#endif
+        public RenderTexture gradients;
+
+        internal void OnValidate()
+        {
+            resolution = Mathf.ClosestPowerOfTwo(resolution);
+        }
+    }
+
+    [Serializable]
     public class VisualizationSettings
     {
         public int resolution = 100;
@@ -51,6 +80,7 @@ namespace WaveGrid
         public VisualizationSettings visualization;
         internal void OnValidate()
         {
+            environment.OnValidate();
             simulation.OnValidate();
         }
     }

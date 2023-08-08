@@ -1,4 +1,7 @@
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using WaveGrid;
 
 namespace WaterWaveSurface
@@ -11,9 +14,6 @@ namespace WaterWaveSurface
 
     public class WaterSurface : MonoBehaviour
     {
-        [SerializeField]
-        private LayerMask m_layers;
-
         [SerializeField]
         private Material m_material;
 
@@ -37,10 +37,51 @@ namespace WaterWaveSurface
         private Texture m_skybox;
 
         internal Settings Settings { get { return m_settings; } }
-        
-        private void CreateEnvironmentMaps()
+
+        private void PrepareEnvironmentMaps()
         {
-            var cam = m_settings.environment.camera;
+            var cam = new GameObject().AddComponent<Camera>();
+            cam.orthographic = true;
+            cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
+            cam.transform.rotation = Quaternion.Euler(90, 0, 0);
+            cam.transform.localScale = new Vector3(1, 1,1);
+            cam.orthographicSize = m_settings.environment.size.x;
+            cam.nearClipPlane = 0f;
+            cam.farClipPlane = transform.lossyScale.y;
+
+            var desc = new RenderTextureDescriptor();
+            desc.useMipMap = false;
+            desc.width = m_settings.environment.resolution;
+            desc.height = desc.width;
+            desc.volumeDepth = 1;
+            desc.graphicsFormat = GraphicsFormat.None;
+            desc.depthStencilFormat = GraphicsFormat.D32_SFloat_S8_UInt;
+            desc.depthBufferBits = 32;
+            desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
+            desc.msaaSamples = 1;
+            desc.autoGenerateMips = false;
+
+            var rt = new RenderTexture(desc); 
+            if (!rt.Create())
+            {
+                Debug.LogError("Could not create depth texture");
+            }
+
+            cam.depthTextureMode = DepthTextureMode.Depth;
+            cam.targetTexture = rt;
+            cam.cullingMask = m_settings.environment.cullingMask;
+
+            cam.RenderWithShader(m_depth_material.shader, "");
+
+            RenderEnvironmentMaps(cam);
+
+            Destroy(cam.targetTexture);
+            Destroy(cam.gameObject);
+        }
+
+        private void RenderEnvironmentMaps(Camera cam)
+        {
+
             var heights = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
             heights.enableRandomWrite = true;
             if (!heights.Create())
@@ -62,9 +103,6 @@ namespace WaterWaveSurface
             shader.SetFloat("position", m_settings.environment.transform.GetPosition().y);
             shader.SetFloat("size", m_settings.environment.size.x);
 
-            cam.depthTextureMode = DepthTextureMode.Depth;
-            cam.RenderWithShader(m_depth_material.shader, "");
-
             int kernelHandle = shader.FindKernel("Heights");
             shader.SetTexture(kernelHandle, "Read", cam.targetTexture);
             shader.SetTexture(kernelHandle, "Write", m_settings.environment.heights);
@@ -74,14 +112,6 @@ namespace WaterWaveSurface
             shader.SetTexture(kernelHandle, "Read", m_settings.environment.heights);
             shader.SetTexture(kernelHandle, "Write", m_settings.environment.gradients);
             shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
-
-            Texture2D tex = new Texture2D(heights.width, heights.height, TextureFormat.RFloat, false);
-            RenderTexture.active = heights;
-            tex.ReadPixels(new Rect(0, 0, heights.width, heights.height), 0, 0);
-            tex.Apply();
-
-            Settings.environment.heightsData = tex.GetPixelData<float>(0).ToArray();
-            Destroy(tex);
         }
 
         void Start()
@@ -93,7 +123,7 @@ namespace WaterWaveSurface
 
             m_settings.environment.transform = transform.localToWorldMatrix;
 
-            CreateEnvironmentMaps();
+            PrepareEnvironmentMaps();
 
             switch (m_implementation)
             {

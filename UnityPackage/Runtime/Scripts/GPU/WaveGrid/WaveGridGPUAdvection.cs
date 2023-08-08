@@ -21,7 +21,6 @@ namespace WaveGrid
 
         internal WaveGridGPUAdvection(
             Settings s,
-            WaveGridGPUEnvironment environment,
             ProfileBufferGPU profileBuffer)
         {
             m_settings = s;
@@ -71,7 +70,7 @@ namespace WaveGrid
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
             m_shader.SetFloat("dx",s.environment.size.x * 2f / s.simulation.n_x);
             m_shader.SetFloat("x_min", -s.environment.size.x);
-            m_shader.SetFloat("env_dx", s.environment.size.x * 2.0f / environment.heights.width);
+            m_shader.SetFloat("env_dx", s.environment.size.x * 2.0f / s.environment.heights.width);
 
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);

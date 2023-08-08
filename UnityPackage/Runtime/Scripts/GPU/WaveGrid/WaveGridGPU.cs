@@ -16,7 +16,6 @@ namespace WaveGrid
         private float m_dz;
 
         private WaveGridGPUMesh m_mesh;
-        private WaveGridGPUEnvironment m_environment;
         private WaveGridGPUAdvection m_advection;
 
         private Material m_material;
@@ -43,8 +42,7 @@ namespace WaveGrid
             }
 
             // Create environment and advection
-            m_environment = new WaveGridGPUEnvironment(settings);
-            m_advection = new WaveGridGPUAdvection(settings, m_environment, m_profileBuffers[0]);
+            m_advection = new WaveGridGPUAdvection(settings, m_profileBuffers[0]);
 
             
             //Create the Mesh
