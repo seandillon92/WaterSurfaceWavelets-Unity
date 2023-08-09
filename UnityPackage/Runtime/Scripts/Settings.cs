@@ -18,13 +18,8 @@ namespace WaveGrid
 
         [SerializeField]
         public LayerMask cullingMask;
-#if !DEBUG
-        [HideInInspector]
-#endif
+
         public RenderTexture heights;
-#if !DEBUG
-        [HideInInspector]
-#endif
         public RenderTexture gradients;
 
         internal void OnValidate()

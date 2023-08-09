@@ -1,5 +1,3 @@
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using WaveGrid;
