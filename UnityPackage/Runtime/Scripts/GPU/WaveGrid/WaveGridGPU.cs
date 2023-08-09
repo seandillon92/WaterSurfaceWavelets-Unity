@@ -59,10 +59,16 @@ namespace WaveGrid
             m_material.SetTexture(Shader.PropertyToID("textureData"), m_profileBuffers[0].data);
             m_material.SetFloat(Shader.PropertyToID("profilePeriod"), m_profileBuffers[0].period);
             m_material.SetFloat(Shader.PropertyToID("nx"), settings.simulation.n_x);
-            
-            var terrainPosition = settings.environment.transform.GetPosition();
-            var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
-            m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
+            var t = settings.environment.transform;
+            var p = t.GetPosition();
+            Matrix4x4 m = 
+                Matrix4x4.Translate(new Vector3(p.x, 0, p.z)) *
+                Matrix4x4.Rotate(Quaternion.Euler(0, t.rotation.eulerAngles.y, 0));
+
+            m_material.SetMatrix("env_trans", m);
+            m_material.SetMatrix("env_trans_inv", m.inverse);
+
+            m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
             m_material.SetFloatArray("defaultAmplitude", settings.simulation.defaultAmplitude);
 

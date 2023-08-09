@@ -150,6 +150,7 @@ internal class WaterSurfaceEditor : Editor
 
         var matrix =
             Matrix4x4.Translate(Vector3.right * pos.x + Vector3.forward * pos.z + Vector3.up * pos.y) *
+            Matrix4x4.Rotate(Quaternion.Euler(0, Target.transform.rotation.eulerAngles.y, 0)) *
             Matrix4x4.Scale(Extends * 2);
 
         Graphics.DrawMesh(m_bakingVolume_mesh, matrix, GetVolumeMaterial(), 0);
@@ -183,6 +184,7 @@ internal class WaterSurfaceEditor : Editor
         var matrix =
             Matrix4x4.Translate(Vector3.right * pos.x + Vector3.forward * pos.z) *
             Matrix4x4.Translate(Vector3.up * WaterLevel) *
+            Matrix4x4.Rotate(Quaternion.Euler(0, Target.transform.rotation.eulerAngles.y, 0)) * 
             Matrix4x4.Scale(Vector3.right * Extends.x * 2 + Vector3.forward * Extends.z * 2);
 
         Graphics.DrawMesh(m_waterLevel_mesh, matrix, GetVolumeMaterial(), 0);

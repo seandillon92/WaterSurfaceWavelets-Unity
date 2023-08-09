@@ -20,11 +20,13 @@ uniform SamplerState point_repeat_sampler;
 
 uniform float2 xmin;
 uniform float2 dx;
-uniform float2 translation;
+uniform float4x4 env_trans;
+uniform float4x4 env_trans_inv;
 uniform uint nx;
 uniform uint direction;
 uniform float amp_mult;
 uniform bool renderOutsideBorders;
+uniform float env_rotation;
 
 
 float3 mulPoint(float4x4 m, float3 p)
@@ -33,19 +35,29 @@ float3 mulPoint(float4x4 m, float3 p)
     return p4.xyz / p4.w;
 }
 
-float2 gridToAmpl(float2 pos)
+float2 gridToAmpl(float3 pos)
 {
-    pos = pos - translation; // account for terrain translation
-    pos = (pos - xmin) * dx - float2(0.5, 0.5); // transfer to simulation space
-    return pos;
+    float2 newPos = mul(env_trans_inv, float4(pos, 1)).xz; // account for terrain transform
+    newPos = (newPos - xmin) * dx - float2(0.5, 0.5); // transfer to simulation space
+    return newPos;
+}
+
+static const float tau = 6.28318530718;
+static const float d_theta = tau / DIR_NUM;
+
+float posModuloItheta(float itheta)
+{
+    return (itheta % DIR_NUM + DIR_NUM) % DIR_NUM;
+}
+
+float getItheta(uint index)
+{
+    float itheta = index + (env_rotation) / d_theta;
+    return posModuloItheta(itheta);
 }
 
 float gridAmplitude(float2 pos, float itheta)
 {
-    /*if (itheta == 5)
-    {
-        return 0;
-    }*/
     float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5) / 16.0f);
     return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x * amp_mult;
 }
@@ -64,17 +76,16 @@ float3 posToGrid(float2 pos)
     
     if (!renderOutsideBorders)
     {
-        p.xz = 
-            clamp(
-                p.xz, 
-                translation - float2(nx * 2, nx * 2), 
-                translation + float2(nx * 2, nx * 2));
+        float2 orthoP = mul(env_trans_inv, float4(p, 1)).xz;
+        orthoP = clamp(
+                orthoP,
+                -float2(nx * 2, nx * 2),
+                float2(nx * 2, nx * 2));
+        p.xz = mul(env_trans, float4(orthoP.x, 0, orthoP.y, 1)).xz;
     }
 
     return p;
 }
-
-static const float tau = 6.28318530718;
 
 float iAmpl(float angle/*in [0,2pi]*/, float amplitude[DIR_NUM]) {
     float a = DIR_NUM * angle / tau + DIR_NUM - 0.5;

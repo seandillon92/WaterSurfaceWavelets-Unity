@@ -53,24 +53,24 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
             {
                 v2f o;
                 float3 pos = posToGrid(v.uv);
-                float2 amplitudePos = gridToAmpl(pos.xz);
-
-                o.amplitude[0].x = gridAmplitude(amplitudePos, 0);
-                o.amplitude[0].y = gridAmplitude(amplitudePos, 1);
-                o.amplitude[0].z = gridAmplitude(amplitudePos, 2);
-                o.amplitude[0].w = gridAmplitude(amplitudePos, 3);
-                o.amplitude[1].x = gridAmplitude(amplitudePos, 4);
-                o.amplitude[1].y = gridAmplitude(amplitudePos, 5);
-                o.amplitude[1].z = gridAmplitude(amplitudePos, 6);
-                o.amplitude[1].w = gridAmplitude(amplitudePos, 7);
-                o.amplitude[2].x = gridAmplitude(amplitudePos, 8);
-                o.amplitude[2].y = gridAmplitude(amplitudePos, 9);
-                o.amplitude[2].z = gridAmplitude(amplitudePos, 10);
-                o.amplitude[2].w = gridAmplitude(amplitudePos, 11);
-                o.amplitude[3].x = gridAmplitude(amplitudePos, 12);
-                o.amplitude[3].y = gridAmplitude(amplitudePos, 13);
-                o.amplitude[3].z = gridAmplitude(amplitudePos, 14);
-                o.amplitude[3].w = gridAmplitude(amplitudePos, 15);
+                float2 amplitudePos = gridToAmpl(pos);
+                
+                o.amplitude[0].x = gridAmplitude(amplitudePos, getItheta(0));
+                o.amplitude[0].y = gridAmplitude(amplitudePos, getItheta(1));
+                o.amplitude[0].z = gridAmplitude(amplitudePos, getItheta(2));
+                o.amplitude[0].w = gridAmplitude(amplitudePos, getItheta(3));
+                o.amplitude[1].x = gridAmplitude(amplitudePos, getItheta(4));
+                o.amplitude[1].y = gridAmplitude(amplitudePos, getItheta(5));
+                o.amplitude[1].z = gridAmplitude(amplitudePos, getItheta(6));
+                o.amplitude[1].w = gridAmplitude(amplitudePos, getItheta(7));
+                o.amplitude[2].x = gridAmplitude(amplitudePos, getItheta(8));
+                o.amplitude[2].y = gridAmplitude(amplitudePos, getItheta(9));
+                o.amplitude[2].z = gridAmplitude(amplitudePos, getItheta(10));
+                o.amplitude[2].w = gridAmplitude(amplitudePos, getItheta(11));
+                o.amplitude[3].x = gridAmplitude(amplitudePos, getItheta(12));
+                o.amplitude[3].y = gridAmplitude(amplitudePos, getItheta(13));
+                o.amplitude[3].z = gridAmplitude(amplitudePos, getItheta(14));
+                o.amplitude[3].w = gridAmplitude(amplitudePos, getItheta(15));
                 
                 pos += wavePosition(pos, o.amplitude);
                 o.position = UnityObjectToClipPos(pos);

@@ -22,7 +22,8 @@ float env_dx;
 
 float2 idxToPos(float2 idx)
 {
-    return float2(x_min, x_min) + (idx + float2(0.5, 0.5)) * dx;
+    float2 pos = float2(x_min, x_min) + (idx + float2(0.5, 0.5)) * dx;
+    return pos;
 }
 
 float2 posToGrid(float2 pos)
@@ -43,7 +44,7 @@ uint posModuloItheta(float itheta)
 
 float Theta2iTheta(float theta)
 {
-    float r = (theta / theta_dx) - 0.5;
+    float r = (theta / theta_dx) -0.5;
     if (r < 0)
         return 16 + r;
     return r;

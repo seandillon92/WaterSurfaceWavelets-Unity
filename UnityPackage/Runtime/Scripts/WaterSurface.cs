@@ -32,7 +32,7 @@ namespace WaterWaveSurface
             var cam = new GameObject().AddComponent<Camera>();
             cam.orthographic = true;
             cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
-            cam.transform.rotation = Quaternion.Euler(90, 0, 0);
+            cam.transform.rotation = Quaternion.Euler(90,0, -transform.rotation.eulerAngles.y);
             cam.transform.localScale = Vector3.one;
             cam.orthographicSize = m_settings.environment.size.x;
             cam.nearClipPlane = 0f;
