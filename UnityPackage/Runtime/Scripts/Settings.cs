@@ -16,10 +16,12 @@ namespace WaveGrid
         [Delayed]
         public int resolution = 1024;
 
-        [SerializeField]
         public LayerMask cullingMask;
+        public Material material;
 
+        [HideInInspector]
         public RenderTexture heights;
+        [HideInInspector]
         public RenderTexture gradients;
 
         internal void OnValidate()
@@ -33,6 +35,8 @@ namespace WaveGrid
     {
         public int resolution = 100;
         public Camera camera;
+        public Texture skybox;
+        public Material material;
     }
 
     [Serializable]

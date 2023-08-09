@@ -13,12 +13,6 @@ namespace WaterWaveSurface
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]
-        private Material m_material;
-
-        [SerializeField]
-        private Material m_depth_material;
-
-        [SerializeField]
         private Settings m_settings;
 
         [SerializeField]
@@ -30,9 +24,6 @@ namespace WaterWaveSurface
         private Implementation m_implementation;
 
         private RenderParams m_renderParams;
-
-        [SerializeField]
-        private Texture m_skybox;
 
         internal Settings Settings { get { return m_settings; } }
 
@@ -68,7 +59,7 @@ namespace WaterWaveSurface
             cam.depthTextureMode = DepthTextureMode.Depth;
             cam.targetTexture = rt;
             cam.cullingMask = m_settings.environment.cullingMask;
-            cam.RenderWithShader(m_depth_material.shader, "");
+            cam.RenderWithShader(m_settings.environment.material.shader, "");
 
             RenderEnvironmentMaps(cam);
 
@@ -113,6 +104,11 @@ namespace WaterWaveSurface
 
         void Start()
         {
+            if(m_settings.visualization.camera == null)
+            {
+                m_settings.visualization.camera = Camera.main;
+            }
+
             m_settings.environment.size =
                 new Vector2Int(
                     Mathf.RoundToInt(transform.localScale.x / 2),
@@ -126,22 +122,24 @@ namespace WaterWaveSurface
             {
                 case Implementation.CPU:
                     
-                    m_grid = new WaveGridCPU(m_settings, m_material);
+                    m_grid = new WaveGridCPU(m_settings, m_settings.visualization.material);
                     
                     break;
                 case Implementation.GPU:
-                    m_grid = new WaveGridGPU(m_settings, m_material);
+                    m_grid = new WaveGridGPU(m_settings, m_settings.visualization.material);
                     
                     break;
             }
 
-            m_renderParams = new RenderParams(m_material);
+            m_renderParams = new RenderParams(m_settings.visualization.material);
 
             m_renderParams.camera = m_settings.visualization.camera;
-            m_material.SetTexture("_Skybox", m_skybox);
-            m_material.SetFloat("_FresnelExponent", 1.0f);
-            m_material.SetFloat("_RefractionIndex", 1.0f);
-            m_material.name = "WaterSurfaceMaterial";
+            
+            if (m_settings.visualization.material.GetTexture("_Skybox") == null)
+            {
+                m_settings.visualization.material.SetTexture("_Skybox", m_settings.visualization.skybox);
+            }
+            m_settings.visualization.material.name = "WaterSurfaceMaterial";
         }
 
         private void Update()
