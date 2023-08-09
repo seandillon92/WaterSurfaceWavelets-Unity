@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &4767020773182261835
+--- !u!1 &4866389373062132709
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,177 +8,119 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4767020773182261833}
-  - component: {fileID: 4767020773182261826}
-  - component: {fileID: 4767020773182261836}
-  - component: {fileID: 4767020773182261837}
-  m_Layer: 0
+  - component: {fileID: 6349194306477307655}
+  - component: {fileID: 2974168371674892653}
+  - component: {fileID: 5829637658706589845}
+  m_Layer: 4
   m_Name: WaterSurface
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4767020773182261833
+--- !u!4 &6349194306477307655
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4767020773182261835}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_GameObject: {fileID: 4866389373062132709}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 256, y: 0, z: 255.99998}
+  m_LocalScale: {x: 512, y: 553.79584, z: 512}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4767020773182261826
+--- !u!114 &2974168371674892653
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4767020773182261835}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ff264a5688d45f4481497e20f996000, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_terrain: {fileID: 11400000, guid: 13cea57186aa41f42bfbff410b809c0c, type: 2}
-  m_layers:
-    serializedVersion: 2
-    m_Bits: 2147483647
-  m_samples: {x: 1024, y: 1024}
-  m_waterLevel: 0
---- !u!114 &4767020773182261836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4767020773182261835}
+  m_GameObject: {fileID: 4866389373062132709}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d14276f221d84674c8ad8acdcf9b7abc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_material: {fileID: 2100000, guid: 938ca63ed5c2b5b41bb5bc4a9ea14c96, type: 2}
   m_settings:
-    max_zeta: 3.321928
-    min_zeta: -5.0588937
-    n_x: 128
-    n_theta: 16
-    n_zeta: 1
-    initial_time: 100
-    spectrum_type: 1
-    terrain: {fileID: 11400000, guid: 13cea57186aa41f42bfbff410b809c0c, type: 2}
-    visualizationResolution: 100
-    camera: {fileID: 0}
-    defaultAmplitude:
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0.1
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
+    simulation:
+      max_zeta: 3.321928
+      min_zeta: -5.0588937
+      n_x: 128
+      n_theta: 16
+      n_zeta: 1
+      initial_time: 100
+      spectrum_type: 1
+      defaultAmplitude:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0.1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    environment:
+      size: {x: 0, y: 0}
+      transform:
+        e00: 0
+        e01: 0
+        e02: 0
+        e03: 0
+        e10: 0
+        e11: 0
+        e12: 0
+        e13: 0
+        e20: 0
+        e21: 0
+        e22: 0
+        e23: 0
+        e30: 0
+        e31: 0
+        e32: 0
+        e33: 0
+      water_level: 113
+      resolution: 1024
+      cullingMask:
+        serializedVersion: 2
+        m_Bits: 4294967295
+      material: {fileID: 2100000, guid: 7c61362ab7fb6ff4989cb0e71d5a5482, type: 2}
+      heights: {fileID: 0}
+      gradients: {fileID: 0}
+    visualization:
+      resolution: 100
+      camera: {fileID: 0}
+      skybox: {fileID: 8900000, guid: e71fc492f440446b99875b8e1df890ba, type: 3}
+      material: {fileID: 2100000, guid: 938ca63ed5c2b5b41bb5bc4a9ea14c96, type: 2}
   m_updateSettings:
     dt: 0
     updateSimulation: 1
-    amplitudeMultiplier: 4
-    amplitudeTracks:
-      data:
-      - name: Track 1
-        mode: 0
-      - name: Track 2
-        mode: 0
-      - name: Track 3
-        mode: 0
-      - name: Track 4
-        mode: 0
-      - name: Track 5
-        mode: 0
-      - name: Track 6
-        mode: 0
-      - name: Track 7
-        mode: 0
-      - name: Track 8
-        mode: 0
-      - name: Track 9
-        mode: 0
-      - name: Track 10
-        mode: 0
-      - name: Track 11
-        mode: 0
-      - name: Track 12
-        mode: 0
-      - name: Track 13
-        mode: 0
-      - name: Track 14
-        mode: 0
-      - name: Track 15
-        mode: 0
-      - name: Track 16
-        mode: 0
-      tracks:
-      - name: Track 1
-        mode: 0
-      - name: Track 2
-        mode: 0
-      - name: Track 3
-        mode: 0
-      - name: Track 4
-        mode: 0
-      - name: Track 5
-        mode: 0
-      - name: Track 6
-        mode: 0
-      - name: Track 7
-        mode: 0
-      - name: Track 8
-        mode: 0
-      - name: Track 9
-        mode: 0
-      - name: Track 10
-        mode: 0
-      - name: Track 11
-        mode: 0
-      - name: Track 12
-        mode: 0
-      - name: Track 13
-        mode: 0
-      - name: Track 14
-        mode: 0
-      - name: Track 15
-        mode: 0
-      - name: Track 16
-        mode: 0
+    amplitudeMultiplier: 1
     renderOutsideBorders: 1
-  m_implementation: 0
-  m_skybox: {fileID: 0}
---- !u!114 &4767020773182261837
+  m_implementation: 1
+--- !u!114 &5829637658706589845
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4767020773182261835}
+  m_GameObject: {fileID: 4866389373062132709}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 58cbf14c1f6f36c4cb657ba5909586e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_disturbance: 0.1
-  m_waterSurface: {fileID: 4767020773182261836}
+  m_waterSurface: {fileID: 2974168371674892653}
   m_enableRain: 0

@@ -26,46 +26,46 @@ internal class WaveGridCPURenderer
 
     private Settings m_settings;
 
-    internal WaveGridCPURenderer(WaveGridCPUData surfaceData, Settings settings,  Material material)
+    internal WaveGridCPURenderer(WaveGridCPUData surfaceData, Settings s,  Material material)
     {
         m_data = surfaceData;
         m_material = material;
-        m_camera = settings.camera;
+        m_camera = s.visualization.camera;
         m_profile_period_id = Shader.PropertyToID("profilePeriod");
         m_profileBuffer_id = Shader.PropertyToID("textureData");
         m_camera_pos_id = Shader.PropertyToID("cameraPos");
         m_cameraProjectionForward_id = Shader.PropertyToID("cameraProjectionForward");
         m_cameraInverseProjection_id = Shader.PropertyToID("cameraInverseProjection");
 
-        m_material.SetFloat("waterLevel", settings.terrain.water_level);
-        m_settings = settings;
+        m_material.SetFloat("waterLevel", s.environment.water_level);
+        m_settings = s;
 
-        var size = new Vector2(settings.terrain.size.x, settings.terrain.size.y);
+        var size = new Vector2(s.environment.size.x, s.environment.size.y);
         m_material.SetVector(Shader.PropertyToID("xmin"), -size);
-        var idx = new Vector2(1f / (size.x * 2f / settings.n_x), 1f / (size.x * 2f / settings.n_x));
+        var idx = new Vector2(1f / (size.x * 2f / s.simulation.n_x), 1f / (size.x * 2f / s.simulation.n_x));
         m_material.SetVector(Shader.PropertyToID("dx"), idx);
-        m_material.SetFloat(Shader.PropertyToID("nx"), settings.n_x);
+        m_material.SetFloat(Shader.PropertyToID("nx"), s.simulation.n_x);
 
-        var terrainPosition = settings.terrain.transform.GetPosition();
+        var terrainPosition = s.environment.transform.GetPosition();
         var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
         m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
-        m_material.SetFloatArray("defaultAmplitude", settings.defaultAmplitude);
+        m_material.SetFloatArray("defaultAmplitude", s.simulation.defaultAmplitude);
 
-        SetAmplitudeTextures(surfaceData, settings);
+        SetAmplitudeTextures(surfaceData, s);
     }
 
-    private void SetAmplitudeTextures(WaveGridCPUData surfaceData, Settings settings)
+    private void SetAmplitudeTextures(WaveGridCPUData surfaceData, Settings s)
     {
         // Create texture
-        m_amplitude = new Texture3D(settings.n_x, settings.n_x, 16, TextureFormat.RFloat, false);
+        m_amplitude = new Texture3D(s.simulation.n_x, s.simulation.n_x, 16, TextureFormat.RFloat, false);
         m_amplitude.filterMode = FilterMode.Bilinear;
         m_amplitude.wrapMode = TextureWrapMode.Clamp;
 
         // Create render texture
         RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
         renderTextureDescriptor.useMipMap = false;
-        renderTextureDescriptor.width = settings.n_x + 2;
-        renderTextureDescriptor.height = settings.n_x + 2;
+        renderTextureDescriptor.width = s.simulation.n_x + 2;
+        renderTextureDescriptor.height = s.simulation.n_x + 2;
         renderTextureDescriptor.volumeDepth = 16;
         renderTextureDescriptor.enableRandomWrite = true;
         renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
@@ -97,15 +97,15 @@ internal class WaveGridCPURenderer
         m_shader.SetTexture(m_copy_kernel, "Read", m_amplitude);
         m_shader.SetTexture(m_copy_kernel, "Write", amplitude);
 
-        SetDefaultAmplitudes(settings);
+        SetDefaultAmplitudes(s);
     }
 
-    void SetDefaultAmplitudes(Settings settings)
+    void SetDefaultAmplitudes(Settings s)
     {
-        SetFloats(m_shader, "Default", settings.defaultAmplitude.ToArray());
+        SetFloats(m_shader, "Default", s.simulation.defaultAmplitude.ToArray());
 
         m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-        m_shader.Dispatch(m_init_kernel, (int)((settings.n_x + 2) / x), (int)((settings.n_x + 2) / y), (int)(16 / z));
+        m_shader.Dispatch(m_init_kernel, (int)((s.simulation.n_x + 2) / x), (int)((s.simulation.n_x + 2) / y), (int)(16 / z));
     }
 
     void SetFloats(ComputeShader shader, string id, float[] f)
@@ -145,7 +145,7 @@ internal class WaveGridCPURenderer
 
         {
             m_shader.GetKernelThreadGroupSizes(m_copy_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_copy_kernel, (int)(m_settings.n_x / x), (int)(m_settings.n_x / y), (int)(16 / z));
+            m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
         }
 
         m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);

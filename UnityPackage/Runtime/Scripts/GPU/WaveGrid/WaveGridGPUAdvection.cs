@@ -20,18 +20,17 @@ namespace WaveGrid
         private ProfileBufferGPU m_profileBuffer;
 
         internal WaveGridGPUAdvection(
-            Settings settings,
-            WaveGridGPUEnvironment environment,
+            Settings s,
             ProfileBufferGPU profileBuffer)
         {
-            m_settings = settings;
+            m_settings = s;
             m_profileBuffer = profileBuffer;
 
             // Create amplitude render textures
             RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
             renderTextureDescriptor.useMipMap = false;
-            renderTextureDescriptor.width = settings.n_x;
-            renderTextureDescriptor.height = settings.n_x;
+            renderTextureDescriptor.width = s.simulation.n_x;
+            renderTextureDescriptor.height = s.simulation.n_x;
             renderTextureDescriptor.volumeDepth = 16;
             renderTextureDescriptor.enableRandomWrite = true;
             renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
@@ -58,8 +57,8 @@ namespace WaveGrid
                 Debug.LogError("Could not create new amplitude texture");
             }
 
-            renderTextureDescriptor.width = settings.n_x + 2;
-            renderTextureDescriptor.height = settings.n_x + 2;
+            renderTextureDescriptor.width = s.simulation.n_x + 2;
+            renderTextureDescriptor.height = s.simulation.n_x + 2;
             amplitude = new RenderTexture(renderTextureDescriptor);
             if (!amplitude.Create())
             {
@@ -69,22 +68,21 @@ namespace WaveGrid
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
-            m_shader.SetFloat("dx",settings.terrain.size.x * 2f / settings.n_x);
-            m_shader.SetFloat("x_min", -settings.terrain.size.x);
-            m_shader.SetFloat("env_dx", settings.terrain.size.x * 2.0f / environment.heights.width);
+            m_shader.SetFloat("dx",s.environment.size.x * 2f / s.simulation.n_x);
+            m_shader.SetFloat("x_min", -s.environment.size.x);
+            m_shader.SetFloat("env_dx", s.environment.size.x * 2.0f / s.environment.heights.width);
 
             m_advection_kernel = m_shader.FindKernel("Advection");
             m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
             m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
-            m_shader.SetTexture(m_advection_kernel, "heights", environment.heights);
-            m_shader.SetTexture(m_advection_kernel, "gradients", environment.gradients);
-
+            m_shader.SetTexture(m_advection_kernel, "heights", s.environment.heights);
+            m_shader.SetTexture(m_advection_kernel, "gradients", s.environment.gradients);
 
             m_diffusion_kernel = m_shader.FindKernel("Diffusion");
             m_shader.SetTexture(m_diffusion_kernel, "Read", m_newAmplitude);
             m_shader.SetTexture(m_diffusion_kernel, "Write", m_amplitude);
-            m_shader.SetTexture(m_diffusion_kernel, "heights", environment.heights);
-            m_shader.SetTexture(m_diffusion_kernel, "gradients", environment.gradients);
+            m_shader.SetTexture(m_diffusion_kernel, "heights", s.environment.heights);
+            m_shader.SetTexture(m_diffusion_kernel, "gradients", s.environment.gradients);
 
             m_init_kernel = m_shader.FindKernel("Init");
             m_shader.SetTexture(m_init_kernel, "Write", amplitude);
@@ -98,14 +96,13 @@ namespace WaveGrid
             SetDefaultAmplitudes(m_settings);
         }
 
-        void SetDefaultAmplitudes(Settings settings)
+        void SetDefaultAmplitudes(Settings s)
         {
-            SetFloats(m_shader, "Default", settings.defaultAmplitude.ToArray());
+            SetFloats(m_shader, "Default", s.simulation.defaultAmplitude.ToArray());
 
             m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_init_kernel, (int)((m_settings.n_x + 2) / x), (int)((m_settings.n_x + 2) / y), (int)(16 / z));
+            m_shader.Dispatch(m_init_kernel, (int)((s.simulation.n_x + 2) / x), (int)((s.simulation.n_x + 2) / y), (int)(16 / z));
         }
-
 
         void SetFloats(ComputeShader shader, string id, float[] f)
         {
@@ -119,7 +116,7 @@ namespace WaveGrid
 
         float cflTimestep()
         {
-            var dx = (m_settings.terrain.size.x * 2f / m_settings.n_x);
+            var dx = (m_settings.environment.size.x * 2f / m_settings.simulation.n_x);
             return dx / m_profileBuffer.groupSpeed;
         }
 
@@ -130,18 +127,18 @@ namespace WaveGrid
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.n_x / x), (int)(m_settings.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
             }
 
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_diffusion_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_diffusion_kernel, (int)(m_settings.n_x / x), (int)(m_settings.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_diffusion_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
             }
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_copy_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_copy_kernel, (int)(m_settings.n_x / x), (int)(m_settings.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
             }
         }
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using WaveGrid;
 
 namespace WaterWaveSurface
@@ -12,9 +13,6 @@ namespace WaterWaveSurface
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]
-        private Material m_material;
-
-        [SerializeField]
         private Settings m_settings;
 
         [SerializeField]
@@ -27,38 +25,126 @@ namespace WaterWaveSurface
 
         private RenderParams m_renderParams;
 
-        [SerializeField]
-        private Texture m_skybox;
-
         internal Settings Settings { get { return m_settings; } }
 
-        private void Update()
+        private void PrepareEnvironmentMaps()
         {
-            Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
+            var cam = new GameObject().AddComponent<Camera>();
+            cam.orthographic = true;
+            cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
+            cam.transform.rotation = Quaternion.Euler(90, 0, 0);
+            cam.transform.localScale = Vector3.one;
+            cam.orthographicSize = m_settings.environment.size.x;
+            cam.nearClipPlane = 0f;
+            cam.farClipPlane = transform.lossyScale.y;
+
+            var desc = new RenderTextureDescriptor();
+            desc.useMipMap = false;
+            desc.width = m_settings.environment.resolution;
+            desc.height = desc.width;
+            desc.volumeDepth = 1;
+            desc.graphicsFormat = GraphicsFormat.None;
+            desc.depthStencilFormat = GraphicsFormat.D32_SFloat_S8_UInt;
+            desc.depthBufferBits = 32;
+            desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
+            desc.msaaSamples = 1;
+            desc.autoGenerateMips = false;
+
+            var rt = new RenderTexture(desc); 
+            if (!rt.Create())
+            {
+                Debug.LogError("Could not create depth texture");
+            }
+
+            cam.depthTextureMode = DepthTextureMode.Depth;
+            cam.targetTexture = rt;
+            cam.cullingMask = m_settings.environment.cullingMask;
+            cam.RenderWithShader(m_settings.environment.material.shader, "");
+
+            RenderEnvironmentMaps(cam);
+
+            Destroy(cam.targetTexture);
+            Destroy(cam.gameObject);
+        }
+
+        private void RenderEnvironmentMaps(Camera cam)
+        {
+
+            var heights = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+            heights.enableRandomWrite = true;
+            if (!heights.Create())
+            {
+                Debug.LogError("Could not create height texture");
+            }
+
+            var gradients = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RGFloat, RenderTextureReadWrite.Linear);
+            gradients.enableRandomWrite = true;
+            if (!gradients.Create())
+            {
+                Debug.LogError("Could not create height gradients texture");
+            }
+            m_settings.environment.heights = heights;
+            m_settings.environment.gradients = gradients;
+
+            var shader = (ComputeShader)Resources.Load("Environment");
+            shader.SetFloat("waterLevel", m_settings.environment.water_level);
+            shader.SetFloat("position", m_settings.environment.transform.GetPosition().y);
+            shader.SetFloat("size", transform.localScale.y * 0.5f);
+
+            int kernelHandle = shader.FindKernel("Heights");
+            shader.SetTexture(kernelHandle, "Read", cam.targetTexture);
+            shader.SetTexture(kernelHandle, "Write", m_settings.environment.heights);
+            shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
+
+            kernelHandle = shader.FindKernel("Gradients");
+            shader.SetTexture(kernelHandle, "Read", m_settings.environment.heights);
+            shader.SetTexture(kernelHandle, "Write", m_settings.environment.gradients);
+            shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
         }
 
         void Start()
         {
+            if(m_settings.visualization.camera == null)
+            {
+                m_settings.visualization.camera = Camera.main;
+            }
+
+            m_settings.environment.size =
+                new Vector2Int(
+                    Mathf.RoundToInt(transform.localScale.x / 2),
+                    Mathf.RoundToInt(transform.localScale.z / 2));
+
+            m_settings.environment.transform = transform.localToWorldMatrix;
+
+            PrepareEnvironmentMaps();
+
             switch (m_implementation)
             {
                 case Implementation.CPU:
                     
-                    m_grid = new WaveGridCPU(m_settings, m_material);
+                    m_grid = new WaveGridCPU(m_settings, m_settings.visualization.material);
                     
                     break;
                 case Implementation.GPU:
-                    m_grid = new WaveGridGPU(m_settings, m_material);
+                    m_grid = new WaveGridGPU(m_settings, m_settings.visualization.material);
                     
                     break;
             }
 
-            m_renderParams = new RenderParams(m_material);
+            m_renderParams = new RenderParams(m_settings.visualization.material);
 
-            m_renderParams.camera = m_settings.camera;
-            m_material.SetTexture("_Skybox", m_skybox);
-            m_material.SetFloat("_FresnelExponent", 1.0f);
-            m_material.SetFloat("_RefractionIndex", 1.0f);
-            m_material.name = "WaterSurfaceMaterial";
+            m_renderParams.camera = m_settings.visualization.camera;
+            
+            if (m_settings.visualization.material.GetTexture("_Skybox") == null)
+            {
+                m_settings.visualization.material.SetTexture("_Skybox", m_settings.visualization.skybox);
+            }
+            m_settings.visualization.material.name = "WaterSurfaceMaterial";
+        }
+
+        private void Update()
+        {
+            Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
         }
 
         void LateUpdate()

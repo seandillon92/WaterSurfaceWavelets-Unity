@@ -64,7 +64,7 @@ float getHeight(float2 pos)
     float height =
         heights.SampleLevel(
             linearClampSampler,
-            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x),
+            float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y),
     0).r;
     return height * env_dx;
 }
@@ -79,15 +79,15 @@ float2 getGradient(float2 pos)
     gradient.x =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).r;
+            float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y), 0).r;
     
     gridPos = pos / env_dx - float2(0.5, 1) + float2(x / 2, y / 2);
     gradient.y =
         gradients.SampleLevel(
             linearClampSampler,
-            float2((gridPos.y + 0.5) / y, (gridPos.x + 0.5) / x), 0).g;
+            float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y), 0).g;
     
-    return length(gradient) == 0 ? gradient : normalize(gradient.yx);
+    return length(gradient) == 0 ? gradient : normalize(gradient.xy);
 }
 
 float3 boundaryReflection(float3 pos)
