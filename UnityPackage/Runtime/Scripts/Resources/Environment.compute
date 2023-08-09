@@ -12,7 +12,10 @@ float size;
 [numthreads(32, 32, 1)]
 void Heights(uint3 id : SV_DispatchThreadID)
 {
-    Write[id.xy] = waterLevel - lerp(-size + position, size + position, (Read[id.xy]));
+    uint w,h;
+    Read.GetDimensions(w, h);
+    uint2 coords = uint2(id.x, h - id.y -1);
+    Write[id.xy] = waterLevel - lerp(-size + position, size + position, (Read[coords]));
 }
 
 [numthreads(32, 32, 1)]

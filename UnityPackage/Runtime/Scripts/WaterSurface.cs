@@ -44,7 +44,7 @@ namespace WaterWaveSurface
             cam.orthographic = true;
             cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
             cam.transform.rotation = Quaternion.Euler(90, 0, 0);
-            cam.transform.localScale = new Vector3(1, 1,1);
+            cam.transform.localScale = Vector3.one;
             cam.orthographicSize = m_settings.environment.size.x;
             cam.nearClipPlane = 0f;
             cam.farClipPlane = transform.lossyScale.y;
@@ -70,7 +70,6 @@ namespace WaterWaveSurface
             cam.depthTextureMode = DepthTextureMode.Depth;
             cam.targetTexture = rt;
             cam.cullingMask = m_settings.environment.cullingMask;
-
             cam.RenderWithShader(m_depth_material.shader, "");
 
             RenderEnvironmentMaps(cam);
@@ -101,7 +100,7 @@ namespace WaterWaveSurface
             var shader = (ComputeShader)Resources.Load("Environment");
             shader.SetFloat("waterLevel", m_settings.environment.water_level);
             shader.SetFloat("position", m_settings.environment.transform.GetPosition().y);
-            shader.SetFloat("size", m_settings.environment.size.x);
+            shader.SetFloat("size", transform.localScale.y * 0.5f);
 
             int kernelHandle = shader.FindKernel("Heights");
             shader.SetTexture(kernelHandle, "Read", cam.targetTexture);
