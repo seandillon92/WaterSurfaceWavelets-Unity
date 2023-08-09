@@ -46,11 +46,19 @@ internal class WaveGridCPURenderer
         m_material.SetVector(Shader.PropertyToID("dx"), idx);
         m_material.SetFloat(Shader.PropertyToID("nx"), s.simulation.n_x);
 
-        var terrainPosition = s.environment.transform.GetPosition();
-        var terrainTranslationXZ = new Vector2(terrainPosition.x, terrainPosition.z);
-        m_material.SetVector(Shader.PropertyToID("translation"), terrainTranslationXZ);
+        var t = s.environment.transform;
+        var p = t.GetPosition();
+        Matrix4x4 m =
+            Matrix4x4.Translate(new Vector3(p.x, 0, p.z)) *
+            Matrix4x4.Rotate(Quaternion.Euler(0, t.rotation.eulerAngles.y, 0));
+
+        m_material.SetMatrix("env_trans", m);
+        m_material.SetMatrix("env_trans_inv", m.inverse);
+
+        m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
+
+
         m_material.SetFloatArray("defaultAmplitude", s.simulation.defaultAmplitude);
-        m_material.SetMatrix("transform", s.environment.transform.inverse);
         SetAmplitudeTextures(surfaceData, s);
     }
 
