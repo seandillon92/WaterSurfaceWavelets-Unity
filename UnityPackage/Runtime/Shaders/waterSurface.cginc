@@ -21,6 +21,7 @@ uniform SamplerState point_repeat_sampler;
 uniform float2 xmin;
 uniform float2 dx;
 uniform float4x4 env_trans;
+uniform float4x4 env_trans_inv;
 uniform uint nx;
 uniform uint direction;
 uniform float amp_mult;
@@ -36,7 +37,7 @@ float3 mulPoint(float4x4 m, float3 p)
 
 float2 gridToAmpl(float3 pos)
 {
-    float2 newPos = mul(env_trans, float4(pos, 1)).xz; // account for terrain transform
+    float2 newPos = mul(env_trans_inv, float4(pos, 1)).xz; // account for terrain transform
     newPos = (newPos - xmin) * dx - float2(0.5, 0.5); // transfer to simulation space
     return newPos;
 }
@@ -75,12 +76,12 @@ float3 posToGrid(float2 pos)
     
     if (!renderOutsideBorders)
     {
-        //TODO fix
-       // p.xz = 
-       //     clamp(
-       //         p.xz, 
-       //         translation - float2(nx * 2, nx * 2), 
-       //         translation + float2(nx * 2, nx * 2));
+        float2 orthoP = mul(env_trans_inv, float4(p, 1)).xz;
+        orthoP = clamp(
+                orthoP,
+                -float2(nx * 2, nx * 2),
+                float2(nx * 2, nx * 2));
+        p.xz = mul(env_trans, float4(orthoP.x, 0, orthoP.y, 1)).xz;
     }
 
     return p;

@@ -65,7 +65,9 @@ namespace WaveGrid
                 Matrix4x4.Translate(new Vector3(p.x, 0, p.z)) *
                 Matrix4x4.Rotate(Quaternion.Euler(0, t.rotation.eulerAngles.y, 0));
 
-            m_material.SetMatrix("env_trans", m.inverse);
+            m_material.SetMatrix("env_trans", m);
+            m_material.SetMatrix("env_trans_inv", m.inverse);
+
             m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
             m_material.SetFloatArray("defaultAmplitude", settings.simulation.defaultAmplitude);
