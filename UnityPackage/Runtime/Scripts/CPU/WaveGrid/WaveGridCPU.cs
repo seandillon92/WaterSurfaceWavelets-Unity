@@ -47,7 +47,7 @@ namespace WaveGrid
                 s.simulation.spectrum_type,
                 heightsData,
                 heightsData.Length,
-                s.simulation.defaultAmplitude.ToArray());
+                s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
 
             var buffersNum = API.Grid.profileBuffersSize(m_ptr);
             for (int i = 0; i < buffersNum; i++)
