@@ -35,12 +35,13 @@ namespace WaveGrid
                     indices[i * (resolution - 1) * 4 + j * 4 + 3] = (i + 1) * resolution + j;
                 }
             }
+            mesh.indexFormat = IndexFormat.UInt32;
             mesh.SetIndices(indices, MeshTopology.Quads, 0);
 
             // Set Vertex Data
             var vertices = new Vertex[count];
 
-            var delta = 2.0f / (resolution - 1);
+            var delta = 2.0f / (resolution-1);
             for (var i = 0; i < resolution; i++)
             {
                 for (var j = 0; j < resolution; j++)
@@ -49,6 +50,7 @@ namespace WaveGrid
                     vertices[i * resolution + j].pos = new Vector3(-1f + i * delta, -1f + j * delta);
                 }
             }
+
 
             mesh.SetVertexBufferData(vertices, 0, 0, count);
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 10000000);
