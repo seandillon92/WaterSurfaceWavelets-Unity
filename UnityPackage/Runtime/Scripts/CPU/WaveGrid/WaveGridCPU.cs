@@ -44,7 +44,7 @@ namespace WaveGrid
                 s.simulation.n_theta,
                 s.simulation.n_zeta,
                 s.simulation.initial_time,
-                s.simulation.spectrum_type,
+                1,
                 heightsData,
                 heightsData.Length,
                 s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());

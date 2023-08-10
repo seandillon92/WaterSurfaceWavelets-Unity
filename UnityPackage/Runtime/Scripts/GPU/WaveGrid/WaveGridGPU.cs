@@ -38,7 +38,11 @@ namespace WaveGrid
             {
                 float zeta_min = idxToPosZeta(izeta) - 0.5f * m_dz;
                 float zeta_max = idxToPosZeta(izeta) + 0.5f * m_dz;
-                m_profileBuffers.Add(new ProfileBufferGPU(zeta_min, zeta_max, new Spectrum(10), s.simulation.initial_time));
+                m_profileBuffers.Add(
+                    new ProfileBufferGPU(
+                        zeta_min, 
+                        zeta_max, 
+                        new Spectrum(s.simulation.wind_speed), s.simulation.initial_time));
             }
 
             // Create environment and advection

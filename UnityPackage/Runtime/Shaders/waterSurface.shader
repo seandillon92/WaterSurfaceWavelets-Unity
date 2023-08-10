@@ -72,10 +72,10 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 o.amplitude[3].z = gridAmplitude(amplitudePos, getItheta(14));
                 o.amplitude[3].w = gridAmplitude(amplitudePos, getItheta(15));
                 
+                o.wavePosition = pos;
                 pos += wavePosition(pos, o.amplitude);
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o, pos);
-                o.wavePosition = pos;
                 
                 return o;
             }

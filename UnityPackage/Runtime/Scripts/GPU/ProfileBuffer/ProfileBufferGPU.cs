@@ -12,11 +12,13 @@ namespace ProfileBuffer
 
         private double m_windSpeed;
 
+        public double WindSpeed => m_windSpeed;
+
         public double calculcate(double zeta)
         {
             double A = Math.Pow(1.1, 1.5 * zeta);
             double B = Math.Exp(-1.8038897788076411 * Math.Pow(4, zeta) / Math.Pow(m_windSpeed, 4));
-            return 0.139098 * Math.Sqrt(A* B);
+            return 0.139098 * Math.Sqrt(A * B);
         }
     }
 
@@ -86,6 +88,7 @@ namespace ProfileBuffer
             m_shader.SetFloat(Shader.PropertyToID("resolution"), resolution);
             m_shader.SetFloat(Shader.PropertyToID("z_min"), zmin);
             m_shader.SetFloat(Shader.PropertyToID("z_max"), zmax);
+            m_shader.SetFloat("windSpeed", (float)spectrum.WindSpeed);
         }
 
         void InitializeGroupSpeed(Spectrum spectrum)

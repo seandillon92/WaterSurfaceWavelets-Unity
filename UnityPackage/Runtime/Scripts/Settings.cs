@@ -42,8 +42,10 @@ namespace WaveGrid
     [Serializable]
     public class SimulationSettings
     {
-        public float wind_strength = 10f;
+        public float wind_speed = 10;
+        [HideInInspector]
         public float wind_direction = 0f;
+        public float wave_amplitude = 1f;
         public float max_zeta = Mathf.Log(10, 2);
         public float min_zeta = Mathf.Log(0.03f, 2);
 
@@ -52,7 +54,6 @@ namespace WaveGrid
         public int n_theta = 16;
         public int n_zeta = 1;
         public float initial_time = 100;
-        public int spectrum_type = 1;
 
         public List<float> GetDefaultAmplitudes(Matrix4x4 transform)
         {
@@ -75,12 +76,12 @@ namespace WaveGrid
 
             if (lowItheta == highItheta)
             {
-                result[lowItheta] = 0.1f;
+                result[lowItheta] = wave_amplitude;
             }
             else
             {
-                result[lowItheta] = Mathf.Lerp(0f, 0.1f, 1-t);
-                result[highItheta] = Mathf.Lerp(0, 0.1f, t);
+                result[lowItheta] = Mathf.Lerp(0f, wave_amplitude, 1-t);
+                result[highItheta] = Mathf.Lerp(0, wave_amplitude, t);
             }
 
             return result;
