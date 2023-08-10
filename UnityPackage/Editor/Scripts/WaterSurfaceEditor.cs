@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using WaterWaveSurface;
+using static UnityEditor.PlayerSettings;
 
 [CustomEditor(typeof(WaterSurface))]
 [CanEditMultipleObjects]
@@ -28,13 +29,17 @@ internal class WaterSurfaceEditor : Editor
 
     SerializedProperty settings;
     SerializedProperty environment;
+    SerializedProperty simulation;
     SerializedProperty waterLevel;
+    SerializedProperty windDirection;
 
     void OnEnable()
     {
         settings = serializedObject.FindProperty("m_settings");
         environment = settings.FindPropertyRelative("environment");
+        simulation = settings.FindPropertyRelative("simulation");
         waterLevel = environment.FindPropertyRelative("water_level");
+        windDirection = simulation.FindPropertyRelative("wind_direction");
         SceneView.duringSceneGui -= CustomSceneGUI;
         SceneView.duringSceneGui += CustomSceneGUI;
     }
@@ -50,6 +55,12 @@ internal class WaterSurfaceEditor : Editor
         set => waterLevel.floatValue = value;
     }
 
+    private float WindDirection
+    {
+        get=>windDirection.floatValue;
+        set => windDirection.floatValue = value;
+    }
+
     private void DrawSceneObjects()
     {
         var shouldDraw = GetAndUpdateShouldDraw();
@@ -62,6 +73,14 @@ internal class WaterSurfaceEditor : Editor
 
     private void CustomSceneGUI(SceneView view)
     {
+        DrawControlGizmos();
+        DrawSceneObjects();
+        serializedObject.ApplyModifiedProperties();
+    }
+
+
+    private void DrawControlGizmos()
+    {
         var maxExtension = Mathf.Max(Extends.x, Extends.z);
         var pos = Target.transform.position;
         var targetY = Target.transform.position.y;
@@ -69,28 +88,30 @@ internal class WaterSurfaceEditor : Editor
 
         Handles.color = new Color(1, 1, 1, 1);
 
-        pos = GetHandlePosition(maxExtension, pos);
-
-        Vector3 newPos = Handles.Slider(pos, Vector3.up);
+        Vector3 newPos = Handles.Slider(pos, Vector3.up, maxExtension, Handles.ArrowHandleCap, 1);
 
         newPos.y = Mathf.Clamp(newPos.y, targetY - Extends.y, targetY + Extends.y);
         WaterLevel = newPos.y;
 
-        Handles.Label(newPos, "Water Level");
+        Handles.Label(newPos + Vector3.up * maxExtension, "Water Level");
 
-        Vector3 GetHandlePosition(int maxExtension, Vector3 pos)
-        {
-            var cameraPos = Camera.current.transform.position;
-            var dir = -(Target.transform.position - cameraPos);
-            dir.y = 0;
-            dir.Normalize();
-            pos.x += maxExtension * dir.z;
-            pos.z += maxExtension * -dir.x;
-            return pos;
-        }
+        
+        var q =
+            Handles.Disc(
+                Quaternion.Euler(0, WindDirection, 0),
+                newPos,
+                Vector3.up,
+                maxExtension, false, 1);
 
-        DrawSceneObjects();
-        serializedObject.ApplyModifiedProperties();
+        WindDirection = q.eulerAngles.y;
+
+        Handles.ArrowHandleCap(
+            0,
+            newPos,
+            Quaternion.Euler(0, q.eulerAngles.y, 0),
+        maxExtension, EventType.Repaint);
+
+        Handles.Label(newPos +  q * Vector3.forward * maxExtension, "Wind Direction");
     }
 
     private Material GetVolumeMaterial()

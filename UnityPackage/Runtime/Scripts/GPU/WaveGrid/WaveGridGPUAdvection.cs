@@ -98,7 +98,10 @@ namespace WaveGrid
 
         void SetDefaultAmplitudes(Settings s)
         {
-            SetFloats(m_shader, "Default", s.simulation.defaultAmplitude.ToArray());
+            SetFloats(
+                m_shader, 
+                "Default", 
+                s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
 
             m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
             m_shader.Dispatch(m_init_kernel, (int)((s.simulation.n_x + 2) / x), (int)((s.simulation.n_x + 2) / y), (int)(16 / z));
