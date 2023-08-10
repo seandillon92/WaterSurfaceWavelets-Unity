@@ -28,6 +28,7 @@ internal class WaveGridCPUMesh
         }
 
         mesh.SetVertexBufferParams(m_count, layout);
+        mesh.indexFormat = IndexFormat.UInt32;
         mesh.SetIndices(m_data.indices, MeshTopology.Quads, 0);
         mesh.SetVertexBufferData(vdata, 0, 0, m_count);
         mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 10000000);
