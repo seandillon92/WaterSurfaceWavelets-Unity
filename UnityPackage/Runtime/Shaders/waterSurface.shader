@@ -48,6 +48,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
             samplerCUBE _Skybox;
             float _FresnelExponent;
             float _RefractionIndex;
+            float _Scale;
 
             v2f vert (appdata v)
             {
