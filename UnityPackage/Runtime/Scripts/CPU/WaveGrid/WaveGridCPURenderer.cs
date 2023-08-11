@@ -42,9 +42,10 @@ internal class WaveGridCPURenderer
 
         var size = new Vector2(s.environment.size.x, s.environment.size.y);
         m_material.SetVector(Shader.PropertyToID("xmin"), -size);
-        var idx = new Vector2(1f / (size.x * 2f / s.simulation.n_x), 1f / (size.x * 2f / s.simulation.n_x));
+        var resolution = s.simulation.GetResolution();
+        var idx = new Vector2(1f / (size.x * 2f / resolution), 1f / (size.x * 2f / resolution));
         m_material.SetVector(Shader.PropertyToID("dx"), idx);
-        m_material.SetFloat(Shader.PropertyToID("nx"), s.simulation.n_x);
+        m_material.SetFloat(Shader.PropertyToID("nx"), resolution);
 
         var t = s.environment.transform;
         var p = t.GetPosition();
@@ -54,6 +55,7 @@ internal class WaveGridCPURenderer
 
         m_material.SetMatrix("env_trans", m);
         m_material.SetMatrix("env_trans_inv", m.inverse);
+        m_material.SetFloat("env_size", s.environment.size.x);
 
         m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
@@ -67,15 +69,15 @@ internal class WaveGridCPURenderer
     private void SetAmplitudeTextures(WaveGridCPUData surfaceData, Settings s)
     {
         // Create texture
-        m_amplitude = new Texture3D(s.simulation.n_x, s.simulation.n_x, 16, TextureFormat.RFloat, false);
+        m_amplitude = new Texture3D(s.simulation.GetResolution(), s.simulation.GetResolution(), 16, TextureFormat.RFloat, false);
         m_amplitude.filterMode = FilterMode.Bilinear;
         m_amplitude.wrapMode = TextureWrapMode.Clamp;
 
         // Create render texture
         RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
         renderTextureDescriptor.useMipMap = false;
-        renderTextureDescriptor.width = s.simulation.n_x + 2;
-        renderTextureDescriptor.height = s.simulation.n_x + 2;
+        renderTextureDescriptor.width = s.simulation.GetResolution() + 2;
+        renderTextureDescriptor.height = s.simulation.GetResolution() + 2;
         renderTextureDescriptor.volumeDepth = 16;
         renderTextureDescriptor.enableRandomWrite = true;
         renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
@@ -118,7 +120,7 @@ internal class WaveGridCPURenderer
             s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
 
         m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-        m_shader.Dispatch(m_init_kernel, (int)((s.simulation.n_x + 2) / x), (int)((s.simulation.n_x + 2) / y), (int)(16 / z));
+        m_shader.Dispatch(m_init_kernel, (int)((s.simulation.GetResolution() + 2) / x), (int)((s.simulation.GetResolution() + 2) / y), (int)(16 / z));
     }
 
     void SetFloats(ComputeShader shader, string id, float[] f)
@@ -158,7 +160,7 @@ internal class WaveGridCPURenderer
 
         {
             m_shader.GetKernelThreadGroupSizes(m_copy_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+            m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
         }
 
         m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);

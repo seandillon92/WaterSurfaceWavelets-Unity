@@ -35,8 +35,8 @@ namespace WaveGrid
             // Create amplitude render textures
             RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
             renderTextureDescriptor.useMipMap = false;
-            renderTextureDescriptor.width = s.simulation.n_x;
-            renderTextureDescriptor.height = s.simulation.n_x;
+            renderTextureDescriptor.width = s.simulation.GetResolution();
+            renderTextureDescriptor.height = s.simulation.GetResolution();
             renderTextureDescriptor.volumeDepth = 16;
             renderTextureDescriptor.enableRandomWrite = true;
             renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
@@ -81,8 +81,8 @@ namespace WaveGrid
                 Debug.LogError("Could not create new manual amplitude texture");
             }
 
-            renderTextureDescriptor.width = s.simulation.n_x + 2;
-            renderTextureDescriptor.height = s.simulation.n_x + 2;
+            renderTextureDescriptor.width = s.simulation.GetResolution() + 2;
+            renderTextureDescriptor.height = s.simulation.GetResolution() + 2;
             amplitude = new RenderTexture(renderTextureDescriptor);
             if (!amplitude.Create())
             {
@@ -93,7 +93,7 @@ namespace WaveGrid
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
-            m_shader.SetFloat("dx",s.environment.size.x * 2f / s.simulation.n_x);
+            m_shader.SetFloat("dx",s.environment.size.x * 2f / s.simulation.GetResolution());
             m_shader.SetFloat("x_min", -s.environment.size.x);
             m_shader.SetFloat("env_dx", s.environment.size.x * 2.0f / s.environment.heights.width);
             m_shader.SetFloat("dissipation", s.simulation.dissipation);
@@ -138,7 +138,7 @@ namespace WaveGrid
                 s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
 
             m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_init_kernel, (int)((s.simulation.n_x + 2) / x), (int)((s.simulation.n_x + 2) / y), (int)(16 / z));
+            m_shader.Dispatch(m_init_kernel, (int)((s.simulation.GetResolution() + 2) / x), (int)((s.simulation.GetResolution() + 2) / y), (int)(16 / z));
         }
 
         void SetFloats(ComputeShader shader, string id, float[] f)
@@ -153,7 +153,7 @@ namespace WaveGrid
 
         float cflTimestep()
         {
-            var dx = (m_settings.environment.size.x * 2f / m_settings.simulation.n_x);
+            var dx = (m_settings.environment.size.x * 2f / m_settings.simulation.GetResolution());
             return dx / m_profileBuffer.groupSpeed;
         }
 
@@ -166,37 +166,37 @@ namespace WaveGrid
                 m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
                 m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
 
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_diffusion_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_diffusion_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_diffusion_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
 
             {
                 m_shader.SetTexture(m_advection_kernel, "Read", m_manualAmplitude);
                 m_shader.SetTexture(m_advection_kernel, "Write", m_newManualAmplitude);
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_dissipation_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_dissipation_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_dissipation_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
 
             {
                 m_shader.GetKernelThreadGroupSizes(m_copy_kernel, out uint x, out uint y, out uint z);
-                m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.n_x / x), (int)(m_settings.simulation.n_x / y), (int)(16 / z));
+                m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
         }
 
         internal void IncreaseAmplitude(float amplitude, Vector3 point)
         {
-            point.x = point.x * m_settings.simulation.n_x;
-            point.y = point.y * m_settings.simulation.n_x;
+            point.x = point.x * m_settings.simulation.GetResolution();
+            point.y = point.y * m_settings.simulation.GetResolution();
             point.z = point.z * 16;
 
             m_shader.SetVector("manual_point", point);

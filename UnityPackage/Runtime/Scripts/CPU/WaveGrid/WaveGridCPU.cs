@@ -40,7 +40,7 @@ namespace WaveGrid
                 s.environment.size.x,
                 s.simulation.max_zeta,
                 s.simulation.min_zeta,
-                s.simulation.n_x,
+                s.simulation.GetResolution(),
                 s.simulation.n_theta,
                 s.simulation.n_zeta,
                 s.simulation.initial_time,

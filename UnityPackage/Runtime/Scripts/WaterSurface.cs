@@ -40,7 +40,7 @@ namespace WaterWaveSurface
 
             var desc = new RenderTextureDescriptor();
             desc.useMipMap = false;
-            desc.width = m_settings.environment.resolution;
+            desc.width = m_settings.environment.GetResolution();
             desc.height = desc.width;
             desc.volumeDepth = 1;
             desc.graphicsFormat = GraphicsFormat.None;
@@ -172,11 +172,6 @@ namespace WaterWaveSurface
         public void AddPointDirectionDisturbance(Vector3 pos, float value)
         {
             m_grid.AddPointDisturbance(pos, value);
-        }
-
-        private void OnValidate()
-        {
-            m_settings.OnValidate();
         }
 
         void OnDestroy()

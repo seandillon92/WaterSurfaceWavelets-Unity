@@ -25,7 +25,7 @@ internal class WaveGridCPUData
     internal WaveGridCPUData(Settings s)
     {
         m_settings = s;
-        amplitudesSize = new Vector3Int(s.simulation.n_x, s.simulation.n_x, s.simulation.n_theta);
+        amplitudesSize = new Vector3Int(s.simulation.GetResolution(), s.simulation.GetResolution(), s.simulation.n_theta);
         Init(s.visualization.resolution);
     }
     private void Init(int size)
@@ -54,9 +54,10 @@ internal class WaveGridCPUData
             }
         }
 
+        var resolution = m_settings.simulation.GetResolution();
         this.amplitudes = 
             new float[
-            m_settings.simulation.n_x * m_settings.simulation.n_x * m_settings.simulation.n_theta];
+            resolution * resolution * m_settings.simulation.n_theta];
     }
 
     internal void LoadProfileBufferData(ProfileBufferCPU buffer)

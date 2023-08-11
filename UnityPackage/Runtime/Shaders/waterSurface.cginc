@@ -22,6 +22,7 @@ uniform float2 xmin;
 uniform float2 dx;
 uniform float4x4 env_trans;
 uniform float4x4 env_trans_inv;
+uniform float env_size;
 uniform uint nx;
 uniform uint direction;
 uniform float amp_mult;
@@ -79,8 +80,8 @@ float3 posToGrid(float2 pos)
         float2 orthoP = mul(env_trans_inv, float4(p, 1)).xz;
         orthoP = clamp(
                 orthoP,
-                -float2(nx * 2, nx * 2),
-                float2(nx * 2, nx * 2));
+                -float2(env_size, env_size),
+                float2(env_size, env_size));
         p.xz = mul(env_trans, float4(orthoP.x, 0, orthoP.y, 1)).xz;
     }
 

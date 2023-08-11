@@ -4,6 +4,18 @@ using UnityEngine;
 
 namespace WaveGrid
 {
+    public enum Resolution
+    {
+        R_128 = 128,
+        R_256 = 256,
+        R_512 = 512,
+        R_1024 = 1024,
+        R_2048 = 2048,
+        R_4096 = 4096,
+        R_8192 = 8192,
+        R_16384 = 16384,
+    }
+
     [Serializable]
     public class EnvironmentSettings
     {
@@ -13,8 +25,14 @@ namespace WaveGrid
         public Matrix4x4 transform;
 
         public float water_level;
-        [Delayed]
-        public int resolution = 1024;
+
+        [SerializeField]
+        private Resolution resolution;
+
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
 
         public LayerMask cullingMask;
         public Material material;
@@ -23,11 +41,6 @@ namespace WaveGrid
         public RenderTexture heights;
         [HideInInspector]
         public RenderTexture gradients;
-
-        internal void OnValidate()
-        {
-            resolution = Mathf.ClosestPowerOfTwo(resolution);
-        }
     }
 
     [Serializable]
@@ -45,16 +58,26 @@ namespace WaveGrid
         public float wind_speed = 10;
         [HideInInspector]
         public float wind_direction = 0f;
-        public float wave_amplitude = 1f;
         [Range(0,1)]
+        public float wave_amplitude = 1f;
+        [Range(0.9f,1)]
         public float dissipation = 0.99f;
+        [HideInInspector]
         public float max_zeta = Mathf.Log(10, 2);
+        [HideInInspector]
         public float min_zeta = Mathf.Log(0.03f, 2);
 
-        [Delayed]
-        public int n_x = 100;
+        [SerializeField]
+        private Resolution resolution = Resolution.R_128;
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
+        [HideInInspector]
         public int n_theta = 16;
+        [HideInInspector]
         public int n_zeta = 1;
+        [HideInInspector]
         public float initial_time = 100;
 
         public List<float> GetDefaultAmplitudes(Matrix4x4 transform)
@@ -88,11 +111,6 @@ namespace WaveGrid
 
             return result;
         }
-
-        public void OnValidate()
-        {
-            n_x = Mathf.ClosestPowerOfTwo(n_x);
-        }
     }
 
     [Serializable]
@@ -101,10 +119,5 @@ namespace WaveGrid
         public SimulationSettings simulation;
         public EnvironmentSettings environment;
         public VisualizationSettings visualization;
-        internal void OnValidate()
-        {
-            environment.OnValidate();
-            simulation.OnValidate();
-        }
     }
 }
