@@ -236,6 +236,21 @@ void Dissipation(uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void ManualPoint(uint3 id : SV_DispatchThreadID)
 {
-    //TODO: interpolate between different depth values
-    Write[uint3(manual_point)] = manual_point_value;
+    float theta = manual_point.z;
+    
+    float t = frac(theta);
+    
+    uint lowTheta = (int(floor(theta)) % 16 + 16) % 16;
+    uint highTheta = (int(ceil(theta)) % 16 + 16) % 16;
+
+    if (lowTheta == highTheta)
+    {
+        
+        Write[uint3(manual_point.xy, lowTheta)] = manual_point_value;
+    }
+    else
+    {
+        Write[uint3(manual_point.xy, lowTheta)] = lerp(0.0f, manual_point_value, 1 - t);
+        Write[uint3(manual_point.xy, highTheta)] = lerp(0.0f, manual_point_value, t);
+    }
 }
