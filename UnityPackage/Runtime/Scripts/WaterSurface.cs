@@ -158,7 +158,10 @@ namespace WaterWaveSurface
         /// <param name="pos">x,y are position coordinates</param>
         public void AddPointDisturbance(Vector2 pos, float value)
         {
-            //m_grid.AddPointDisturbance(pos, value);
+            for (int i = 0; i < 16; i++)
+            {
+                m_grid.AddPointDisturbance(new Vector3(pos.x,pos.y, i), value);
+            }
         }
 
         /// <summary>
@@ -167,7 +170,7 @@ namespace WaterWaveSurface
         /// <param name="pos">x,y are position coordinates. z is the angle of the wave in radians</param>
         public void AddPointDirectionDisturbance(Vector3 pos, float value)
         {
-            //m_grid.AddPointDisturbance(pos, value);
+            m_grid.AddPointDisturbance(pos, value);
         }
 
         private void OnValidate()

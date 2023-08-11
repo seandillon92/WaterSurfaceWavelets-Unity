@@ -40,6 +40,7 @@ internal class Disturbance : MonoBehaviour
             var posY = ray.origin.y - waterLevel;
             float t = -posY / ray.direction.y;
             var pos = ray.origin + t * ray.direction;
+            //TODO account for rotation
             var terrainPos = m_waterSurface.Settings.environment.transform.GetPosition();
             pos.x -= terrainPos.x;
             pos.z -= terrainPos.z;
@@ -67,11 +68,9 @@ internal class Disturbance : MonoBehaviour
         if (!m_enableRain)
             return;
 
-        var size = m_waterSurface.Settings.environment.size;
-        var offset = m_waterSurface.Settings.environment.transform.GetPosition();
         var point = new Vector2(
-            Random.Range(offset.x - size.x, offset.x + size.x),
-            Random.Range(offset.z - size.y, offset.z + size.y));
+            Random.Range(0, m_waterSurface.Settings.simulation.n_x),
+            Random.Range(0, m_waterSurface.Settings.simulation.n_x));
 
         m_waterSurface.AddPointDisturbance(point, m_disturbance);
     }

@@ -110,5 +110,15 @@ namespace WaveGrid
             m_renderer.Update(s);
             API.Grid.timeStep(m_ptr, s.dt * m_timeStep, s.updateSimulation);
         }
+
+        void IWaveGrid.AddPointDisturbance(Vector3 pos, float value)
+        {
+            API.Grid.addPointDisturbanceDirection(m_ptr, pos, value);
+        }
+
+        void IDisposable.Dispose()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

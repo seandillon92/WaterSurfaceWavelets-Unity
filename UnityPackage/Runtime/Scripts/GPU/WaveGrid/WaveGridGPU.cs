@@ -117,5 +117,10 @@ namespace WaveGrid
             m_profileBuffers[0].Update();
             
         }
+
+        void IWaveGrid.AddPointDisturbance(Vector3 pos, float value)
+        {
+            m_advection.IncreaseAmplitude(value, pos);
+        }
     }
 }
