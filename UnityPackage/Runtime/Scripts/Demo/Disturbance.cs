@@ -40,10 +40,8 @@ internal class Disturbance : MonoBehaviour
             var posY = ray.origin.y - waterLevel;
             float t = -posY / ray.direction.y;
             var pos = ray.origin + t * ray.direction;
-            //TODO account for rotation
-            var terrainPos = m_waterSurface.Settings.environment.transform.GetPosition();
-            pos.x -= terrainPos.x;
-            pos.z -= terrainPos.z;
+
+            Debug.DrawLine(pos, pos + Vector3.up, Color.red);
 
             if (m_previous_left_mouse_position != null)
             {
@@ -51,8 +49,8 @@ internal class Disturbance : MonoBehaviour
                 var direction = (pos - m_previous_left_mouse_position).Value.normalized;
                 var angle1 = Angle(direction, Vector3.forward + Vector3.right * 0.5f);
                 var angle2 = Angle(direction, Vector3.back + Vector3.right * 0.5f);
-                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle1 * Mathf.Deg2Rad), m_disturbance * velocity);
-                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle2 * Mathf.Deg2Rad), m_disturbance * velocity);
+                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle1), m_disturbance * velocity);
+                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle2), m_disturbance * velocity);
             }
 
             m_previous_left_mouse_position = pos;
@@ -68,9 +66,21 @@ internal class Disturbance : MonoBehaviour
         if (!m_enableRain)
             return;
 
-        var point = new Vector2(
-            Random.Range(0, m_waterSurface.Settings.simulation.n_x),
-            Random.Range(0, m_waterSurface.Settings.simulation.n_x));
+        var center = m_waterSurface.Settings.environment.transform.GetPosition();
+        var size = m_waterSurface.Settings.environment.size;
+
+        var point = new Vector2(0,0);
+
+        point.x += Random.Range((float)-size.x, (float)size.x);
+        point.y += Random.Range((float)-size.y, (float)size.y);
+
+        var localPoint = new Vector3(point.x, 0, point.y);
+        var worldPoint = m_waterSurface.Settings.environment.transform.rotation * localPoint;
+        point.x = worldPoint.x;
+        point.y = worldPoint.z;
+
+        point.x += center.x;
+        point.y += center.z;
 
         m_waterSurface.AddPointDisturbance(point, m_disturbance);
     }

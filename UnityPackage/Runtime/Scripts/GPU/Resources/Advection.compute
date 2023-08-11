@@ -224,7 +224,7 @@ void Init(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 8)]
 void Copy(uint3 id : SV_DispatchThreadID)
 {
-    Write[id + uint3(1, 1, 0)] = Read[id] + Read2[id];
+    Write[id + uint3(1, 1, 0)] = saturate(Read[id] + Read2[id]);
 }
 
 [numthreads(8,8,8)]
@@ -236,5 +236,6 @@ void Dissipation(uint3 id : SV_DispatchThreadID)
 [numthreads(1,1,1)]
 void ManualPoint(uint3 id : SV_DispatchThreadID)
 {
+    //TODO: interpolate between different depth values
     Write[uint3(manual_point)] = manual_point_value;
 }

@@ -158,16 +158,17 @@ namespace WaterWaveSurface
         /// <param name="pos">x,y are position coordinates</param>
         public void AddPointDisturbance(Vector2 pos, float value)
         {
+            var d_theta = 360f / 16f;
             for (int i = 0; i < 16; i++)
             {
-                m_grid.AddPointDisturbance(new Vector3(pos.x,pos.y, i), value);
+                m_grid.AddPointDisturbance(new Vector3(pos.x,pos.y, (float)(i * d_theta)), value);
             }
         }
 
         /// <summary>
         /// Add disturbance at a point with a specific direction
         /// </summary>
-        /// <param name="pos">x,y are position coordinates. z is the angle of the wave in radians</param>
+        /// <param name="pos">x,y are position coordinates. z is the angle of the wave in euler angles</param>
         public void AddPointDirectionDisturbance(Vector3 pos, float value)
         {
             m_grid.AddPointDisturbance(pos, value);
