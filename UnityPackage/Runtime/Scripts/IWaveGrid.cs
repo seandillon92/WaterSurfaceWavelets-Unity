@@ -6,6 +6,9 @@ namespace WaveGrid
     internal interface IWaveGrid : IDisposable
     {
         internal void Update(UpdateSettings settings);
+
+        internal void AddPointDisturbance(Vector3 pos, float value);
+
         internal Mesh Mesh { get; }
     }
 

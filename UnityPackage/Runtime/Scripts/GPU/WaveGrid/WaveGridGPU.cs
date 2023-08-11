@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace WaveGrid
 {
@@ -116,6 +117,30 @@ namespace WaveGrid
             //Precompute step
             m_profileBuffers[0].Update();
             
+        }
+
+        void IWaveGrid.AddPointDisturbance(Vector3 pos, float value)
+        {
+            // convert from world to local space
+            var terrainPos = m_settings.environment.transform.GetPosition();
+            var terrainRot = m_settings.environment.transform.rotation;
+
+            Matrix4x4 terrainTR = Matrix4x4.Translate(terrainPos) * Matrix4x4.Rotate(terrainRot);
+            var inverse = terrainTR.inverse;
+            var worldPos = new Vector3(pos.x, 0, pos.y);
+            var localPos = inverse.MultiplyPoint(worldPos);
+            localPos.x += m_settings.environment.size.x;
+            localPos.z += m_settings.environment.size.y;
+
+            pos.x = localPos.x/(m_settings.environment.size.x * 2f);
+            pos.y = localPos.z / (m_settings.environment.size.y * 2f);
+            pos.z /= 360f;
+
+            Assert.IsTrue(pos.x >= 0 && pos.x <= 1);
+            Assert.IsTrue(pos.y >= 0 && pos.y <= 1);
+            Assert.IsTrue(pos.z >= 0 && pos.z <= 1);
+
+            m_advection.IncreaseAmplitude(value, pos);
         }
     }
 }

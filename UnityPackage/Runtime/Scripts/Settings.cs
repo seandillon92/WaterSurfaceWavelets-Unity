@@ -46,6 +46,8 @@ namespace WaveGrid
         [HideInInspector]
         public float wind_direction = 0f;
         public float wave_amplitude = 1f;
+        [Range(0,1)]
+        public float dissipation = 0.99f;
         public float max_zeta = Mathf.Log(10, 2);
         public float min_zeta = Mathf.Log(0.03f, 2);
 
