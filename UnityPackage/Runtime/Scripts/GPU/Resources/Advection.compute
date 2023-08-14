@@ -1,10 +1,10 @@
 #pragma enable_d3d11_debug_symbols
 #pragma kernel Advection
 #pragma kernel Diffusion
-#pragma kernel Init
 #pragma kernel Copy
 #pragma kernel ManualPoint
 #pragma kernel Dissipation
+#pragma kernel UpdateEdge
 
 Texture3D<float> Read;
 Texture3D<float> Read2;
@@ -210,14 +210,17 @@ void Advection(uint3 id : SV_DispatchThreadID)
     }
 }
 
-[numthreads(1, 1, 8)]
-void Init(uint3 id : SV_DispatchThreadID)
+[numthreads(1,1,1)]
+void UpdateEdge(uint3 id : SV_DispatchThreadID)
 {
     uint x, y, z;
+    
     Write.GetDimensions(x, y, z);
-    if (id.x == 0 || id.x == x - 1 || id.y == 0 || id.y == y - 1)
+    if (id.x == 0 || id.y == 0 || id.x == x - 1 || id.y == y - 1)
     {
-        Write[id] = Default[id.z];
+        uint3 coords = id;
+        coords = clamp(coords, uint3(0, 0, 0), uint3(x - 3, y - 3, 16));
+        Write[id] = Read[coords];
     }
 }
 

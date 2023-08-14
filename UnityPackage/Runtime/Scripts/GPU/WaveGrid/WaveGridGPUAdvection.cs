@@ -15,10 +15,10 @@ namespace WaveGrid
         private ComputeShader m_shader;
         private int m_advection_kernel;
         private int m_diffusion_kernel;
-        private int m_init_kernel;
         private int m_copy_kernel;
         private int m_manualPoint_kernel;
         private int m_dissipation_kernel;
+        private int m_updateEdge_kernel;
 
 
         private Settings m_settings;
@@ -119,8 +119,9 @@ namespace WaveGrid
             m_shader.SetTexture(m_diffusion_kernel, "heights", s.environment.heights);
             m_shader.SetTexture(m_diffusion_kernel, "gradients", s.environment.gradients);
 
-            m_init_kernel = m_shader.FindKernel("Init");
-            m_shader.SetTexture(m_init_kernel, "Write", amplitude);
+            m_updateEdge_kernel = m_shader.FindKernel("UpdateEdge");
+            m_shader.SetTexture(m_updateEdge_kernel, "Read", m_amplitude);
+            m_shader.SetTexture(m_updateEdge_kernel, "Write", amplitude);
 
             m_copy_kernel = m_shader.FindKernel("Copy");
             m_shader.SetTexture(m_copy_kernel, "Read", m_amplitude);
@@ -136,18 +137,16 @@ namespace WaveGrid
 
             m_deltaTime_id = Shader.PropertyToID("deltaTime");
 
-            SetDefaultAmplitudes(m_settings);
+            SetDefaultAmplitudes(s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
         }
 
-        void SetDefaultAmplitudes(Settings s)
+        void SetDefaultAmplitudes(float[] amplitudes)
         {
+
             SetFloats(
                 m_shader, 
                 "Default", 
-                s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
-
-            m_shader.GetKernelThreadGroupSizes(m_init_kernel, out uint x, out uint y, out uint z);
-            m_shader.Dispatch(m_init_kernel, (int)((s.simulation.GetResolution() + 2) / x), (int)((s.simulation.GetResolution() + 2) / y), (int)(16 / z));
+                amplitudes);
         }
 
         void SetFloats(ComputeShader shader, string id, float[] f)
@@ -172,6 +171,8 @@ namespace WaveGrid
             m_shader.SetFloat(m_deltaTime_id, cflTimestep() * Time.deltaTime);
 
             {
+                var s = m_settings;
+                SetDefaultAmplitudes(s.simulation.GetDefaultAmplitudes(s.environment.transform).ToArray());
                 m_shader.SetTexture(m_advection_kernel, "Read", m_amplitude);
                 m_shader.SetTexture(m_advection_kernel, "Write", m_newAmplitude);
                 m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
@@ -185,10 +186,16 @@ namespace WaveGrid
             }
 
             {
+                float[] amplitudes = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                SetDefaultAmplitudes(amplitudes);
                 m_shader.SetTexture(m_advection_kernel, "Read", m_manualAmplitude);
                 m_shader.SetTexture(m_advection_kernel, "Write", m_newManualAmplitude);
-                m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out uint x, out uint y, out uint z);
+
+                uint x, y, z;
+
+                m_shader.GetKernelThreadGroupSizes(m_advection_kernel, out x, out y, out z);
                 m_shader.Dispatch(m_advection_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
+
             }
 
             {
@@ -199,6 +206,12 @@ namespace WaveGrid
             {
                 m_shader.GetKernelThreadGroupSizes(m_copy_kernel, out uint x, out uint y, out uint z);
                 m_shader.Dispatch(m_copy_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
+
+                m_shader.GetKernelThreadGroupSizes(m_updateEdge_kernel, out x, out y, out z);
+                m_shader.Dispatch(m_updateEdge_kernel, 
+                    (int)((m_settings.simulation.GetResolution() + 2) / x), 
+                    (int)((m_settings.simulation.GetResolution() + 2) / y), 
+                    (int)(16 / z));
             }
         }
 
