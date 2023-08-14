@@ -41,8 +41,6 @@ internal class Disturbance : MonoBehaviour
             float t = -posY / ray.direction.y;
             var pos = ray.origin + t * ray.direction;
 
-            Debug.DrawLine(pos, pos + Vector3.up, Color.red);
-
             if (m_previous_left_mouse_position != null)
             {
                 float velocity = Vector3.Distance(m_previous_left_mouse_position.Value, pos) * Time.deltaTime;
