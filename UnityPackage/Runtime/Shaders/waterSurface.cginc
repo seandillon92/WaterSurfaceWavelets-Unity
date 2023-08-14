@@ -22,8 +22,8 @@ uniform float2 xmin;
 uniform float2 dx;
 uniform float4x4 env_trans;
 uniform float4x4 env_trans_inv;
-uniform float env_size;
-uniform uint nx;
+uniform float2 env_size;
+uniform uint2 nx;
 uniform uint direction;
 uniform float amp_mult;
 uniform bool renderOutsideBorders;
@@ -59,7 +59,7 @@ float getItheta(uint index)
 
 float gridAmplitude(float2 pos, float itheta)
 {
-    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + 2), (itheta + 0.5) / 16.0f);
+    float3 samplingPos = float3((pos + float2(1.5, 1.5)) / (nx + uint2(2, 2)), (itheta + 0.5) / 16.0f);
     return amplitude.SampleLevel(linear_clamp_sampler, samplingPos, 0).x * amp_mult;
 }
 
@@ -78,10 +78,7 @@ float3 posToGrid(float2 pos)
     if (!renderOutsideBorders)
     {
         float2 orthoP = mul(env_trans_inv, float4(p, 1)).xz;
-        orthoP = clamp(
-                orthoP,
-                -float2(env_size, env_size),
-                float2(env_size, env_size));
+        orthoP = clamp(orthoP,-env_size, env_size);
         p.xz = mul(env_trans, float4(orthoP.x, 0, orthoP.y, 1)).xz;
     }
 

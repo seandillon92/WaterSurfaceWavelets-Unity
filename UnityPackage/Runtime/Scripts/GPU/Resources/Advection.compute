@@ -19,9 +19,9 @@ SamplerState linearClampSampler;
 SamplerState pointClampSampler;
 static double tau = 6.28318530718;
 static float theta_dx = tau / 16;
-float dx;
-float x_min;
-float env_dx;
+float2 dx;
+float2 x_min;
+float2 env_dx;
 
 float3 manual_point;
 float manual_point_value;
@@ -29,13 +29,13 @@ float dissipation;
 
 float2 idxToPos(float2 idx)
 {
-    float2 pos = float2(x_min, x_min) + (idx + float2(0.5, 0.5)) * dx;
+    float2 pos = x_min + (idx + float2(0.5, 0.5)) * dx;
     return pos;
 }
 
 float2 posToGrid(float2 pos)
 {
-    return ((pos - float2(x_min, x_min))) / dx - float2(0.5, 0.5);
+    return ((pos - x_min)) / dx - float2(0.5, 0.5);
 }
 
 
@@ -74,7 +74,7 @@ float getHeight(float2 pos)
             linearClampSampler,
             float2((gridPos.x + 0.5) / x, (gridPos.y + 0.5) / y),
     0).r;
-    return height * env_dx;
+    return height * length(env_dx);
 }
 
 float2 getGradient(float2 pos)
@@ -152,9 +152,9 @@ float sample(float3 coord)
 void Diffusion(uint3 id : SV_DispatchThreadID)
 {
     float ls = getHeight(idxToPos(float2(id.x, id.y)));
-    float gamma = 2 * 0.025 * groupSpeed * deltaTime / dx;
+    float gamma = 2 * 0.025 * groupSpeed * deltaTime / length(dx);
           // do diffusion only if you are 2 grid nodes away from boudnary
-    if (ls >= 4 * dx)
+    if (ls >= 4 * length(dx))
     {
         Write[id] =
                 (1 - gamma) * Read[id] +

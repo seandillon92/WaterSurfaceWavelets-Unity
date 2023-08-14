@@ -34,7 +34,8 @@ namespace WaterWaveSurface
             cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
             cam.transform.rotation = Quaternion.Euler(90,0, -transform.rotation.eulerAngles.y);
             cam.transform.localScale = Vector3.one;
-            cam.orthographicSize = m_settings.environment.size.x;
+            cam.orthographicSize = m_settings.environment.size.y;
+            cam.aspect = m_settings.environment.size.x / m_settings.environment.size.y;
             cam.nearClipPlane = 0f;
             cam.farClipPlane = transform.lossyScale.y;
 

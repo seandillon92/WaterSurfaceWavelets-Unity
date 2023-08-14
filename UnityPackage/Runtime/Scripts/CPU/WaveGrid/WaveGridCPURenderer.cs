@@ -45,7 +45,7 @@ internal class WaveGridCPURenderer
         var resolution = s.simulation.GetResolution();
         var idx = new Vector2(1f / (size.x * 2f / resolution), 1f / (size.x * 2f / resolution));
         m_material.SetVector(Shader.PropertyToID("dx"), idx);
-        m_material.SetFloat(Shader.PropertyToID("nx"), resolution);
+        m_material.SetVector(Shader.PropertyToID("nx"), new Vector2(resolution, resolution));
 
         var t = s.environment.transform;
         var p = t.GetPosition();
@@ -55,7 +55,7 @@ internal class WaveGridCPURenderer
 
         m_material.SetMatrix("env_trans", m);
         m_material.SetMatrix("env_trans_inv", m.inverse);
-        m_material.SetFloat("env_size", s.environment.size.x);
+        m_material.SetVector("env_size",  new Vector2(s.environment.size.x, s.environment.size.y));
 
         m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
 

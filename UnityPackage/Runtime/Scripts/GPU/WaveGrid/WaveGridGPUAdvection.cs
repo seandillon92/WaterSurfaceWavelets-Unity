@@ -93,9 +93,18 @@ namespace WaveGrid
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
-            m_shader.SetFloat("dx",s.environment.size.x * 2f / s.simulation.GetResolution());
-            m_shader.SetFloat("x_min", -s.environment.size.x);
-            m_shader.SetFloat("env_dx", s.environment.size.x * 2.0f / s.environment.heights.width);
+            m_shader.SetVector(
+                "dx",
+                new Vector2(
+                    s.environment.size.x * 2f / s.simulation.GetResolution(),
+                    s.environment.size.y * 2f / s.simulation.GetResolution()
+                ));
+
+            m_shader.SetVector("x_min" , new Vector2(-s.environment.size.x, -s.environment.size.y));
+            m_shader.SetVector("env_dx", 
+                new Vector2(
+                    s.environment.size.x * 2.0f / s.environment.heights.width,
+                    s.environment.size.y * 2.0f/ s.environment.heights.height));
             m_shader.SetFloat("dissipation", s.simulation.dissipation);
 
             m_advection_kernel = m_shader.FindKernel("Advection");
