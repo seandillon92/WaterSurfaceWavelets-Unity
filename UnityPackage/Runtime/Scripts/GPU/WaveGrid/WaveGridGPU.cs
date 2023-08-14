@@ -59,11 +59,11 @@ namespace WaveGrid
             m_material.SetTexture(Shader.PropertyToID("amplitude"), m_advection.amplitude);
             var size = new Vector2(s.environment.size.x, s.environment.size.y);
             m_material.SetVector(Shader.PropertyToID("xmin"), -size);
-            var idx = new Vector2(1f/(size.x * 2f / s.simulation.GetResolution()),1f/ (size.x * 2f / s.simulation.GetResolution()));
+            var idx = new Vector2(1f/(size.x * 2f / s.simulation.GetResolution()),1f/ (size.y * 2f / s.simulation.GetResolution()));
             m_material.SetVector(Shader.PropertyToID("dx"), idx);
             m_material.SetTexture(Shader.PropertyToID("textureData"), m_profileBuffers[0].data);
             m_material.SetFloat(Shader.PropertyToID("profilePeriod"), m_profileBuffers[0].period);
-            m_material.SetFloat(Shader.PropertyToID("nx"), s.simulation.GetResolution());
+            m_material.SetVector(Shader.PropertyToID("nx"), new Vector2(s.simulation.GetResolution(), s.simulation.GetResolution()));
             var t = s.environment.transform;
             var p = t.GetPosition();
             Matrix4x4 m = 
@@ -72,7 +72,7 @@ namespace WaveGrid
 
             m_material.SetMatrix("env_trans", m);
             m_material.SetMatrix("env_trans_inv", m.inverse);
-            m_material.SetFloat("env_size", s.environment.size.x);
+            m_material.SetVector("env_size", new Vector2(s.environment.size.x, s.environment.size.y));
 
             m_material.SetFloat("env_rotation", t.rotation.eulerAngles.y * Mathf.Deg2Rad);
 
@@ -135,6 +135,8 @@ namespace WaveGrid
 
             pos.x = localPos.x/(m_settings.environment.size.x * 2f);
             pos.y = localPos.z / (m_settings.environment.size.y * 2f);
+            pos.z += terrainRot.eulerAngles.y;
+            pos.z = (pos.z % 360 + 360) % 360;
             pos.z /= 360f;
 
             Assert.IsTrue(pos.x >= 0 && pos.x <= 1);
