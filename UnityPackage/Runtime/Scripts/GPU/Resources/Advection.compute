@@ -249,11 +249,11 @@ void ManualPoint(uint3 id : SV_DispatchThreadID)
     if (lowTheta == highTheta)
     {
         
-        Write[uint3(manual_point.xy, lowTheta)] = manual_point_value;
+        Write[uint3(manual_point.xy, lowTheta)] += manual_point_value;
     }
     else
     {
-        Write[uint3(manual_point.xy, lowTheta)] = lerp(0.0f, manual_point_value, 1 - t);
-        Write[uint3(manual_point.xy, highTheta)] = lerp(0.0f, manual_point_value, t);
+        Write[uint3(manual_point.xy, lowTheta)] +=lerp(0.0f, manual_point_value, 1 - t);
+        Write[uint3(manual_point.xy, highTheta)] += lerp(0.0f, manual_point_value, t);
     }
 }

@@ -6,17 +6,29 @@ public class CameraMovement : MonoBehaviour
     private Camera m_Camera;
 
     [SerializeField]
-
     private float scrollSpeed = 3.0f;
+
+    [SerializeField]
+    private bool rotate;
+
+    [SerializeField]
+    private bool translate;
 
     private Vector3? m_last_right_mouse_pos;
     private Vector3? m_last_middle_mouse_pos;
 
     private void Update()
     {
-        HandleRightMouse();
-        HandleMiddleMouse();
-        HandleMouseScroll();
+        if (rotate)
+        {
+            HandleRightMouse();
+        }
+
+        if (translate)
+        {
+            HandleMiddleMouse();
+            HandleMouseScroll();
+        }
     }
 
     private void HandleMouseScroll()

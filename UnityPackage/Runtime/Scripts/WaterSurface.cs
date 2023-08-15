@@ -145,6 +145,7 @@ namespace WaterWaveSurface
 
         private void Update()
         {
+            
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
         }
 
