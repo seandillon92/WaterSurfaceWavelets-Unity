@@ -67,7 +67,7 @@ public class CameraMovement : MonoBehaviour
     private void HandleRightMouse()
     {
        
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(2))
         {
             var pos = Input.mousePosition;
             if (m_last_right_mouse_pos != null)

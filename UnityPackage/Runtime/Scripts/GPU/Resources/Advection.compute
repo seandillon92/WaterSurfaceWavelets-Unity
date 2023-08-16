@@ -236,6 +236,53 @@ void Dissipation(uint3 id : SV_DispatchThreadID)
     Write[id] = Read[id] * dissipation;
 }
 
+void ManualPointZ(uint theta, float theta_t, uint x, float x_t)
+{
+    float z = manual_point.y;
+    float t = frac(z);
+    uint lowZ = uint(floor(z));
+    uint highZ = uint(ceil(z));
+    
+    if (lowZ == highZ)
+    {
+
+        float x_val = lerp(0, manual_point_value, x_t);
+        float z_val = lerp(0, x_val, t);
+        float theta_val = lerp(0, z_val, theta_t);
+        Write[uint3(x, lowZ, theta)] += theta_val;
+    }
+    else
+    {
+        float x_val = lerp(0, manual_point_value, x_t);
+        float z_val = lerp(0, x_val, 1-t);
+        float theta_val = lerp(0, z_val, theta_t);
+        Write[uint3(x, lowZ, theta)] += theta_val;
+        
+        x_val = lerp(0, manual_point_value, x_t);
+        z_val = lerp(0, x_val, t);
+        theta_val = lerp(0, z_val, theta_t);
+        Write[uint3(x, highZ, theta)] += theta_val;
+    }
+
+}
+
+void ManualPointX(uint theta, float theta_t)
+{
+    float x = manual_point.x;
+    float t = frac(x);
+    uint lowX = uint(floor(x));
+    uint highX = uint(ceil(x));
+    if (lowX == highX)
+    {
+        ManualPointZ(theta, theta_t, lowX, 1);
+    }
+    else
+    {
+        ManualPointZ(theta, theta_t, lowX, 1 - t);
+        ManualPointZ(theta, theta_t, highX, t);
+    }
+}
+
 [numthreads(1,1,1)]
 void ManualPoint(uint3 id : SV_DispatchThreadID)
 {
@@ -243,17 +290,18 @@ void ManualPoint(uint3 id : SV_DispatchThreadID)
     
     float t = frac(theta);
     
+    
     uint lowTheta = (int(floor(theta)) % 16 + 16) % 16;
     uint highTheta = (int(ceil(theta)) % 16 + 16) % 16;
 
     if (lowTheta == highTheta)
     {
         
-        Write[uint3(manual_point.xy, lowTheta)] += manual_point_value;
+        ManualPointX(lowTheta, 1);
     }
     else
     {
-        Write[uint3(manual_point.xy, lowTheta)] +=lerp(0.0f, manual_point_value, 1 - t);
-        Write[uint3(manual_point.xy, highTheta)] += lerp(0.0f, manual_point_value, t);
+        ManualPointX(lowTheta, 1 - t);
+        ManualPointX(highTheta, t);
     }
 }

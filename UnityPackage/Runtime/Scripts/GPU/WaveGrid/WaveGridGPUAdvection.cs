@@ -217,9 +217,9 @@ namespace WaveGrid
 
         internal void IncreaseAmplitude(float amplitude, Vector3 point)
         {
-            point.x = point.x * m_settings.simulation.GetResolution();
-            point.y = point.y * m_settings.simulation.GetResolution();
-            point.z = point.z * 16;
+            point.x = point.x * (m_settings.simulation.GetResolution() - 1);
+            point.y = point.y * (m_settings.simulation.GetResolution() - 1);
+            point.z = point.z * 16 - 0.5f;
 
             m_shader.SetVector("manual_point", point);
             m_shader.SetFloat("manual_point_value", amplitude);

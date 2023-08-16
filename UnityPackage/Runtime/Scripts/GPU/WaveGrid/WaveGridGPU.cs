@@ -135,9 +135,12 @@ namespace WaveGrid
 
             pos.x = localPos.x/(m_settings.environment.size.x * 2f);
             pos.y = localPos.z / (m_settings.environment.size.y * 2f);
+            var prev = pos.z;
+
             pos.z += terrainRot.eulerAngles.y;
             pos.z = (pos.z % 360 + 360) % 360;
             pos.z /= 360f;
+            
 
             Assert.IsTrue(pos.x >= 0 && pos.x <= 1);
             Assert.IsTrue(pos.y >= 0 && pos.y <= 1);

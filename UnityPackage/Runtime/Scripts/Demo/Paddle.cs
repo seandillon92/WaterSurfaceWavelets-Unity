@@ -14,11 +14,17 @@ public class Paddle : MonoBehaviour
 
     public Transform end => m_end;
 
-    public delegate void RowDelegate();
+    public enum RowEventType
+    {
+        Start,
+        End
+    }
+
+    public delegate void RowDelegate(RowEventType e);
     public RowDelegate StartRow { get; set; }
 
-    public void OnStartRow()
+    public void OnStartRow(RowEventType e)
     {
-        StartRow();
+        StartRow(e);
     }
 }
