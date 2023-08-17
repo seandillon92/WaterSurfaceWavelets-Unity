@@ -170,10 +170,16 @@ namespace WaterWaveSurface
         /// <summary>
         /// Add disturbance at a point with a specific direction
         /// </summary>
-        /// <param name="pos">x,y are position coordinates. z is the angle of the wave in euler angles</param>
-        public void AddPointDirectionDisturbance(Vector3 pos, float value)
+        /// <param name="pos">global position coordinates</param>#
+        /// <param name="direction"> direction of the distrurbance in global coordinates</param>
+        /// 
+
+        public void AddPointDirectionDisturbance(Vector3 pos, Vector3 direction, float value)
         {
-            m_grid.AddPointDisturbance(pos, value);
+            direction.y = 0;
+            var angle = -Vector3.SignedAngle(Vector3.right, direction.normalized, Vector3.up);
+            var position = new Vector3(pos.x, pos.z, angle);
+            m_grid.AddPointDisturbance(position, value);
         }
 
         void OnDestroy()

@@ -111,13 +111,10 @@ public class Boat : MonoBehaviour
 
     private void MakeWavesLeft()
     {
-        var forward = leftPaddle.end.forward;
-        forward.y = 0;
-
-        var angle = -Vector3.SignedAngle(Vector3.right, forward.normalized, Vector3.up);
-        var pos3 = new Vector3(leftPaddle.end.position.x, leftPaddle.end.position.z, angle);
+        var dir = leftPaddle.end.forward;
+        var pos = leftPaddle.end.position;
         var paddleSpeed = leftPaddle.Animator.speed;
-        surface.AddPointDirectionDisturbance(pos3, m_row_amplitude * paddleSpeed);
+        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed);
     }
 
     private void OnRowRight(Paddle.RowEventType e)
@@ -137,13 +134,10 @@ public class Boat : MonoBehaviour
 
     private void MakeWavesRight()
     {
-        var forward = rightPaddle.end.forward;
-        forward.y = 0;
-
-        var angle = -Vector3.SignedAngle(Vector3.right, forward.normalized, Vector3.up);
-        var pos3 = new Vector3(rightPaddle.end.position.x, rightPaddle.end.position.z, angle);
+        var dir = rightPaddle.end.forward;
+        var pos = rightPaddle.end.position;
         var paddleSpeed = rightPaddle.Animator.speed;
-        surface.AddPointDirectionDisturbance(pos3, m_row_amplitude * paddleSpeed);
+        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed);
     }
 
     private void Render()
