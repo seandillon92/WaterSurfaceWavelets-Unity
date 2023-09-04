@@ -41,16 +41,14 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 float4 position : SV_POSITION;
                 float3 wavePosition : POSITION1;
                 float4 amplitude[DIR_NUM/4] : POSITION2;
-                float discardPixel:TEXCOORD1;
             };
 
 
 
-            samplerCUBE _Skybox;
-            float _FresnelExponent;
-            float _RefractionIndex;
-            float _Scale;
-            uniform float4x4 _BoatTransform;
+            uniform samplerCUBE _Skybox;
+            uniform float _FresnelExponent;
+            uniform float _RefractionIndex;
+            uniform float _Scale;
 
             v2f vert (appdata v)
             {
@@ -78,11 +76,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 o.wavePosition = pos;
                 pos += wavePosition(pos, o.amplitude);
     
-                float3 boatPos = mul(_BoatTransform, float4(pos, 1));
-                if (boatPos.x < 1.1 && boatPos.z < 2 && boatPos.x > -1.1 && boatPos.z > -2.75)
-                {
-                    o.discardPixel = 1;
-                }
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o, pos);
                 
@@ -91,10 +84,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                if (i.discardPixel)
-                {
-                    discard;
-                }
                 float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, i.amplitude));
                 fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);

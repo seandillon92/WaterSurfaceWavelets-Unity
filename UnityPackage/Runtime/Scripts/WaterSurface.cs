@@ -188,13 +188,20 @@ namespace WaterWaveSurface
                 return;
             }
 
-            var d_theta = 1f/16;
-            var dir_xz = new Vector3(direction.x,0, direction.z);
-            var perpendicular = Vector3.Cross(dir_xz, Vector3.up);
+            var d_theta = 1f/8;
+            var dir_xz = new Vector3(direction.x,0, direction.z).normalized;
+            
+            var perpendicular = Vector3.Cross(-dir_xz, Vector3.up);
 
-            for (float theta = 0f; theta < 1f; theta+= d_theta)
+            for (float theta = 0f; theta <= 1f; theta+= d_theta)
             {
-                var dir = Vector3.Slerp(-perpendicular, perpendicular, theta);
+                var dir = Vector3.Slerp(-perpendicular, dir_xz, theta);
+                AddPointDirectionDisturbance(pos, dir, value * d_theta);
+            }
+
+            for (float theta = 0f; theta <= 1f; theta += d_theta)
+            {
+                var dir = Vector3.Slerp(dir_xz, perpendicular, theta);
                 AddPointDirectionDisturbance(pos, dir, value * d_theta);
             }
         }

@@ -1,4 +1,5 @@
 using ProfileBuffer;
+using UnityEditorInternal;
 using UnityEngine;
 
 namespace WaveGrid

@@ -48,20 +48,18 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
             float amplitude13;
             float amplitude14;
             float amplitude15;
-            float discardPixel;
         };
 
 
 
-        samplerCUBE _Skybox;
-        float _FresnelExponent;
-        float _RefractionIndex;
-        float4 _Color;
-        float _Scale;
-        uniform float4x4 _BoatTransform;
+        uniform samplerCUBE _Skybox;
+        uniform float _FresnelExponent;
+        uniform float _RefractionIndex;
+        uniform float4 _Color;
+        uniform float _Scale;
 
-        half _Glossiness;
-        half _Metallic;
+        uniform half _Glossiness;
+        uniform half _Metallic;
 
         void vert(inout appdata_full v, out Input o)
         {
@@ -109,22 +107,10 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
             };
             pos += wavePosition(pos, amp);
             v.vertex.xyz = pos;
-    
-            float3 boatPos = mul(_BoatTransform, float4(pos, 1));
-            o.discardPixel = 0;
-            if (boatPos.x < 1.1 && boatPos.z < 2 && boatPos.x > -1.1 && boatPos.z > -2.75)
-            {
-                o.discardPixel = 1;
-            }
         }
 
         void surf(in Input i, inout SurfaceOutputStandard o)
         {
-    
-            if (i.discardPixel)
-            {
-                discard;
-            }
     
             float amp[16] =
             {

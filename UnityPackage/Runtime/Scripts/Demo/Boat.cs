@@ -1,3 +1,4 @@
+using UnityEditorInternal;
 using UnityEngine;
 using WaterWaveSurface;
 
@@ -101,6 +102,7 @@ public class Boat : MonoBehaviour
             m_boat_speed += 0.001f * speed;
             m_boat_rotate_speed_right += 0.005f * speed;
         }
+
 
         transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
         transform.Rotate(Vector3.up * -m_boat_rotate_speed_left);
