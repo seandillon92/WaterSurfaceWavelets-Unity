@@ -1,6 +1,5 @@
 using UnityEngine;
 using WaterWaveSurface;
-using static UnityEditorInternal.VersionControl.ListControl;
 
 public class Boat : MonoBehaviour
 {
@@ -74,8 +73,8 @@ public class Boat : MonoBehaviour
         {
             case Paddle.RowEventType.Start:
                 m_rowing_left = true;
-                var pos2 = new Vector2(leftPaddle.end.position.x, leftPaddle.end.position.z);
-                surface.AddPointDisturbance(pos2, m_row_amplitude_splash);
+                var posxz = new Vector2(leftPaddle.end.position.x, leftPaddle.end.position.z);
+                surface.AddPointDisturbance(posxz, m_row_amplitude_splash);
                 break;
             case Paddle.RowEventType.End:
                 m_rowing_left = false;
@@ -114,7 +113,7 @@ public class Boat : MonoBehaviour
         var dir = leftPaddle.end.forward;
         var pos = leftPaddle.end.position;
         var paddleSpeed = leftPaddle.Animator.speed;
-        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed);
+        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed, true);
     }
 
     private void OnRowRight(Paddle.RowEventType e)
@@ -137,7 +136,7 @@ public class Boat : MonoBehaviour
         var dir = rightPaddle.end.forward;
         var pos = rightPaddle.end.position;
         var paddleSpeed = rightPaddle.Animator.speed;
-        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed);
+        surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed, true);
     }
 
     private void Render()

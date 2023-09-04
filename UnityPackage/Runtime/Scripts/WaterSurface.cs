@@ -1,6 +1,8 @@
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using WaveGrid;
+using static UnityEditor.PlayerSettings;
 
 namespace WaterWaveSurface
 {
@@ -174,7 +176,30 @@ namespace WaterWaveSurface
         /// <param name="direction"> direction of the distrurbance in global coordinates</param>
         /// 
 
-        public void AddPointDirectionDisturbance(Vector3 pos, Vector3 direction, float value)
+        public void AddPointDirectionDisturbance(
+            Vector3 pos, 
+            Vector3 direction, 
+            float value, 
+            bool sideDirections = false)
+        {
+            if (!sideDirections)
+            {
+                AddPointDirectionDisturbance(pos, direction, value);
+                return;
+            }
+
+            var d_theta = 1f/16;
+            var dir_xz = new Vector3(direction.x,0, direction.z);
+            var perpendicular = Vector3.Cross(dir_xz, Vector3.up);
+
+            for (float theta = 0f; theta < 1f; theta+= d_theta)
+            {
+                var dir = Vector3.Slerp(-perpendicular, perpendicular, theta);
+                AddPointDirectionDisturbance(pos, dir, value * d_theta);
+            }
+        }
+
+        private void AddPointDirectionDisturbance(Vector3 pos, Vector3 direction, float value)
         {
             direction.y = 0;
             var angle = -Vector3.SignedAngle(Vector3.right, direction.normalized, Vector3.up);

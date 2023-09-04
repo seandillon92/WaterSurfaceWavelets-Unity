@@ -37,8 +37,8 @@ internal class Disturbance : MonoBehaviour
                 var direction = (pos - m_previous_left_mouse_position).Value.normalized;
                 var dir1 = direction + Vector3.forward * 0.5f;
                 var dir2 = direction + Vector3.back * 0.5f;
-                m_waterSurface.AddPointDirectionDisturbance(pos, dir1, m_disturbance * velocity);
-                m_waterSurface.AddPointDirectionDisturbance(pos, dir2, m_disturbance * velocity);
+                m_waterSurface.AddPointDirectionDisturbance(pos, dir1, m_disturbance * velocity, false);
+                m_waterSurface.AddPointDirectionDisturbance(pos, dir2, m_disturbance * velocity, false);
             }
 
             m_previous_left_mouse_position = pos;
