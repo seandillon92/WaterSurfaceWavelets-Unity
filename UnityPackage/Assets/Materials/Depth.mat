@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: environment
+  m_Name: Depth
   m_Shader: {fileID: 4800000, guid: fdc6a72efbad8954ebb5585d3fc1af13, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

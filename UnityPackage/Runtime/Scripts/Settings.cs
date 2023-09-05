@@ -17,7 +17,7 @@ namespace WaveGrid
     }
 
     [Serializable]
-    public class EnvironmentSettings
+    public class TerrainSettings
     {
         [HideInInspector]
         public Vector2Int size;
@@ -41,6 +41,25 @@ namespace WaveGrid
         public RenderTexture heights;
         [HideInInspector]
         public RenderTexture gradients;
+    }
+
+    [Serializable]
+    public class BoatSettings
+    {
+        public GameObject boat;
+        public LayerMask cullingMask;
+        //[HideInInspector]
+        public RenderTexture heights;
+        public RenderTexture gradients;
+        public Material material;
+
+        [SerializeField]
+        private Resolution resolution;
+
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
     }
 
     [Serializable]
@@ -117,7 +136,8 @@ namespace WaveGrid
     public class Settings
     {
         public SimulationSettings simulation;
-        public EnvironmentSettings environment;
+        public TerrainSettings environment;
+        public BoatSettings boat;
         public VisualizationSettings visualization;
     }
 }

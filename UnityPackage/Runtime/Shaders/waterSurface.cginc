@@ -29,6 +29,10 @@ uniform float amp_mult;
 uniform bool renderOutsideBorders;
 uniform float env_rotation;
 
+uniform float4x4 boat_trans;
+uniform float3 boat_size;
+uniform sampler2D boat;
+
 
 float3 mulPoint(float4x4 m, float3 p)
 {
@@ -55,6 +59,15 @@ float getItheta(uint index)
 {
     float itheta = index + (env_rotation) / d_theta;
     return posModuloItheta(itheta);
+}
+
+bool isBoat(float3 pos)
+{
+    float3 local = mul(boat_trans, float4(pos, 1));
+    float2 coords = float2(0.5 - local.z / boat_size.x, 0.5 -  local.x / boat_size.z);
+    
+    float4 pixel = tex2Dlod(boat, float4(coords, 0, 0));
+    return pixel.x < 0.0f;
 }
 
 float gridAmplitude(float2 pos, float itheta)
@@ -97,6 +110,9 @@ float iAmpl(float angle, float amplitude[DIR_NUM]) {
 static const int seed = 40234324;
 
 float3 wavePosition(float3 pos, float amplitude[DIR_NUM]) {
+    
+    
+    
     float3 result = float3(0.0, 0.0, 0.0);
 
     const int N = NUM_INTEGRATION_NODES;
@@ -115,6 +131,7 @@ float3 wavePosition(float3 pos, float amplitude[DIR_NUM]) {
         result.xz += kdir * tt.x;
         result.y += tt.y;
     }
+    
     return result;
 }
 

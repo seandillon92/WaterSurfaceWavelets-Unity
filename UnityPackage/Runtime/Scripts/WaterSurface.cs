@@ -1,8 +1,7 @@
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
+using Codice.Client.Commands;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using WaveGrid;
-using static UnityEditor.PlayerSettings;
 
 namespace WaterWaveSurface
 {
@@ -33,27 +32,19 @@ namespace WaterWaveSurface
         {
             var cam = new GameObject().AddComponent<Camera>();
             cam.orthographic = true;
-            cam.transform.position = transform.position + Vector3.up* transform.lossyScale.y * 0.5f;
-            cam.transform.rotation = Quaternion.Euler(90,0, -transform.rotation.eulerAngles.y);
+            cam.transform.position = transform.position + Vector3.up * transform.lossyScale.y * 0.5f;
+            cam.transform.rotation = Quaternion.Euler(90, 0, -transform.rotation.eulerAngles.y);
             cam.transform.localScale = Vector3.one;
             cam.orthographicSize = m_settings.environment.size.y;
             cam.aspect = m_settings.environment.size.x / (float)m_settings.environment.size.y;
             cam.nearClipPlane = 0f;
             cam.farClipPlane = transform.lossyScale.y;
 
-            var desc = new RenderTextureDescriptor();
-            desc.useMipMap = false;
-            desc.width = m_settings.environment.GetResolution();
-            desc.height = desc.width;
-            desc.volumeDepth = 1;
-            desc.graphicsFormat = GraphicsFormat.None;
-            desc.depthStencilFormat = GraphicsFormat.D32_SFloat_S8_UInt;
-            desc.depthBufferBits = 32;
-            desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
-            desc.msaaSamples = 1;
-            desc.autoGenerateMips = false;
+            var desc = CreateDepthTextureDesc(
+                m_settings.environment.GetResolution(),
+                m_settings.environment.GetResolution());
 
-            var rt = new RenderTexture(desc); 
+            var rt = new RenderTexture(desc);
             if (!rt.Create())
             {
                 Debug.LogError("Could not create depth texture");
@@ -64,30 +55,113 @@ namespace WaterWaveSurface
             cam.cullingMask = m_settings.environment.cullingMask;
             cam.RenderWithShader(m_settings.environment.material.shader, "");
 
-            RenderEnvironmentMaps(cam);
+            var maps = 
+                RenderHeightGradient(
+                    cam, 
+                    m_settings.environment.transform.GetPosition().y, 
+                    transform.lossyScale.y * 0.5f);
+
+            m_settings.environment.heights = maps.heights;
+            m_settings.environment.gradients = maps.gradients;
 
             Destroy(cam.targetTexture);
             Destroy(cam.gameObject);
         }
 
-        private void RenderEnvironmentMaps(Camera cam)
+        private void PrepareBoatMaps()
+        {
+            var boat = m_settings.boat.boat;
+            var mesh = boat.GetComponent<MeshFilter>().sharedMesh;
+            var height = mesh.bounds.size.x;
+            var width = mesh.bounds.size.z;
+            var ratio = width / height;
+
+            var cam = new GameObject().AddComponent<Camera>();
+            cam.orthographic = true;
+            var position = boat.transform.position;
+            position.y = boat.transform.TransformPoint(mesh.bounds.min).y;
+            cam.transform.position = position;
+            
+            cam.transform.rotation = Quaternion.Euler(-90, boat.transform.rotation.eulerAngles.y + 90, 0);
+            cam.transform.localScale = Vector3.one;
+            cam.orthographicSize = height / 2f;
+            cam.aspect = ratio;
+            cam.nearClipPlane = 0f;
+            cam.farClipPlane = boat.transform.lossyScale.y * mesh.bounds.size.y;
+
+            var height_res = m_settings.boat.GetResolution();
+            var width_res = Mathf.ClosestPowerOfTwo((int)(height_res * ratio));
+            var desc = CreateDepthTextureDesc(width_res, height_res);
+
+            var rt = new RenderTexture(desc);
+            if (!rt.Create())
+            {
+                Debug.LogError("Could not create texture");
+                return;
+            }
+
+            cam.depthTextureMode = DepthTextureMode.Depth;
+            cam.targetTexture = rt;
+            cam.cullingMask = m_settings.boat.cullingMask;
+            cam.RenderWithShader(m_settings.boat.material.shader, "");
+
+            var center = boat.transform.TransformPoint(mesh.bounds.center);
+            var maps = RenderHeightGradient(cam, center.y, mesh.bounds.extents.y);
+
+            m_settings.boat.heights = maps.heights;
+            m_settings.boat.gradients = maps.gradients;
+
+            Destroy(cam.targetTexture);
+            Destroy(cam.gameObject);
+        }
+
+        private RenderTextureDescriptor CreateDepthTextureDesc(int width, int height)
+        {
+            var desc = new RenderTextureDescriptor();
+            desc.useMipMap = false;
+            desc.width = width;
+            desc.height = height;
+            desc.volumeDepth = 1;
+            desc.graphicsFormat = GraphicsFormat.None;
+            desc.depthStencilFormat = GraphicsFormat.D32_SFloat_S8_UInt;
+            desc.depthBufferBits = 32;
+            desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
+            desc.msaaSamples = 1;
+            desc.autoGenerateMips = false;
+            return desc;
+        }
+
+        private (RenderTexture heights, RenderTexture gradients) 
+            RenderHeightGradient(Camera cam, float position, float size)
         {
 
-            var heights = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RFloat, RenderTextureReadWrite.Linear);
+            var heights = 
+                new RenderTexture(
+                    cam.pixelWidth, 
+                    cam.pixelHeight, 
+                    0, 
+                    RenderTextureFormat.RFloat, 
+                    RenderTextureReadWrite.Linear);
+
             heights.enableRandomWrite = true;
             if (!heights.Create())
             {
                 Debug.LogError("Could not create height texture");
             }
 
-            var gradients = new RenderTexture(cam.pixelWidth, cam.pixelHeight, 0, RenderTextureFormat.RGFloat, RenderTextureReadWrite.Linear);
+            var gradients = 
+                new RenderTexture(
+                    cam.pixelWidth, 
+                    cam.pixelHeight, 
+                    0, 
+                    RenderTextureFormat.RGFloat, 
+                    RenderTextureReadWrite.Linear);
+
             gradients.enableRandomWrite = true;
             if (!gradients.Create())
             {
-                Debug.LogError("Could not create height gradients texture");
+                Debug.LogError("Could not create gradients texture");
             }
-            m_settings.environment.heights = heights;
-            m_settings.environment.gradients = gradients;
 
             var shader = (ComputeShader)Resources.Load("Environment");
             shader.SetFloat("waterLevel", m_settings.environment.water_level);
@@ -96,13 +170,15 @@ namespace WaterWaveSurface
 
             int kernelHandle = shader.FindKernel("Heights");
             shader.SetTexture(kernelHandle, "Read", cam.targetTexture);
-            shader.SetTexture(kernelHandle, "Write", m_settings.environment.heights);
+            shader.SetTexture(kernelHandle, "Write", heights);
             shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
 
             kernelHandle = shader.FindKernel("Gradients");
-            shader.SetTexture(kernelHandle, "Read", m_settings.environment.heights);
-            shader.SetTexture(kernelHandle, "Write", m_settings.environment.gradients);
+            shader.SetTexture(kernelHandle, "Read", heights);
+            shader.SetTexture(kernelHandle, "Write", gradients);
             shader.Dispatch(kernelHandle, cam.pixelWidth / 32, cam.pixelHeight / 32, 1);
+
+            return (heights, gradients);
         }
 
         void Start()
@@ -120,6 +196,7 @@ namespace WaterWaveSurface
             m_settings.environment.transform = transform.localToWorldMatrix;
 
             PrepareEnvironmentMaps();
+            PrepareBoatMaps();
 
             switch (m_implementation)
             {

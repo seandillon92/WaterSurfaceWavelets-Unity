@@ -105,7 +105,13 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
                 o.amplitude14,
                 o.amplitude15
             };
+            
             pos += wavePosition(pos, amp);
+            if (isBoat(pos))
+            {
+                pos.y = waterLevel - boat_size.y * 0.5f;
+            }
+    
             v.vertex.xyz = pos;
         }
 

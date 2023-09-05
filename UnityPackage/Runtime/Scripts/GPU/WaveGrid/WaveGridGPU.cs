@@ -24,6 +24,7 @@ namespace WaveGrid
         private int m_cameraPos_id;
         private int m_cameraProjectionForward_id;
         private int m_cameraInverseProjection_id;
+        private int m_boat_trans_id;
         private Camera m_camera;
 
         Mesh IWaveGrid.Mesh => m_mesh.mesh;
@@ -57,6 +58,12 @@ namespace WaveGrid
             m_material = mat;
             m_material.SetFloat(Shader.PropertyToID("waterLevel"), s.environment.water_level);
             m_material.SetTexture(Shader.PropertyToID("amplitude"), m_advection.amplitude);
+            m_material.SetTexture(Shader.PropertyToID("boat"), m_settings.boat.heights);
+
+            var boatMesh = m_settings.boat.boat.GetComponent<MeshFilter>().sharedMesh.bounds;
+            m_material.SetVector(Shader.PropertyToID("boat_size"), new Vector3(boatMesh.size.z, boatMesh.size.y, boatMesh.size.x));
+            m_boat_trans_id = Shader.PropertyToID("boat_trans");
+
             var size = new Vector2(s.environment.size.x, s.environment.size.y);
             m_material.SetVector(Shader.PropertyToID("xmin"), -size);
             var idx = new Vector2(1f/(size.x * 2f / s.simulation.GetResolution()),1f/ (size.y * 2f / s.simulation.GetResolution()));
@@ -108,6 +115,8 @@ namespace WaveGrid
                 m_camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)) * m_camera.projectionMatrix.inverse);
             m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
+
+            m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
 
             if (settings.updateSimulation)
             {
