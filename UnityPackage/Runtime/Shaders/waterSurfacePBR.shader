@@ -143,7 +143,6 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
 
             o.Normal = normal;
             o.Albedo = _Color;
-    
             o.Metallic = 0;
             o.Smoothness = fresnel;
 }

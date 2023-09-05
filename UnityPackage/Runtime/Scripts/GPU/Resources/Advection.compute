@@ -301,7 +301,7 @@ void ManualPoint(uint3 id : SV_DispatchThreadID)
     }
     else
     {
-        ManualPointX(lowTheta, 1 - t);
-        ManualPointX(highTheta, t);
+        ManualPointX(min(lowTheta, highTheta), 1 - t);
+        ManualPointX(max(lowTheta, highTheta), t);
     }
 }
