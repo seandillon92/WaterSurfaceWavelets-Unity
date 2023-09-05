@@ -64,7 +64,7 @@ float getItheta(uint index)
 bool isBoat(float3 pos)
 {
     float3 local = mul(boat_trans, float4(pos, 1));
-    float2 coords = float2(0.5 - local.z / boat_size.x, 0.5 -  local.x / boat_size.z);
+    float2 coords = float2(0.5 - local.z / boat_size.z, 0.5 -  local.x / boat_size.x);
     
     float4 pixel = tex2Dlod(boat, float4(coords, 0, 0));
     return pixel.x < 0.0f;

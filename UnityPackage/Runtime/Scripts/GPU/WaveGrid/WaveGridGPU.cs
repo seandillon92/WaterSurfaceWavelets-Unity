@@ -61,7 +61,7 @@ namespace WaveGrid
             m_material.SetTexture(Shader.PropertyToID("boat"), m_settings.boat.heights);
 
             var boatMesh = m_settings.boat.boat.GetComponent<MeshFilter>().sharedMesh.bounds;
-            m_material.SetVector(Shader.PropertyToID("boat_size"), new Vector3(boatMesh.size.z, boatMesh.size.y, boatMesh.size.x));
+            m_material.SetVector(Shader.PropertyToID("boat_size"), boatMesh.size);
             m_boat_trans_id = Shader.PropertyToID("boat_trans");
 
             var size = new Vector2(s.environment.size.x, s.environment.size.y);

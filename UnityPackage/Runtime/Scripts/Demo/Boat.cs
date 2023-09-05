@@ -17,10 +17,16 @@ public class Boat : MonoBehaviour
     private Paddle rightPaddle;
 
     [SerializeField]
+    private Transform front;
+
+    [SerializeField]
     private float m_row_amplitude_splash = 0.05f;
 
     [SerializeField]
     private float m_row_amplitude = 0.1f;
+
+    [SerializeField]
+    private float m_front_amplitude = 2f;
 
     [SerializeField]
     private float m_row_speed_mutliplier_vertical = 0.01f;
@@ -58,6 +64,8 @@ public class Boat : MonoBehaviour
         {
             MakeWavesRight();
         }
+
+        MakeWavesFront();
     }
 
     private int row_param;
@@ -116,6 +124,14 @@ public class Boat : MonoBehaviour
         var pos = leftPaddle.end.position;
         var paddleSpeed = leftPaddle.Animator.speed;
         surface.AddPointDirectionDisturbance(pos, dir, m_row_amplitude * paddleSpeed, true);
+    }
+
+    private void MakeWavesFront()
+    {
+        var dir = front.forward;
+        var pos = front.position;
+        var speed = m_boat_speed;
+        surface.AddPointDirectionDisturbance(pos, dir, speed * m_front_amplitude, true);
     }
 
     private void OnRowRight(Paddle.RowEventType e)
