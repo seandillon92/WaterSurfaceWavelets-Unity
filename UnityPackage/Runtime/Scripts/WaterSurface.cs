@@ -225,29 +225,26 @@ namespace WaterWaveSurface
 
         private void InitializeReflections()
         {
-            switch (m_settings.reflection.mode)
-            {
-                case ReflectionSettings.ReflectionMode.Baked:
-                case ReflectionSettings.ReflectionMode.Realtime:
-                    var resolution = m_settings.reflection.GetResolution();
-                    var rt = new RenderTexture(resolution, resolution, 1);
-                    rt.dimension = UnityEngine.Rendering.TextureDimension.Cube;
-                    rt.hideFlags = HideFlags.HideAndDontSave;
-                    m_settings.reflection.texture_lights = rt;
-                    m_settings.reflection.texture_noLights = new RenderTexture(rt);
-                    var cam = new GameObject().AddComponent<Camera>();
-                    cam.transform.SetParent(m_settings.visualization.camera.transform, false);
-                    cam.CopyFrom(m_settings.visualization.camera);
-                    cam.cullingMask = m_settings.reflection.cullingMask;
-                    cam.enabled = false;
-                    cam.gameObject.SetActive(false);
-                    cam.name = "ReflectionsCamera";
-                    m_settings.reflection.camera = cam;
-                    m_settings.reflection.lights = FindObjectsOfType<Light>();
+            var resolution = m_settings.reflection.GetResolution();
+            var rt = new RenderTexture(resolution, resolution, 1);
+            rt.dimension = UnityEngine.Rendering.TextureDimension.Cube;
+            rt.hideFlags = HideFlags.HideAndDontSave;
+            m_settings.reflection.texture_lights = rt;
+            m_settings.reflection.texture_noLights = new RenderTexture(rt);
+            var cam = new GameObject().AddComponent<Camera>();
+            cam.transform.SetParent(m_settings.visualization.camera.transform, false);
+            cam.CopyFrom(m_settings.visualization.camera);
+            cam.cullingMask = m_settings.reflection.cullingMask;
+            cam.enabled = false;
+            cam.gameObject.SetActive(false);
+            cam.name = "ReflectionsCamera";
+            m_settings.reflection.camera = cam;
+            m_settings.reflection.lights = FindObjectsOfType<Light>();
 
-                    RenderReflections();
-                    break;
-                case ReflectionSettings.ReflectionMode.None: break;
+            if (m_settings.reflection.onlySkybox)
+            {
+                cam.cullingMask = 0;
+                RenderReflections();
             }
         }
 
@@ -255,7 +252,9 @@ namespace WaterWaveSurface
         {
             var rt = m_settings.reflection.texture_lights;
             var cam = m_settings.reflection.camera;
-            cam.RenderToCubemap(rt);
+            var side = Time.frameCount % 6;
+            var mask = 0x1 << side;
+            cam.RenderToCubemap(rt, mask);
 
             rt = m_settings.reflection.texture_noLights;
             m_settings.reflection.StoreLights();
@@ -276,16 +275,15 @@ namespace WaterWaveSurface
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
         }
 
-        private void UpdateSimulation(float dt, bool updateManual = true)
+        private void UpdateSimulation(float dt)
         {
             m_updateSettings.dt = dt;
-            m_updateSettings.updateManualAmplitude = updateManual;
             m_grid.Update(m_updateSettings);
         }
 
         void LateUpdate()
         {
-            if (m_settings.reflection.mode == ReflectionSettings.ReflectionMode.Realtime)
+            if (!m_settings.reflection.onlySkybox)
             {
                 RenderReflections();
             }

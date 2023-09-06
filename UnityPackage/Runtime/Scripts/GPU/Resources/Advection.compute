@@ -6,6 +6,9 @@
 #pragma kernel Dissipation
 #pragma kernel UpdateEdge
 
+#define tau 6.28318530718
+#define theta_dx tau/16
+
 Texture3D<float> Read;
 Texture3D<float> Read2;
 Texture2D<float> heights;
@@ -17,8 +20,7 @@ float deltaTime;
 float groupSpeed;
 SamplerState linearClampSampler;
 SamplerState pointClampSampler;
-static double tau = 6.28318530718;
-static float theta_dx = tau / 16;
+
 float2 dx;
 float2 x_min;
 float2 env_dx;
@@ -171,6 +173,7 @@ void Diffusion(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 8)]
 void Advection(uint3 id : SV_DispatchThreadID)
 {
+    
     float3 pos = id;
     pos.xy = idxToPos(id.xy);
     float height = getHeight(pos.xy);
@@ -185,7 +188,6 @@ void Advection(uint3 id : SV_DispatchThreadID)
         height = getHeight(pos.xy);
         if (height >= 0)
         {
-        
             float2 gridPos = posToGrid(pos.xy);
             if (gridPos.x < 0 ||
                 gridPos.x > x - 1 ||
@@ -203,14 +205,13 @@ void Advection(uint3 id : SV_DispatchThreadID)
         }
         else
         {
-        
             Write[id] = Read[id];
         }
         
     }
 }
 
-[numthreads(1,1,1)]
+[numthreads(1,1,16)]
 void UpdateEdge(uint3 id : SV_DispatchThreadID)
 {
     uint x, y, z;

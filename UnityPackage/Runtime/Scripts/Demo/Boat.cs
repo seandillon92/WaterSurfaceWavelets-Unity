@@ -54,7 +54,6 @@ public class Boat : MonoBehaviour
         Controls();
         MoveBoat();
 
-
         if (m_rowing_left)
         {
             MakeWavesLeft();
