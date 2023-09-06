@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEditor;
 using WaterWaveSurface;
 using static UnityEditor.PlayerSettings;
+using Unity.Collections;
+using UnityEngine.Rendering;
+using UnityEngine.Experimental.Rendering;
 
 [CustomEditor(typeof(WaterSurface))]
 [CanEditMultipleObjects]
@@ -32,16 +35,54 @@ internal class WaterSurfaceEditor : Editor
     SerializedProperty simulation;
     SerializedProperty waterLevel;
     SerializedProperty windDirection;
+    SerializedProperty amplitude;
 
     void OnEnable()
     {
         settings = serializedObject.FindProperty("m_settings");
         environment = settings.FindPropertyRelative("environment");
         simulation = settings.FindPropertyRelative("simulation");
+        amplitude = simulation.FindPropertyRelative("amplitude");
         waterLevel = environment.FindPropertyRelative("water_level");
         windDirection = simulation.FindPropertyRelative("wind_direction");
         SceneView.duringSceneGui -= CustomSceneGUI;
         SceneView.duringSceneGui += CustomSceneGUI;
+    }
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+        if(GUILayout.Button("Store Simulation Data"))
+        {
+            Store(Amplitude, "amplitude");
+        }
+        if (GUILayout.Button("Load Simulation Data"))
+        {
+            Load(Amplitude, "amplitude");
+        }
+    }
+
+    void Store(RenderTexture rt3D, string path)
+    {
+        int width = rt3D.width, height = rt3D.height, depth = rt3D.volumeDepth;
+        var nativeArray = new NativeArray<float>(width * height * depth, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+        var request = AsyncGPUReadback.RequestIntoNativeArray(ref nativeArray, rt3D, 0, (_) =>
+        {
+            Texture3D output = new Texture3D(width, height, depth, rt3D.graphicsFormat, TextureCreationFlags.None);
+            output.SetPixelData(nativeArray, 0);
+            output.Apply(updateMipmaps: false, makeNoLongerReadable: true);
+            AssetDatabase.CreateAsset(output, $"Assets/{path}.asset");
+            AssetDatabase.SaveAssetIfDirty(output);
+            nativeArray.Dispose();
+        });
+
+        request.WaitForCompletion();
+    }
+
+    void Load(RenderTexture rt3D, string path)
+    {
+        var texture = AssetDatabase.LoadAssetAtPath<Texture3D>($"Assets/{path}.asset");       
+        Graphics.CopyTexture(texture, rt3D);
     }
 
     void OnDisable()
@@ -59,6 +100,12 @@ internal class WaterSurfaceEditor : Editor
     {
         get=>windDirection.floatValue;
         set => windDirection.floatValue = value;
+    }
+
+    private RenderTexture Amplitude
+    {
+        get => amplitude.objectReferenceValue as RenderTexture;
+        set => amplitude.objectReferenceValue = value;
     }
 
     private void DrawSceneObjects()

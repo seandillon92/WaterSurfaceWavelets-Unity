@@ -1,3 +1,4 @@
+using ProfileBuffer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -94,7 +95,36 @@ namespace WaveGrid
         }
 
         [HideInInspector]
-        public RenderTexture texture;
+        public RenderTexture texture_lights;
+        [HideInInspector]
+        public RenderTexture texture_noLights;
+
+        [HideInInspector]
+        public Light[] lights;
+
+        private bool[] lights_enabled;
+
+        public void StoreLights()
+        {
+            if (lights_enabled == null || lights_enabled.Length != lights.Length)
+            {
+                lights_enabled = new bool[lights.Length];
+            }
+
+            for(var i = 0; i < lights.Length; i++)
+            {
+                lights_enabled[i] = lights[i].enabled;
+            }
+        }
+
+        public void LoadLights()
+        {
+            for (var i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = lights_enabled[i];
+            }
+        }
+
         public LayerMask cullingMask;
         [HideInInspector]
         public Camera camera;
@@ -114,6 +144,9 @@ namespace WaveGrid
         public float max_zeta = Mathf.Log(10, 2);
         [HideInInspector]
         public float min_zeta = Mathf.Log(0.03f, 2);
+
+        [HideInInspector]
+        public RenderTexture amplitude;
 
         [SerializeField]
         private Resolution resolution = Resolution.R_128;

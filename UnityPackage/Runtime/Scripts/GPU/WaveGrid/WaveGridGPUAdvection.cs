@@ -1,5 +1,4 @@
 using ProfileBuffer;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace WaveGrid
@@ -33,20 +32,9 @@ namespace WaveGrid
             m_settings = s;
             m_profileBuffer = profileBuffer;
 
-            // Create amplitude render textures
-            RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
-            renderTextureDescriptor.useMipMap = false;
-            renderTextureDescriptor.width = s.simulation.GetResolution();
-            renderTextureDescriptor.height = s.simulation.GetResolution();
-            renderTextureDescriptor.volumeDepth = 16;
-            renderTextureDescriptor.enableRandomWrite = true;
-            renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
-            renderTextureDescriptor.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
-            renderTextureDescriptor.msaaSamples = 1;
-            renderTextureDescriptor.sRGB = false;
-            renderTextureDescriptor.autoGenerateMips = false;
 
-            m_amplitude = new RenderTexture(renderTextureDescriptor);
+
+            m_amplitude = m_settings.simulation.amplitude;
             m_amplitude.wrapMode = TextureWrapMode.Clamp;
             m_amplitude.filterMode = FilterMode.Bilinear;
             m_amplitude.name = "AmplitudeTexture";
@@ -55,7 +43,7 @@ namespace WaveGrid
                 Debug.LogError("Could not create amplitude texture");
             }
 
-            m_newAmplitude = new RenderTexture(renderTextureDescriptor);
+            m_newAmplitude = new RenderTexture(m_amplitude);
             m_newAmplitude.wrapMode = TextureWrapMode.Clamp;
             m_newAmplitude.filterMode = FilterMode.Bilinear;
             m_newAmplitude.name = "NewAmplitudeTexture";
@@ -64,7 +52,7 @@ namespace WaveGrid
                 Debug.LogError("Could not create new amplitude texture");
             }
 
-            m_manualAmplitude = new RenderTexture(renderTextureDescriptor);
+            m_manualAmplitude = new RenderTexture(m_amplitude);
             m_manualAmplitude.wrapMode = TextureWrapMode.Clamp;
             m_manualAmplitude.filterMode = FilterMode.Bilinear;
             m_manualAmplitude.name = "ManualAmplitudeTexture";
@@ -73,7 +61,7 @@ namespace WaveGrid
                 Debug.LogError("Could not create manual amplitude texture");
             }
 
-            m_newManualAmplitude = new RenderTexture(renderTextureDescriptor);
+            m_newManualAmplitude = new RenderTexture(m_amplitude);
             m_newManualAmplitude.wrapMode = TextureWrapMode.Clamp;
             m_newManualAmplitude.filterMode = FilterMode.Bilinear;
             m_newManualAmplitude.name = "NewManualAmplitudeTexture";
@@ -81,10 +69,10 @@ namespace WaveGrid
             {
                 Debug.LogError("Could not create new manual amplitude texture");
             }
+            amplitude = new RenderTexture(m_amplitude);
 
-            renderTextureDescriptor.width = s.simulation.GetResolution() + 2;
-            renderTextureDescriptor.height = s.simulation.GetResolution() + 2;
-            amplitude = new RenderTexture(renderTextureDescriptor);
+            amplitude.width = s.simulation.GetResolution() + 2;
+            amplitude.height = s.simulation.GetResolution() + 2;
             if (!amplitude.Create())
             {
                 Debug.LogError("Could not create amplitude texture");
@@ -166,9 +154,8 @@ namespace WaveGrid
             return dx / m_profileBuffer.groupSpeed;
         }
 
-        internal void Update()
+        internal void Update(bool updateManualAmplitude)
         {
-            var ts = cflTimestep();
             m_shader.SetFloat(m_deltaTime_id, cflTimestep() * Time.deltaTime);
 
             {
@@ -186,6 +173,7 @@ namespace WaveGrid
                 m_shader.Dispatch(m_diffusion_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));
             }
 
+            if (updateManualAmplitude)
             {
                 float[] amplitudes = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                 SetDefaultAmplitudes(amplitudes);
@@ -199,6 +187,7 @@ namespace WaveGrid
 
             }
 
+            if (updateManualAmplitude)
             {
                 m_shader.GetKernelThreadGroupSizes(m_dissipation_kernel, out uint x, out uint y, out uint z);
                 m_shader.Dispatch(m_dissipation_kernel, (int)(m_settings.simulation.GetResolution() / x), (int)(m_settings.simulation.GetResolution() / y), (int)(16 / z));

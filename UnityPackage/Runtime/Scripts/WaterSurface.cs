@@ -21,9 +21,6 @@ namespace WaterWaveSurface
 
         private IWaveGrid m_grid;
 
-        [SerializeField]
-        private Implementation m_implementation;
-
         private RenderParams m_renderParams;
 
         internal Settings Settings { get { return m_settings; } }
@@ -198,30 +195,32 @@ namespace WaterWaveSurface
             PrepareEnvironmentMaps();
             PrepareBoatMaps();
             InitializeReflections();
+            InitializeAmplitude();
 
-            switch (m_implementation)
-            {
-                case Implementation.CPU:
-
-                    m_grid = new WaveGridCPU(m_settings, m_settings.visualization.material);
-
-                    break;
-                case Implementation.GPU:
-                    m_grid = new WaveGridGPU(m_settings, m_settings.visualization.material);
-
-                    break;
-            }
+            m_grid = new WaveGridGPU(m_settings, m_settings.visualization.material);
 
             m_renderParams = new RenderParams(m_settings.visualization.material);
 
             m_renderParams.camera = m_settings.visualization.camera;
-
-            if (m_settings.visualization.material.GetTexture("_Skybox") == null)
-            {
-                m_settings.visualization.material.SetTexture("_Skybox", m_settings.visualization.skybox);
-            }
             m_settings.visualization.material.name = "WaterSurfaceMaterial";
+        }
 
+        private void InitializeAmplitude()
+        {
+            // Create amplitude render textures
+            RenderTextureDescriptor renderTextureDescriptor = new RenderTextureDescriptor();
+            renderTextureDescriptor.useMipMap = false;
+            renderTextureDescriptor.width = m_settings.simulation.GetResolution();
+            renderTextureDescriptor.height = m_settings.simulation.GetResolution();
+            renderTextureDescriptor.volumeDepth = 16;
+            renderTextureDescriptor.enableRandomWrite = true;
+            renderTextureDescriptor.colorFormat = RenderTextureFormat.RFloat;
+            renderTextureDescriptor.dimension = UnityEngine.Rendering.TextureDimension.Tex3D;
+            renderTextureDescriptor.msaaSamples = 1;
+            renderTextureDescriptor.sRGB = false;
+            renderTextureDescriptor.autoGenerateMips = false;
+
+            m_settings.simulation.amplitude = new RenderTexture(renderTextureDescriptor);
         }
 
         private void InitializeReflections()
@@ -234,7 +233,8 @@ namespace WaterWaveSurface
                     var rt = new RenderTexture(resolution, resolution, 1);
                     rt.dimension = UnityEngine.Rendering.TextureDimension.Cube;
                     rt.hideFlags = HideFlags.HideAndDontSave;
-                    m_settings.reflection.texture = rt;
+                    m_settings.reflection.texture_lights = rt;
+                    m_settings.reflection.texture_noLights = new RenderTexture(rt);
                     var cam = new GameObject().AddComponent<Camera>();
                     cam.transform.SetParent(m_settings.visualization.camera.transform, false);
                     cam.CopyFrom(m_settings.visualization.camera);
@@ -243,6 +243,7 @@ namespace WaterWaveSurface
                     cam.gameObject.SetActive(false);
                     cam.name = "ReflectionsCamera";
                     m_settings.reflection.camera = cam;
+                    m_settings.reflection.lights = FindObjectsOfType<Light>();
 
                     RenderReflections();
                     break;
@@ -252,9 +253,21 @@ namespace WaterWaveSurface
 
         private void RenderReflections()
         {
-            var rt = m_settings.reflection.texture;
+            var rt = m_settings.reflection.texture_lights;
             var cam = m_settings.reflection.camera;
             cam.RenderToCubemap(rt);
+
+            rt = m_settings.reflection.texture_noLights;
+            m_settings.reflection.StoreLights();
+            var lights = m_settings.reflection.lights;
+            for (int i = 0; i < lights.Length; i++)
+            {
+                var light = lights[i];
+                light.enabled = false;
+            }
+
+            cam.RenderToCubemap(rt);
+            m_settings.reflection.LoadLights();
         }
 
 
@@ -263,14 +276,20 @@ namespace WaterWaveSurface
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
         }
 
+        private void UpdateSimulation(float dt, bool updateManual = true)
+        {
+            m_updateSettings.dt = dt;
+            m_updateSettings.updateManualAmplitude = updateManual;
+            m_grid.Update(m_updateSettings);
+        }
+
         void LateUpdate()
         {
             if (m_settings.reflection.mode == ReflectionSettings.ReflectionMode.Realtime)
             {
                 RenderReflections();
             }
-            m_updateSettings.dt = Time.deltaTime;
-            m_grid.Update(m_updateSettings);
+            UpdateSimulation(Time.deltaTime);
         }
         /// <summary>
         /// Add disturbance at a point in all directions
