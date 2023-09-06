@@ -1,3 +1,4 @@
+using ProfileBuffer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace WaveGrid
     }
 
     [Serializable]
-    public class EnvironmentSettings
+    public class TerrainSettings
     {
         [HideInInspector]
         public Vector2Int size;
@@ -44,12 +45,89 @@ namespace WaveGrid
     }
 
     [Serializable]
+    public class BoatSettings
+    {
+        public GameObject boat;
+        public LayerMask cullingMask;
+        [HideInInspector]
+        public RenderTexture heights;
+        [HideInInspector]
+        public RenderTexture gradients;
+        public Material material;
+
+        [SerializeField]
+        private Resolution resolution;
+
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
+    }
+
+    [Serializable]
     public class VisualizationSettings
     {
         public int resolution = 100;
         public Camera camera;
         public Texture skybox;
         public Material material;
+    }
+
+    [Serializable]
+    public class ReflectionSettings
+    {
+        public enum ReflectionMode
+        {
+            None,
+            Baked,
+            Realtime
+        }
+
+        [SerializeField]
+        public ReflectionMode mode;
+
+        [SerializeField]
+        private Resolution resolution;
+
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
+
+        [HideInInspector]
+        public RenderTexture texture_lights;
+        [HideInInspector]
+        public RenderTexture texture_noLights;
+
+        [HideInInspector]
+        public Light[] lights;
+
+        private bool[] lights_enabled;
+
+        public void StoreLights()
+        {
+            if (lights_enabled == null || lights_enabled.Length != lights.Length)
+            {
+                lights_enabled = new bool[lights.Length];
+            }
+
+            for(var i = 0; i < lights.Length; i++)
+            {
+                lights_enabled[i] = lights[i].enabled;
+            }
+        }
+
+        public void LoadLights()
+        {
+            for (var i = 0; i < lights.Length; i++)
+            {
+                lights[i].enabled = lights_enabled[i];
+            }
+        }
+
+        public LayerMask cullingMask;
+        [HideInInspector]
+        public Camera camera;
     }
 
     [Serializable]
@@ -66,6 +144,9 @@ namespace WaveGrid
         public float max_zeta = Mathf.Log(10, 2);
         [HideInInspector]
         public float min_zeta = Mathf.Log(0.03f, 2);
+
+        [HideInInspector]
+        public RenderTexture amplitude;
 
         [SerializeField]
         private Resolution resolution = Resolution.R_128;
@@ -117,7 +198,9 @@ namespace WaveGrid
     public class Settings
     {
         public SimulationSettings simulation;
-        public EnvironmentSettings environment;
+        public TerrainSettings environment;
+        public BoatSettings boat;
         public VisualizationSettings visualization;
+        public ReflectionSettings reflection;
     }
 }

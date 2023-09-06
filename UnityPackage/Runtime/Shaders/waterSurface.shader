@@ -45,10 +45,10 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
 
 
-            samplerCUBE _Skybox;
-            float _FresnelExponent;
-            float _RefractionIndex;
-            float _Scale;
+            uniform samplerCUBE _Skybox;
+            uniform float _FresnelExponent;
+            uniform float _RefractionIndex;
+            uniform float _Scale;
 
             v2f vert (appdata v)
             {
@@ -75,6 +75,7 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
                 
                 o.wavePosition = pos;
                 pos += wavePosition(pos, o.amplitude);
+    
                 o.position = UnityObjectToClipPos(pos);
                 UNITY_TRANSFER_FOG(o, pos);
                 
@@ -83,7 +84,6 @@ Shader"Unlit/WaterWaveSurfaces/waterSurface"
 
             fixed4 frag (v2f i) : SV_Target
             {
-
                 float3 normal = UnityObjectToWorldNormal(waveNormal(i.wavePosition, i.amplitude));
                 fixed4 fragment = fixed4(0.0f, 0.0f, 0.0f, 1.0f);
                 normal= normalize(normal);

@@ -24,6 +24,7 @@ namespace WaveGrid
         private int m_cameraPos_id;
         private int m_cameraProjectionForward_id;
         private int m_cameraInverseProjection_id;
+        private int m_boat_trans_id;
         private Camera m_camera;
 
         Mesh IWaveGrid.Mesh => m_mesh.mesh;
@@ -57,6 +58,15 @@ namespace WaveGrid
             m_material = mat;
             m_material.SetFloat(Shader.PropertyToID("waterLevel"), s.environment.water_level);
             m_material.SetTexture(Shader.PropertyToID("amplitude"), m_advection.amplitude);
+            m_material.SetTexture(Shader.PropertyToID("boat"), m_settings.boat.heights);
+
+            var boatMesh = m_settings.boat.boat.GetComponent<MeshFilter>().sharedMesh.bounds;
+            m_material.SetVector(Shader.PropertyToID("boat_size"), boatMesh.size);
+            m_boat_trans_id = Shader.PropertyToID("boat_trans");
+
+            m_material.SetTexture("_ReflectionLights", m_settings.reflection.texture_lights);
+            m_material.SetTexture("_ReflectionNoLights", m_settings.reflection.texture_noLights);
+
             var size = new Vector2(s.environment.size.x, s.environment.size.y);
             m_material.SetVector(Shader.PropertyToID("xmin"), -size);
             var idx = new Vector2(1f/(size.x * 2f / s.simulation.GetResolution()),1f/ (size.y * 2f / s.simulation.GetResolution()));
@@ -109,10 +119,12 @@ namespace WaveGrid
             m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
 
+            m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
+
             if (settings.updateSimulation)
             {
                 //Advection step
-                m_advection.Update();
+                m_advection.Update(settings.updateManualAmplitude);
             }
 
             //Precompute step
@@ -135,9 +147,11 @@ namespace WaveGrid
 
             pos.x = localPos.x/(m_settings.environment.size.x * 2f);
             pos.y = localPos.z / (m_settings.environment.size.y * 2f);
+
             pos.z += terrainRot.eulerAngles.y;
             pos.z = (pos.z % 360 + 360) % 360;
             pos.z /= 360f;
+            
 
             Assert.IsTrue(pos.x >= 0 && pos.x <= 1);
             Assert.IsTrue(pos.y >= 0 && pos.y <= 1);

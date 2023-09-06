@@ -18,6 +18,9 @@ namespace WaveGrid
         [HideInInspector]
         public float dt;
 
+        [HideInInspector]
+        public bool updateManualAmplitude;
+
         public bool updateSimulation = true;
         public float amplitudeMultiplier = 4f;
 

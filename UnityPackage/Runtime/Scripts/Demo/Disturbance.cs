@@ -20,16 +20,6 @@ internal class Disturbance : MonoBehaviour
         Rain();
     }
 
-    private float Angle(Vector3 v1, Vector3 v2)
-    {
-        var angle = Vector3.SignedAngle(v1, v2, Vector3.up);
-        if (angle < 0)
-        {
-            angle = 360 + angle;
-        }
-        return angle;
-    }
-
     private void BoatPath()
     {
 
@@ -45,10 +35,10 @@ internal class Disturbance : MonoBehaviour
             {
                 float velocity = Vector3.Distance(m_previous_left_mouse_position.Value, pos) * Time.deltaTime;
                 var direction = (pos - m_previous_left_mouse_position).Value.normalized;
-                var angle1 = Angle(direction, Vector3.forward + Vector3.right * 0.5f);
-                var angle2 = Angle(direction, Vector3.back + Vector3.right * 0.5f);
-                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle1), m_disturbance * velocity);
-                m_waterSurface.AddPointDirectionDisturbance(new Vector3(pos.x, pos.z, angle2), m_disturbance * velocity);
+                var dir1 = direction + Vector3.forward * 0.5f;
+                var dir2 = direction + Vector3.back * 0.5f;
+                m_waterSurface.AddPointDirectionDisturbance(pos, dir1, m_disturbance * velocity, false);
+                m_waterSurface.AddPointDirectionDisturbance(pos, dir2, m_disturbance * velocity, false);
             }
 
             m_previous_left_mouse_position = pos;
