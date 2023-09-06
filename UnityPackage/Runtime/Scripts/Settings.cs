@@ -76,15 +76,8 @@ namespace WaveGrid
     [Serializable]
     public class ReflectionSettings
     {
-        public enum ReflectionMode
-        {
-            None,
-            Baked,
-            Realtime
-        }
-
         [SerializeField]
-        public ReflectionMode mode;
+        public bool onlySkybox;
 
         [SerializeField]
         private Resolution resolution;
@@ -126,6 +119,7 @@ namespace WaveGrid
         }
 
         public LayerMask cullingMask;
+
         [HideInInspector]
         public Camera camera;
     }

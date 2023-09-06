@@ -124,7 +124,7 @@ namespace WaveGrid
             if (settings.updateSimulation)
             {
                 //Advection step
-                m_advection.Update(settings.updateManualAmplitude);
+                m_advection.Update();
             }
 
             //Precompute step
