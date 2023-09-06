@@ -4,7 +4,7 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
     {
         
 		[PowerSlider(4)] _FresnelExponent ("Fresnel Exponent", Range(0.25, 4)) = 1
-        _RefractionIndex ("Refraction Index", Range(0.0, 1.0)) = 1
+        _RefractionIndex ("Refraction Index", Range(0.0, 2.0)) = 1
         _Color("Color", Color) = (.25, .5, .5, 1)
     }
     SubShader
@@ -51,12 +51,10 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
         };
 
 
-
-        uniform samplerCUBE _Skybox;
+        uniform samplerCUBE _Reflection;
         uniform float _FresnelExponent;
         uniform float _RefractionIndex;
         uniform float4 _Color;
-        uniform float _Scale;
 
         uniform half _Glossiness;
         uniform half _Metallic;
@@ -141,17 +139,20 @@ Shader "WaterWaveSurfaces/waterSurfacePBR"
             normal = normalize(normal);
 
             float3 view = normalize(WorldSpaceViewDir(float4(i.wavePosition, 1.0f)));
+            float3 reflectionDir = reflect(-view, normal);
+            float3 reflection = texCUBE(_Reflection, reflectionDir);
+    
+            float3 refractionDir = refract(-view, normal, _RefractionIndex);
+            float3 refraction = texCUBE(_Reflection, refractionDir);
             
             float fresnel = dot(normal, view);
 
             fresnel = saturate(1 - fresnel);
             fresnel = pow(fresnel, _FresnelExponent);
-
+            
             o.Normal = normal;
-            o.Albedo = _Color;
-            o.Metallic = 0;
-            o.Smoothness = fresnel;
-}
+            o.Emission = (1 - fresnel) * refraction + (fresnel) * reflection;
+        }
         ENDCG
         
     }

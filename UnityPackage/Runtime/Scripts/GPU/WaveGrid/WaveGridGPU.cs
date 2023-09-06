@@ -64,6 +64,8 @@ namespace WaveGrid
             m_material.SetVector(Shader.PropertyToID("boat_size"), boatMesh.size);
             m_boat_trans_id = Shader.PropertyToID("boat_trans");
 
+            m_material.SetTexture("unity_SpecCube0", m_settings.reflection.texture);
+
             var size = new Vector2(s.environment.size.x, s.environment.size.y);
             m_material.SetVector(Shader.PropertyToID("xmin"), -size);
             var idx = new Vector2(1f/(size.x * 2f / s.simulation.GetResolution()),1f/ (size.y * 2f / s.simulation.GetResolution()));
@@ -117,6 +119,8 @@ namespace WaveGrid
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
 
             m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
+
+            m_material.SetTexture("_Reflection", m_settings.reflection.texture);
 
             if (settings.updateSimulation)
             {

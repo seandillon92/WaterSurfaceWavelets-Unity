@@ -48,8 +48,9 @@ namespace WaveGrid
     {
         public GameObject boat;
         public LayerMask cullingMask;
-        //[HideInInspector]
+        [HideInInspector]
         public RenderTexture heights;
+        [HideInInspector]
         public RenderTexture gradients;
         public Material material;
 
@@ -69,6 +70,34 @@ namespace WaveGrid
         public Camera camera;
         public Texture skybox;
         public Material material;
+    }
+
+    [Serializable]
+    public class ReflectionSettings
+    {
+        public enum ReflectionMode
+        {
+            None,
+            Baked,
+            Realtime
+        }
+
+        [SerializeField]
+        public ReflectionMode mode;
+
+        [SerializeField]
+        private Resolution resolution;
+
+        public int GetResolution()
+        {
+            return (int)resolution;
+        }
+
+        [HideInInspector]
+        public RenderTexture texture;
+        public LayerMask cullingMask;
+        [HideInInspector]
+        public Camera camera;
     }
 
     [Serializable]
@@ -139,5 +168,6 @@ namespace WaveGrid
         public TerrainSettings environment;
         public BoatSettings boat;
         public VisualizationSettings visualization;
+        public ReflectionSettings reflection;
     }
 }

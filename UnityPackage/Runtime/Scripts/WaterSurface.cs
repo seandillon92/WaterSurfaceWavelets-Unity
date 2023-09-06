@@ -183,7 +183,7 @@ namespace WaterWaveSurface
 
         void Start()
         {
-            if(m_settings.visualization.camera == null)
+            if (m_settings.visualization.camera == null)
             {
                 m_settings.visualization.camera = Camera.main;
             }
@@ -197,39 +197,78 @@ namespace WaterWaveSurface
 
             PrepareEnvironmentMaps();
             PrepareBoatMaps();
+            InitializeReflections();
 
             switch (m_implementation)
             {
                 case Implementation.CPU:
-                    
+
                     m_grid = new WaveGridCPU(m_settings, m_settings.visualization.material);
-                    
+
                     break;
                 case Implementation.GPU:
                     m_grid = new WaveGridGPU(m_settings, m_settings.visualization.material);
-                    
+
                     break;
             }
 
             m_renderParams = new RenderParams(m_settings.visualization.material);
 
             m_renderParams.camera = m_settings.visualization.camera;
-            
+
             if (m_settings.visualization.material.GetTexture("_Skybox") == null)
             {
                 m_settings.visualization.material.SetTexture("_Skybox", m_settings.visualization.skybox);
             }
             m_settings.visualization.material.name = "WaterSurfaceMaterial";
+
         }
+
+        private void InitializeReflections()
+        {
+            switch (m_settings.reflection.mode)
+            {
+                case ReflectionSettings.ReflectionMode.Baked:
+                case ReflectionSettings.ReflectionMode.Realtime:
+                    var resolution = m_settings.reflection.GetResolution();
+                    var rt = new RenderTexture(resolution, resolution, 1);
+                    rt.dimension = UnityEngine.Rendering.TextureDimension.Cube;
+                    rt.hideFlags = HideFlags.HideAndDontSave;
+                    m_settings.reflection.texture = rt;
+                    var cam = new GameObject().AddComponent<Camera>();
+                    cam.transform.SetParent(m_settings.visualization.camera.transform, false);
+                    cam.CopyFrom(m_settings.visualization.camera);
+                    cam.cullingMask = m_settings.reflection.cullingMask;
+                    cam.enabled = false;
+                    cam.gameObject.SetActive(false);
+                    cam.name = "ReflectionsCamera";
+                    m_settings.reflection.camera = cam;
+
+                    RenderReflections();
+                    break;
+                case ReflectionSettings.ReflectionMode.None: break;
+            }
+        }
+
+        private void RenderReflections()
+        {
+            var rt = m_settings.reflection.texture;
+            var cam = m_settings.reflection.camera;
+            cam.RenderToCubemap(rt);
+        }
+
 
         private void Update()
         {
-            
             Graphics.RenderMesh(m_renderParams, m_grid.Mesh, 0, Matrix4x4.identity);
         }
 
         void LateUpdate()
         {
+            if (m_settings.reflection.mode == ReflectionSettings.ReflectionMode.Realtime)
+            {
+                RenderReflections();
+            }
             m_updateSettings.dt = Time.deltaTime;
             m_grid.Update(m_updateSettings);
         }
