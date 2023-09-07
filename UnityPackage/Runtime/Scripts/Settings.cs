@@ -166,6 +166,8 @@ namespace WaveGrid
         [HideInInspector]
         public RenderTexture amplitude;
 
+        public Texture3D stored_amplitude;
+
         [SerializeField]
         private Resolution resolution = Resolution.R_128;
         public int GetResolution()

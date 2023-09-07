@@ -228,7 +228,8 @@ void UpdateEdge(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 8)]
 void Copy(uint3 id : SV_DispatchThreadID)
 {
-    Write[id + uint3(1, 1, 0)] = saturate(Read[id] + Read2[id]);
+    float read2 = clamp(Read2[id], 0, 0.1f);
+    Write[id + uint3(1, 1, 0)] = saturate(Read[id] + read2);
 }
 
 [numthreads(8,8,8)]

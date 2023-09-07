@@ -196,6 +196,11 @@ namespace WaterWaveSurface
 
             m_renderParams.camera = m_settings.visualization.camera;
             m_settings.visualization.material.name = "WaterSurfaceMaterial";
+
+            if (m_settings.simulation.stored_amplitude != null)
+            {
+                Graphics.CopyTexture(m_settings.simulation.stored_amplitude, m_settings.simulation.amplitude);
+            }
         }
 
         private void InitializeAmplitude()
