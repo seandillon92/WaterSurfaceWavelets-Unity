@@ -35,6 +35,12 @@ public class Boat : MonoBehaviour
     private float m_row_speed_mutliplier_horizontal = 0.01f;
 
     [SerializeField]
+    private float m_row_acceleration = 0.01f;
+
+    [SerializeField]
+    private float m_row_rotate_acceleration = 0.01f;
+
+    [SerializeField]
     private float m_max_row_speed = 1.0f;
 
     [SerializeField]
@@ -99,15 +105,15 @@ public class Boat : MonoBehaviour
         if (m_rowing_left)
         {
             var speed = leftPaddle.Animator.speed;
-            m_boat_speed += 0.001f * speed;
-            m_boat_rotate_speed_left += 0.005f * speed;
+            m_boat_speed +=  speed * Time.deltaTime * m_row_acceleration;
+            m_boat_rotate_speed_left += speed * Time.deltaTime * m_row_rotate_acceleration;
 
         }
         if (m_rowing_right)
         {
             var speed = rightPaddle.Animator.speed;
-            m_boat_speed += 0.001f * speed;
-            m_boat_rotate_speed_right += 0.005f * speed;
+            m_boat_speed += speed * Time.deltaTime * m_row_acceleration;
+            m_boat_rotate_speed_right += speed * Time.deltaTime * m_row_rotate_acceleration;
         }
 
 

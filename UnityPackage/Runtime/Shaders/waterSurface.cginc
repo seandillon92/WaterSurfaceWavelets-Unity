@@ -1,8 +1,15 @@
 #pragma enable_d3d11_debug_symbols 
 #define DIR_NUM 16
 
-static const int NUM = DIR_NUM / 4;
-static const int NUM_INTEGRATION_NODES = 8 * DIR_NUM;
+#define NUM DIR_NUM / 4
+#define NUM_INTEGRATION_NODES 8 * DIR_NUM
+
+#define TAU 6.28318530718
+#define D_THETA TAU / (DIR_NUM)
+#define DA 1.0 / (NUM_INTEGRATION_NODES)
+#define DX (DIR_NUM) * TAU / (NUM_INTEGRATION_NODES)
+
+#define SEED 40234324
 
 uniform sampler2D textureData;
 uniform float profilePeriod;
@@ -47,8 +54,7 @@ float2 gridToAmpl(float3 pos)
     return newPos;
 }
 
-static const float tau = 6.28318530718;
-static const float d_theta = tau / DIR_NUM;
+
 
 float posModuloItheta(float itheta)
 {
@@ -57,7 +63,7 @@ float posModuloItheta(float itheta)
 
 float getItheta(uint index)
 {
-    float itheta = index + (env_rotation) / d_theta;
+    float itheta = index + (env_rotation) / D_THETA;
     return posModuloItheta(itheta);
 }
 
@@ -101,32 +107,24 @@ float3 posToGrid(float2 pos)
 }
 
 float iAmpl(float angle, float amplitude[DIR_NUM]) {
-    float a = DIR_NUM * angle / tau + DIR_NUM - 0.5;
+    float a = DIR_NUM * angle / TAU + DIR_NUM - 0.5;
     uint ia = uint(floor(a));
     float w = a - ia;
-    return (1 - w) * amplitude[ia % DIR_NUM]+ w * amplitude[(ia + 1) % DIR_NUM];
+    return (1 - w) * amplitude[ia % DIR_NUM] + w * amplitude[(ia + uint(1)) % DIR_NUM];
 }
-
-static const int seed = 40234324;
 
 float3 wavePosition(float3 pos, float amplitude[DIR_NUM]) {
     
-    
-    
     float3 result = float3(0.0, 0.0, 0.0);
-
-    const int N = NUM_INTEGRATION_NODES;
-    float da = 1.0 / N;
-    float dx = DIR_NUM * tau / N;
-    for (float a = 0; a < 1; a += da) {
-
-        float angle = a * tau;
+    for (int i = 0; i < NUM_INTEGRATION_NODES; i++)
+    {
+        float a = i * DA;
+        float angle = a * TAU;
         float2 kdir = float2(cos(angle), sin(angle));
-        float kdir_x = dot(pos.xz, kdir) + tau * sin(seed * a);
+        float kdir_x = dot(pos.xz, kdir) + TAU * sin(SEED * a);
         float w = kdir_x / profilePeriod;
 
-        float4 tt = dx * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
-        //textureData.SampleLevel(point_repeat_sampler, float2(w, 0), 0);
+        float4 tt = DX * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
 
         result.xz += kdir * tt.x;
         result.y += tt.y;
@@ -140,18 +138,14 @@ float3 waveNormal(float3 pos, float amplitude[DIR_NUM]) {
     float3 tx = float3(1.0, 0.0, 0.0);
     float3 ty = float3(0.0, 1.0, 0.0);
 
-    const float N = NUM_INTEGRATION_NODES;
-    float da = 1.0 / N;
-    float dx = DIR_NUM * tau / N;
-    for (float a = 0; a < 1; a += da) {
-
-        float angle = a * tau;
+    for (int i = 0; i < NUM_INTEGRATION_NODES; i++)
+    {
+        float a = i * DA;
+        float angle = a * TAU;
         float2 kdir = float2(cos(angle), sin(angle));
-        float kdir_x = dot(pos.xz, kdir) + tau * sin(a * seed);
+        float kdir_x = dot(pos.xz, kdir) + TAU * sin(a * SEED);
         float w = kdir_x / profilePeriod;
-        float4 tt = dx * iAmpl(angle, amplitude) *
-        tex2D(textureData, float2(w, 0));
-        //textureData.Sample(linear_repeat_sampler, float2(w, 0));
+        float4 tt = DX * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
 
         tx.xz += kdir.x * tt.zw;
         ty.yz += kdir.y * tt.zw;

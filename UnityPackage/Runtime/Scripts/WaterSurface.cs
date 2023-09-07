@@ -244,16 +244,14 @@ namespace WaterWaveSurface
             if (m_settings.reflection.onlySkybox)
             {
                 cam.cullingMask = 0;
-                RenderReflections();
+                RenderReflections(63);
             }
         }
 
-        private void RenderReflections()
+        private void RenderReflections(int mask)
         {
             var rt = m_settings.reflection.texture_lights;
             var cam = m_settings.reflection.camera;
-            var side = Time.frameCount % 6;
-            var mask = 0x1 << side;
             cam.RenderToCubemap(rt, mask);
 
             rt = m_settings.reflection.texture_noLights;
@@ -265,7 +263,7 @@ namespace WaterWaveSurface
                 light.enabled = false;
             }
 
-            cam.RenderToCubemap(rt);
+            cam.RenderToCubemap(rt, mask);
             m_settings.reflection.LoadLights();
         }
 
@@ -285,7 +283,8 @@ namespace WaterWaveSurface
         {
             if (!m_settings.reflection.onlySkybox)
             {
-                RenderReflections();
+                var mask = m_settings.reflection.GetMask(Time.frameCount);
+                RenderReflections(mask);
             }
             UpdateSimulation(Time.deltaTime);
         }

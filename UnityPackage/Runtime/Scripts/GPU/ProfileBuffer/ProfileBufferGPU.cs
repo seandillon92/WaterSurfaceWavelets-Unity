@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using Unity.Profiling;
 
 namespace ProfileBuffer
 {
@@ -120,11 +121,15 @@ namespace ProfileBuffer
             groupSpeed = (float)(3.0 * result.Item1 / result.Item2);
         }
 
+        ProfilerMarker mk = new ProfilerMarker("precompute");
+
         internal void Update()
         {
+            mk.Begin();
             m_shader.SetFloat(m_time_id, Time.time +m_initial_time);
             m_shader.GetKernelThreadGroupSizes(m_kernelIndex, out uint x, out uint _, out uint _);
             m_shader.Dispatch(m_kernelIndex, (int)(m_resolution / x), 1, 1);
+            mk.End();
         }
 
         public void Dispose()

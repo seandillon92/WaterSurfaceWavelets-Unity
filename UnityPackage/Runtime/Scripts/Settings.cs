@@ -1,4 +1,3 @@
-using ProfileBuffer;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -79,6 +78,9 @@ namespace WaveGrid
         [SerializeField]
         public bool onlySkybox;
 
+        [Range(1,6)]
+        public int rendersPerFrame = 6;
+
         [SerializeField]
         private Resolution resolution;
 
@@ -96,6 +98,28 @@ namespace WaveGrid
         public Light[] lights;
 
         private bool[] lights_enabled;
+
+        public int GetMask(int frame)
+        {
+
+            switch(rendersPerFrame)
+            {
+                case 1:
+                    return 0b1 << frame % 6;
+                case 2:
+                    return 0b11 << frame % 3;
+                case 3:
+                    return 0b111 << frame % 2;
+                case 4:
+                    return 0b1111 << frame % 2;
+                case 5:
+                    return 0b11111 << frame % 2;
+                case 6:
+                    return 0b111111;
+            }
+
+            throw new Exception("Unhandled input");
+        }
 
         public void StoreLights()
         {
