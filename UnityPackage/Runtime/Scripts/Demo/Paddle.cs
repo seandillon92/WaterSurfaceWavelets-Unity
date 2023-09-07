@@ -10,6 +10,9 @@ public class Paddle : MonoBehaviour
     [SerializeField]
     private Transform m_end;
 
+    [SerializeField]
+    public ParticleSystem particles;
+
     public Animator Animator => m_animator;
 
     public Transform end => m_end;

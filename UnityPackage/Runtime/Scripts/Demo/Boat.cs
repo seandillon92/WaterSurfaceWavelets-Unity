@@ -48,6 +48,9 @@ public class Boat : MonoBehaviour
     [SerializeField]
     private bool m_make_waves;
 
+    [SerializeField]
+    private int m_row_particles = 1000;
+
     private void Start()
     {
         row_param = Animator.StringToHash("row");
@@ -98,6 +101,7 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_left = true;
                 var posxz = new Vector2(leftPaddle.end.position.x, leftPaddle.end.position.z);
+                leftPaddle.particles.Emit(m_row_particles);
                 if (m_make_waves)
                 {
                     surface.AddPointDisturbance(posxz, m_row_amplitude_splash);
@@ -159,6 +163,7 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_right = true;
                 var pos2 = new Vector2(rightPaddle.end.position.x, rightPaddle.end.position.z);
+                rightPaddle.particles.Emit(m_row_particles);
                 if (m_make_waves)
                 {
                     surface.AddPointDisturbance(pos2, m_row_amplitude_splash);
