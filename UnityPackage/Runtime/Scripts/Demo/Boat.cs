@@ -1,4 +1,3 @@
-using UnityEditorInternal;
 using UnityEngine;
 using WaterWaveSurface;
 
@@ -46,6 +45,9 @@ public class Boat : MonoBehaviour
     [SerializeField]
     private float m_min_row_speed = 0.1f;
 
+    [SerializeField]
+    private bool m_make_waves;
+
     private void Start()
     {
         row_param = Animator.StringToHash("row");
@@ -60,6 +62,14 @@ public class Boat : MonoBehaviour
         Controls();
         MoveBoat();
 
+        if (m_make_waves)
+        {
+            MakeWaves();
+        }
+    }
+
+    private void MakeWaves()
+    {
         if (m_rowing_left)
         {
             MakeWavesLeft();
@@ -88,7 +98,10 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_left = true;
                 var posxz = new Vector2(leftPaddle.end.position.x, leftPaddle.end.position.z);
-                surface.AddPointDisturbance(posxz, m_row_amplitude_splash);
+                if (m_make_waves)
+                {
+                    surface.AddPointDisturbance(posxz, m_row_amplitude_splash);
+                }
                 break;
             case Paddle.RowEventType.End:
                 m_rowing_left = false;
@@ -146,7 +159,10 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_right = true;
                 var pos2 = new Vector2(rightPaddle.end.position.x, rightPaddle.end.position.z);
-                surface.AddPointDisturbance(pos2, m_row_amplitude_splash);
+                if (m_make_waves)
+                {
+                    surface.AddPointDisturbance(pos2, m_row_amplitude_splash);
+                }
                 break;
             case Paddle.RowEventType.End:
                 m_rowing_right = false;
@@ -221,10 +237,5 @@ public class Boat : MonoBehaviour
  
         leftPaddle.Animator.SetBool(row_param, ShouldRow(leftPaddle, 0, ref m_previous_left_mouse_position));
         rightPaddle.Animator.SetBool(row_param, ShouldRow(rightPaddle, 1, ref m_previous_right_mouse_position));
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        
     }
 }

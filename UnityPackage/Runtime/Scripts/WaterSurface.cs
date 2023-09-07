@@ -1,16 +1,9 @@
-using Codice.Client.Commands;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using WaveGrid;
 
 namespace WaterWaveSurface
 {
-    public enum Implementation
-    {
-        CPU,
-        GPU
-    }
-
     public class WaterSurface : MonoBehaviour
     {
         [SerializeField]

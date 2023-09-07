@@ -120,13 +120,10 @@ namespace WaveGrid
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
 
             m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
-
-            if (settings.updateSimulation)
-            {
-                //Advection step
-                m_advection.Update();
-            }
-
+            
+            //Advection step
+            m_advection.Update(settings);
+            
             //Precompute step
             m_profileBuffers[0].Update();
             
