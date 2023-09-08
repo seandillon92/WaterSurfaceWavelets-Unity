@@ -24,7 +24,7 @@ Waves take their shape based on the environment. This can be simulated in the Ed
 ## **Interactive Simulation**
 ![BoatInteractions](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/fad6baf6-b793-43e4-8a79-e4fd81c63625)
 
-The public API allows you to generate real-time distrubrances at Runtime, used for the oar waves and the boat wake in the above image.
+The public API allows you to generate real-time disturbances at Runtime, used for the oar waves and the boat wake in the above image.
 
 # Credits
 This work is a GPU implementation of [1]. More precisely, it's a Unity port of https://github.com/lecopivo/WaterSurfaceWavelets where the CPU simulation code is ported to Compute Shaders and additional tooling is added.
