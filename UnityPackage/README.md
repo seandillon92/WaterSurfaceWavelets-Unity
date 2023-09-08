@@ -13,15 +13,15 @@ Builds are possible but performance might suffer.
 WebGL does not support Compute Shaders. The simulation, which is the main component that relies on Compute Shaders, can be extended with a CPU/Unity Jobs implementation to support WebGL.
 
 # Features
-## **Realistic**
+## **Realistic Rendering**
 ![WavesRender1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/ca93c9fc-c173-4c29-9c35-a641ee02b4ea)
-Trochoidal waves using a spectrum input.
+Waves are rendered as trochoidal waves using a spectrum input.
 
-## **Environment aware** 
+## **Environment-aware Simulation** 
 ![Environment1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/420be1bc-d484-44af-97d8-0b56b2015c2c)
 
 Waves take their shape based on the environment. This can be simulated in the Editor or at Runtime, in real-time.
-## **Interactive**
+## **Interactive Simulation**
 ![BoatInteractions](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/fad6baf6-b793-43e4-8a79-e4fd81c63625)
 
 The public API allows you to generate distrubrances, used for the oar waves and the boat wake in the above image.
