@@ -42,6 +42,12 @@ TBA
 TBA
 
 ## Credits
-This work is a GPU implementation of [1]. More precisely, it's a Unity port of https://github.com/lecopivo/WaterSurfaceWavelets. Additionally, I ported the simulation code to Compute Shaders and created extra tooling.
+This work is a GPU implementation of [1]. More precisely, it's a Unity port of [2]. Additionally, I ported the simulation code to Compute Shaders and created extra tooling.
+
+[2] has a few issues when building on windows. I used a fork [3], that resolves those issues. 
 ### References
 [1] Stefan Jeschke, Tomáš Skřivan, Matthias Müller-Fischer, Nuttapong Chentanez, Miles Macklin, and Chris Wojtan. 2018. Water surface wavelets. ACM Trans. Graph. 37, 4, Article 94 (August 2018), 13 pages. https://doi.org/10.1145/3197517.3201336
+
+[2] https://github.com/lecopivo/WaterSurfaceWavelets
+
+[3] https://github.com/speps/WaterSurfaceWavelets
