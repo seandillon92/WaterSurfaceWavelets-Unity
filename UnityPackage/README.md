@@ -33,7 +33,25 @@ TBA
 TBA
 
 ## Performance
-TBA
+
+❗ The following measurements are indicative only.  
+
+
+
+
+Hardware used for measurements:
+
+* GPU: NVIDIA RTX 2080 Super, 8GB DDR6.
+* Processor: Intel Core i9-10980HK @ 2.4GHz
+* RAM: 32GB
+
+|            Resolution         | FPS       |   Scene |
+| --------------------| --------------------| --------------- |
+| Full HD (1920 x 1080)| ~80 | DemoScene |
+| WXGA (1366 x 768) | ~105| DemoScene |
+| QHD (2560 x 1440) | ~55 | DemoScene |
+| 4K UHD (3840 x 2160) | ~33| DemoScene|
+
 
 ## Installation
 TBA
