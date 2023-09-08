@@ -29,6 +29,12 @@ WebGL does not support Compute Shaders. The simulation, which is the main compon
 ## Supported Rendering Pipelines
 TBA
 
+## Supported Editor Versions
+TBA
+
+## Performance
+TBA
+
 ## Installation
 TBA
 
