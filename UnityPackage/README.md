@@ -4,7 +4,7 @@ Unity Package for interactive water surfaces.
 
 ## Supported Platforms
 ### Win, Mac, Linux :heavy_check_mark: 
-Developed and tested with Windows64 with DX11/12. All other desktop platforms *should* be OK.
+Developed and tested on Win64 and DX11/12. All other desktop platforms and APIs *should* work.
 
 ### Android, iOS ⚠️
 Builds are possible but performance might suffer.
