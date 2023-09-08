@@ -44,7 +44,8 @@ namespace WaveGrid
                     new ProfileBufferGPU(
                         zeta_min, 
                         zeta_max, 
-                        new Spectrum(s.simulation.wind_speed), s.simulation.initial_time));
+                        new Spectrum(s.simulation.wind_speed), 
+                        s.simulation.initial_time));
             }
 
             // Create environment and advection

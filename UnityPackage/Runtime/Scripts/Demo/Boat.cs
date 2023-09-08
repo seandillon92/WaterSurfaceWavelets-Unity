@@ -49,7 +49,10 @@ public class Boat : MonoBehaviour
     private bool m_make_waves;
 
     [SerializeField]
-    private int m_row_particles = 1000;
+    private int m_row_particles_min = 1000;
+
+    [SerializeField]
+    private int m_row_particles_max = 20000;
 
     private void Start()
     {
@@ -94,6 +97,12 @@ public class Boat : MonoBehaviour
     private float m_boat_rotate_speed_right;
 
 
+    private int GetParticlesNum(Paddle paddle)
+    {
+        var t = (paddle.Animator.speed - m_min_row_speed) / (m_max_row_speed - m_min_row_speed);
+        return (int)Mathf.Lerp(m_row_particles_min, m_row_particles_max, t);
+    }
+
     private void OnRowLeft(Paddle.RowEventType e)
     {
         switch (e)
@@ -101,7 +110,8 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_left = true;
                 var posxz = new Vector2(leftPaddle.end.position.x, leftPaddle.end.position.z);
-                leftPaddle.particles.Emit(m_row_particles);
+
+                leftPaddle.particles.Emit(GetParticlesNum(leftPaddle));
                 if (m_make_waves)
                 {
                     surface.AddPointDisturbance(posxz, m_row_amplitude_splash);
@@ -109,6 +119,7 @@ public class Boat : MonoBehaviour
                 break;
             case Paddle.RowEventType.End:
                 m_rowing_left = false;
+                leftPaddle.particles.Emit(GetParticlesNum(leftPaddle));
                 break;
         }
     }
@@ -163,13 +174,14 @@ public class Boat : MonoBehaviour
             case Paddle.RowEventType.Start:
                 m_rowing_right = true;
                 var pos2 = new Vector2(rightPaddle.end.position.x, rightPaddle.end.position.z);
-                rightPaddle.particles.Emit(m_row_particles);
+                rightPaddle.particles.Emit(GetParticlesNum(rightPaddle));
                 if (m_make_waves)
                 {
                     surface.AddPointDisturbance(pos2, m_row_amplitude_splash);
                 }
                 break;
             case Paddle.RowEventType.End:
+                rightPaddle.particles.Emit(GetParticlesNum(rightPaddle));
                 m_rowing_right = false;
                 break;
         }

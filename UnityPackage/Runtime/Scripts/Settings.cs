@@ -68,7 +68,6 @@ namespace WaveGrid
     {
         public int resolution = 100;
         public Camera camera;
-        public Texture skybox;
         public Material material;
     }
 
@@ -170,6 +169,7 @@ namespace WaveGrid
 
         [SerializeField]
         private Resolution resolution = Resolution.R_128;
+
         public int GetResolution()
         {
             return (int)resolution;
