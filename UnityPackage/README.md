@@ -13,7 +13,7 @@ Builds are possible but performance might suffer.
 WebGL does not support Compute Shaders. The simulation, which is the main component that relies on Compute Shaders, can be extended with a CPU/Unity Jobs implementation to support WebGL.
 
 # Features
-## **Realistic waves**
+## **Realistic**
 ![WavesRender1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/ca93c9fc-c173-4c29-9c35-a641ee02b4ea)
 Trochoidal waves using a spectrum input.
 
