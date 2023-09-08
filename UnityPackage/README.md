@@ -12,6 +12,9 @@ Builds are possible but performance might suffer.
 ### WebGL ❌
 WebGL does not support Compute Shaders. The simulation, which is the main component that relies on Compute Shaders, can be extended with a CPU/Unity Jobs implementation to support WebGL.
 
+## Supported Rendering Pipelines
+TBA
+
 # Features
 ## **Realistic Rendering**
 ![WavesRender1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/ca93c9fc-c173-4c29-9c35-a641ee02b4ea)
@@ -25,6 +28,12 @@ Waves take their shape based on the environment. This can be simulated in the Ed
 ![BoatInteractions](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/fad6baf6-b793-43e4-8a79-e4fd81c63625)
 
 The public API allows you to generate real-time disturbances at Runtime, used for the oar waves and the boat wake in the above image.
+
+# Installation
+TBA
+
+# Usage
+TBA
 
 # Credits
 This work is a GPU implementation of [1]. More precisely, it's a Unity port of https://github.com/lecopivo/WaterSurfaceWavelets where the CPU simulation code is ported to Compute Shaders and additional tooling is added.
