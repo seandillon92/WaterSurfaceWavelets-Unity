@@ -4,15 +4,15 @@ Unity Package for interactive water surfaces.
 
 ## Features
 ### **Realistic Rendering**
-![WavesRender1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/ca93c9fc-c173-4c29-9c35-a641ee02b4ea)
+![WavesRender1](Docs/WavesRender2.png)
 Waves are rendered as trochoidal waves using a spectrum input.
 
 ### **Environment-aware Simulation** 
-![Environment1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/420be1bc-d484-44af-97d8-0b56b2015c2c)
+![Environment1](Docs/Environment1.png)
 
 Waves take their shape based on the environment. This can be simulated in the Editor or in the build, in real-time.
 ### **Interactive Simulation**
-![BoatInteractions](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/fad6baf6-b793-43e4-8a79-e4fd81c63625)
+![BoatInteractions](Docs/BoatInteractions.png)
 
 The public API allows you to generate real-time disturbances at Runtime, used for the oar waves and the boat wake in the above image.
 
@@ -66,14 +66,14 @@ TBA
 Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Surface*** on the toolbar menu.
 
 ### Scene Window
-![SurfaceEditorTool](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/b8e66dc1-cc98-48cc-af60-2cf6f01b8ea8)
+![SurfaceEditorTool](Docs/SurfaceEditorTool.png)
 1. Use the default transform gizmos to move, rotate and scale the simulation volume, so that it encapsulates your terrain.
 2. Use the water level gizmo to control the height of the water.
 3. Use the wind direction gizmo to control the main direction of the waves. 
 
 
 ### Inspector Window
-![SurfaceInspector](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/59919312-ba57-411a-b3e7-c5752d49d8da)
+![SurfaceInspector](Docs/SurfaceInspector.png)
 
 Use the inspector to configure rendering and simulation parameters.
 
