@@ -32,8 +32,8 @@ WebGL does not support Compute Shaders. The simulation, which is the main compon
 * HDRP ❌
 
 ## Supported Editor Versions
-* Unity 2021 LTS ✔️
 * Unity 2022 LTS ✔️
+* Unity 2021 LTS ✔️
 
 ## Performance
 
@@ -60,9 +60,21 @@ Hardware used for measurements:
 TBA
 
 ## Usage
-TBA
+### Creating a new surface
+Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Surface*** on the toolbar menu.
+
+### Scene Window
+![SurfaceEditorTool](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/b8e66dc1-cc98-48cc-af60-2cf6f01b8ea8)
+1. Use the default transform gizmos to move, rotate and scale the simulation volume, so that it encapsulates your terrain
+2. Use the water level gizmo to control the height of the water.
+3. Use the wind direction gizmo to control the main direction of the waves. 
+
+
+### Inspector Window
+![SurfaceInspector](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/c40b412f-4041-4150-8449-defe30641e21)
 
 ## Credits
+
 This work is a GPU implementation of [1]. More precisely, it's a Unity port of [2]. Additionally, I ported the simulation code to Compute Shaders and created extra tooling.
 
 [2] has a few issues when building on windows. I used a fork [3], that resolves those issues. 
