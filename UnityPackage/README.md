@@ -50,10 +50,12 @@ Hardware used for measurements:
 
 |            Resolution         | FPS       |   Scene |
 | --------------------| --------------------| --------------- |
-| Full HD (1920 x 1080)| ~80 | DemoScene |
-| WXGA (1366 x 768) | ~105| DemoScene |
-| QHD (2560 x 1440) | ~55 | DemoScene |
-| 4K UHD (3840 x 2160) | ~33| DemoScene|
+| Full HD (1920 x 1080)| ~80 | Demo Scene* |
+| WXGA (1366 x 768) | ~105| Demo Scene* |
+| QHD (2560 x 1440) | ~55 | Demo Scene* |
+| 4K UHD (3840 x 2160) | ~33| Demo Scene*|
+
+\* Demo Scene video: https://www.youtube.com/watch?v=pmVNWkjJeK8
 
 
 ## Installation
