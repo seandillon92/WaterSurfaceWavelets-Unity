@@ -63,17 +63,17 @@ Hardware used for measurements:
 Install via the package manager. See https://docs.unity3d.com/Manual/upm-ui-giturl.html
 
 ## Usage
-### Creating a new surface
+### 1. Creating a new surface
 Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Surface*** on the toolbar menu.
 
-### Scene Window
+### 2. Scene Window
 ![SurfaceEditorTool](Docs/SurfaceEditorTool.png)
 1. Use the default transform gizmos to move, rotate and scale the simulation volume, so that it encapsulates your terrain.
 2. Use the water level gizmo to control the height of the water.
 3. Use the wind direction gizmo to control the main direction of the waves. 
 
 
-### Inspector Window
+### 3. Inspector Window
 ![SurfaceInspector](Docs/SurfaceInspector.png)
 
 Use the inspector to configure rendering and simulation parameters.
@@ -127,7 +127,7 @@ Store/Load the current state of the simulation, during Play Mode.
 ### Start Rendering/Simulation
 Press the Play button on the Editor to go into Play Mode or create and run a build.
 
-### API
+### 4. API
 You can use the public API to disturb the water surface.
 
  ```csharp
