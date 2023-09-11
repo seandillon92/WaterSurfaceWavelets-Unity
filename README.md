@@ -19,10 +19,10 @@ The public API allows you to generate real-time disturbances at Runtime, used fo
 
 ## Supported Platforms
 ### Win, Mac, Linux :heavy_check_mark: 
-Developed and tested on Win64 and DX11/12. All other desktop platforms and APIs *should* work.
+Developed and tested on Win64 and DX11/12. All other desktop platforms and APIs should work but have not been tested.
 
-### Android, iOS ⚠️
-Builds are possible but performance might suffer.
+### Android, iOS ✔️
+Builds are possible, though code has been developed and optimized only for desktop targets.
 
 ### WebGL ❌
 WebGL does not support Compute Shaders. The simulation, which is the main component that relies on Compute Shaders, can be extended with a CPU/Unity Jobs implementation to support WebGL.
