@@ -1,4 +1,5 @@
-![Movie_031](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/f7495a91-6ccd-4d7b-92bf-36bcdab9aab1)
+<img src="Docs/BoatDemo6MB.gif" width="500" height="281"/>
+
 # Water Surface Wavelets
 Unity Package for interactive water surfaces.
 
