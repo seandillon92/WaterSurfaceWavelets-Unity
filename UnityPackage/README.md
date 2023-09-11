@@ -27,7 +27,9 @@ Builds are possible but performance might suffer.
 WebGL does not support Compute Shaders. The simulation, which is the main component that relies on Compute Shaders, can be extended with a CPU/Unity Jobs implementation to support WebGL.
 
 ## Supported Rendering Pipelines
-TBA
+* Built-In (Standard) ✔️
+* URP ❌
+* HDRP ❌
 
 ## Supported Editor Versions
 * Unity 2021 LTS ✔️
