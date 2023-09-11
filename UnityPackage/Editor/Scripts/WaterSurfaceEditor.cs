@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using WaterWaveSurface;
-using static UnityEditor.PlayerSettings;
 using Unity.Collections;
 using UnityEngine.Rendering;
 using UnityEngine.Experimental.Rendering;
@@ -10,6 +9,17 @@ using UnityEngine.Experimental.Rendering;
 [CanEditMultipleObjects]
 internal class WaterSurfaceEditor : Editor
 {
+    [MenuItem("GameObject/Water Surface/Create Water Surface")]
+    public static void CreateSurface()
+    {
+        var prefab = 
+            AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Packages/com.sean-dillon.water-wave-surfaces/Assets/Prefabs/WaterSurface.prefab");
+
+        Selection.activeObject = PrefabUtility.InstantiatePrefab(prefab);
+
+    }
+
     private WaterSurface Target => (WaterSurface)this.target;
 
     private Mesh m_waterLevel_mesh;

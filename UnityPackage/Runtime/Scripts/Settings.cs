@@ -27,7 +27,7 @@ namespace WaveGrid
         public float water_level;
 
         [SerializeField]
-        private Resolution resolution;
+        private Resolution resolution = Resolution.R_1024;
 
         public int GetResolution()
         {
@@ -46,6 +46,7 @@ namespace WaveGrid
     [Serializable]
     public class BoatSettings
     {
+        public bool useBoat = false;
         public GameObject boat;
         public LayerMask cullingMask;
         [HideInInspector]
@@ -55,7 +56,7 @@ namespace WaveGrid
         public Material material;
 
         [SerializeField]
-        private Resolution resolution;
+        private Resolution resolution = Resolution.R_256;
 
         public int GetResolution()
         {
@@ -81,7 +82,7 @@ namespace WaveGrid
         public int rendersPerFrame = 6;
 
         [SerializeField]
-        private Resolution resolution;
+        private Resolution resolution = Resolution.R_128;
 
         public int GetResolution()
         {

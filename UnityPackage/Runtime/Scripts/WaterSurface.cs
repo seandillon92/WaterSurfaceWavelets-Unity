@@ -186,7 +186,10 @@ namespace WaterWaveSurface
             m_settings.environment.transform = transform.localToWorldMatrix;
 
             PrepareEnvironmentMaps();
-            PrepareBoatMaps();
+            if (m_settings.boat.useBoat)
+            {
+                PrepareBoatMaps();
+            }
             InitializeReflections();
             InitializeAmplitude();
 

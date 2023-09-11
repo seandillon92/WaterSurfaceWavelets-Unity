@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4866389373062132709}
-  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 256, y: 0, z: 255.99998}
   m_LocalScale: {x: 512, y: 553.79584, z: 512}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2974168371674892653
 MonoBehaviour:
@@ -47,30 +47,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_settings:
     simulation:
+      wind_speed: 10
+      wind_direction: 0
+      wave_amplitude: 1
+      dissipation: 0.99
       max_zeta: 3.321928
       min_zeta: -5.0588937
-      n_x: 128
+      amplitude: {fileID: 0}
+      stored_amplitude: {fileID: 0}
+      resolution: 1024
       n_theta: 16
       n_zeta: 1
       initial_time: 100
-      spectrum_type: 1
-      defaultAmplitude:
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0.1
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
     environment:
       size: {x: 0, y: 0}
       transform:
@@ -98,17 +86,35 @@ MonoBehaviour:
       material: {fileID: 2100000, guid: 7c61362ab7fb6ff4989cb0e71d5a5482, type: 2}
       heights: {fileID: 0}
       gradients: {fileID: 0}
+    boat:
+      boat: {fileID: 0}
+      cullingMask:
+        serializedVersion: 2
+        m_Bits: 0
+      heights: {fileID: 0}
+      gradients: {fileID: 0}
+      material: {fileID: 0}
+      resolution: 256
     visualization:
       resolution: 100
       camera: {fileID: 0}
-      skybox: {fileID: 8900000, guid: e71fc492f440446b99875b8e1df890ba, type: 3}
       material: {fileID: 2100000, guid: 938ca63ed5c2b5b41bb5bc4a9ea14c96, type: 2}
+    reflection:
+      onlySkybox: 0
+      rendersPerFrame: 6
+      resolution: 128
+      texture_lights: {fileID: 0}
+      texture_noLights: {fileID: 0}
+      lights: []
+      cullingMask:
+        serializedVersion: 2
+        m_Bits: 0
+      camera: {fileID: 0}
   m_updateSettings:
     dt: 0
     updateSimulation: 1
     amplitudeMultiplier: 1
     renderOutsideBorders: 1
-  m_implementation: 1
 --- !u!114 &5829637658706589845
 MonoBehaviour:
   m_ObjectHideFlags: 0

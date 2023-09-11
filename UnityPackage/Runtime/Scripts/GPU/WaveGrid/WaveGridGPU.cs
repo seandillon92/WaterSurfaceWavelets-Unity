@@ -61,9 +61,12 @@ namespace WaveGrid
             m_material.SetTexture(Shader.PropertyToID("amplitude"), m_advection.amplitude);
             m_material.SetTexture(Shader.PropertyToID("boat"), m_settings.boat.heights);
 
-            var boatMesh = m_settings.boat.boat.GetComponent<MeshFilter>().sharedMesh.bounds;
-            m_material.SetVector(Shader.PropertyToID("boat_size"), boatMesh.size);
-            m_boat_trans_id = Shader.PropertyToID("boat_trans");
+            if (m_settings.boat.useBoat)
+            {
+                var boatMesh = m_settings.boat.boat.GetComponent<MeshFilter>().sharedMesh.bounds;
+                m_material.SetVector(Shader.PropertyToID("boat_size"), boatMesh.size);
+                m_boat_trans_id = Shader.PropertyToID("boat_trans");
+            }
 
             m_material.SetTexture("_ReflectionLights", m_settings.reflection.texture_lights);
             m_material.SetTexture("_ReflectionNoLights", m_settings.reflection.texture_noLights);
@@ -119,8 +122,10 @@ namespace WaveGrid
                 m_camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)) * m_camera.projectionMatrix.inverse);
             m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
-
-            m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
+            if (m_settings.boat.useBoat)
+            {
+                m_material.SetMatrix(Shader.PropertyToID("boat_trans"), m_settings.boat.boat.transform.worldToLocalMatrix);
+            }
             
             //Advection step
             m_advection.Update(settings);
