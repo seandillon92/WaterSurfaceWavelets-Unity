@@ -30,7 +30,8 @@ WebGL does not support Compute Shaders. The simulation, which is the main compon
 TBA
 
 ## Supported Editor Versions
-TBA
+* Unity 2021 LTS ✔️
+* Unity 2022 LTS ✔️
 
 ## Performance
 
