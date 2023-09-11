@@ -127,6 +127,30 @@ Store/Load the current state of the simulation, during Play Mode.
 ### Start Rendering/Simulation
 Press the Play button on the Editor to go into Play Mode or create and run a build.
 
+### API
+You can use the public API to distrurb the water surface.
+
+ ```csharp
+        /// <summary>
+        /// Add disturbance at a point in all directions
+        /// </summary>
+        /// <param name="pos">global coordinates on the x-z plane</param>
+        /// <param name="value">intensity of distrurbance</param>
+public void AddPointDisturbance(Vector2 pos, float value)
+
+        /// <summary>
+        /// Add disturbance at a point with a specific direction
+        /// </summary>
+        /// <param name="pos">global position coordinates</param>
+        /// <param name="direction"> direction of the distrurbance in global coordinates</param>
+        /// <param name="value">intensity of distrurbance</param>
+        /// <param name="sideDirections"> generate waves in directions next to the main direction</param>
+ public void AddPointDirectionDisturbance(
+            Vector3 pos, 
+            Vector3 direction, 
+            float value, 
+            bool sideDirections = false)
+ ```
 ## Credits
 
 This work started as a GPU implementation of [1] and more precisely, as a Unity port of [2]. On top of that work, the simulation code was ported to Compute Shaders and extra tooling and new features were added.
