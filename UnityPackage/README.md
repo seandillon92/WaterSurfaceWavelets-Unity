@@ -65,7 +65,7 @@ Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Sur
 
 ### Scene Window
 ![SurfaceEditorTool](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/b8e66dc1-cc98-48cc-af60-2cf6f01b8ea8)
-1. Use the default transform gizmos to move, rotate and scale the simulation volume, so that it encapsulates your terrain
+1. Use the default transform gizmos to move, rotate and scale the simulation volume, so that it encapsulates your terrain.
 2. Use the water level gizmo to control the height of the water.
 3. Use the wind direction gizmo to control the main direction of the waves. 
 
@@ -75,9 +75,9 @@ Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Sur
 
 ## Credits
 
-This work is a GPU implementation of [1]. More precisely, it's a Unity port of [2]. Additionally, I ported the simulation code to Compute Shaders and created extra tooling.
+This work started as a GPU implementation of [1] and more precisely, as a Unity port of [2]. On top of that work, the simulation code was ported to Compute Shaders and extra tooling and new features were added.
 
-[2] has a few issues when building on windows. I used a fork [3], that resolves those issues. 
+In the early stages, when working with native code from [2], there were a few issues when building on windows. I used [3] which is a fork of [2], that resolves those issues. 
 ### References
 [1] Stefan Jeschke, Tomáš Skřivan, Matthias Müller-Fischer, Nuttapong Chentanez, Miles Macklin, and Chris Wojtan. 2018. Water surface wavelets. ACM Trans. Graph. 37, 4, Article 94 (August 2018), 13 pages. https://doi.org/10.1145/3197517.3201336
 
