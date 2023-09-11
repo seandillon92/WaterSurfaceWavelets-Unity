@@ -122,7 +122,7 @@ Settings that can be changed during gameplay.
 Store/Load the current state of the simulation, during Play Mode.
 
 ### Start Rendering/Simulation
-Press the Play button on the Editor to go into Play Mode.
+Press the Play button on the Editor to go into Play Mode or create and run a build.
 
 ## Credits
 
