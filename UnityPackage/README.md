@@ -10,7 +10,7 @@ Waves are rendered as trochoidal waves using a spectrum input.
 ### **Environment-aware Simulation** 
 ![Environment1](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/420be1bc-d484-44af-97d8-0b56b2015c2c)
 
-Waves take their shape based on the environment. This can be simulated in the Editor or at Runtime, in real-time.
+Waves take their shape based on the environment. This can be simulated in the Editor or in the build, in real-time.
 ### **Interactive Simulation**
 ![BoatInteractions](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/fad6baf6-b793-43e4-8a79-e4fd81c63625)
 
