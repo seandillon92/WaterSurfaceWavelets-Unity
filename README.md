@@ -124,10 +124,10 @@ Settings that can be changed during gameplay.
 #### Store/Load Simulation Data (Editor only)
 Store/Load the current state of the simulation, during Play Mode.
 
-### Start Rendering/Simulation
+### 4. Start Rendering/Simulation
 Press the Play button on the Editor to go into Play Mode or create and run a build.
 
-### 4. API
+### 5. API
 You can use the public API to disturb the water surface.
 
  ```csharp
