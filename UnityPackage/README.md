@@ -71,7 +71,58 @@ Create a new surface by clicking on ***GameObject/WaterSurfaces/Create Water Sur
 
 
 ### Inspector Window
-![SurfaceInspector](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/c40b412f-4041-4150-8449-defe30641e21)
+![SurfaceInspector](https://github.com/seandillon92/WaterSurfaceWavelets-Plugins/assets/51912249/59919312-ba57-411a-b3e7-c5752d49d8da)
+
+Use the inspector to configure rendering and simulation parameters.
+
+#### Simulation
+The simulation creates a 3D texture that captures the amplitude of the waves in different parts of the surface. The amplitude texture can be updated on every frame, during gameplay.
+
+- *Wind Speed* - The speed by which the waves propagate during the simulation.
+- *Wave Amplitude* - The default wave amplitude used during the simulation.
+- *Dissipation* - The rate by which the waves created by the user interactions, lose their energy. A value of 1 will conserve all energy.
+- *Stored Amplitude* - An optional amplitude texture that can be used to initialize the simulation.
+- *Resolution* - The amplitude texture resolution.
+
+#### Environment
+The simulation takes the environment into account. A heightmap of the environemnt is created once at Start and is used during the simulation.
+- *Water Level* - The height of the water, in global coordinates.
+- *Resolution* - The resolution of the environment heightmap.
+- *Culling Mask* - Layers that the camera should render when capturing the environment height map.
+- *Material* - The depth material used to capture the depth values of the environment height map.
+
+#### Boat (optional)
+To avoid rendering issues where the water surface penetrates the boat that the camera is standing on, we generate a heightmap of the boat hull.
+
+- *Boat* - The gameobject that has the transform of the boat and the MeshRenderer of the boat.
+- *Culling Mask* - Layers that the camera should render when capturing the boat height map.
+- *Material* - The depth material used to capture the depth values of the boat height map.
+- *Resolution* - The resolution of the boat heightmap.
+
+#### Visualization
+When rendering, we create a grid in the x-z plane and we sample its y values from the simulation data.
+- *Resolution* - The resolution of the projected grid.
+- *Camera* - The camera that renders the surface.
+- *Material* - The material to render the surface with.
+
+#### Reflection
+To render the reflections of the environment on the water, we render the environment into a cubemap in realtime.
+- *Only Skybox* - Render only the Skybox?
+- *Renders Per Frame* - How many maps from the cubemap should be rendered on each frame.
+- *Resolution* - The resolution of the reflection cubemap.
+- *Culling Mask* - Layers that the camera should render when capturing the reflections.
+
+#### Update Settings
+Settings that can be changed during gameplay.
+- *Update Simulation* - Should the simulation be updated in this frame?
+- *Amplitude Multiplier* - Modify the amplitude, only when rendering (not in simulation).
+- *Render Outside Borders* - Should we render the surface as an infinite ocean?
+
+#### Store/Load Simulation Data (Editor only)
+Store/Load the current state of the simulation, during Play Mode.
+
+### Start Rendering/Simulation
+Press the Play button on the Editor to go into Play Mode.
 
 ## Credits
 
