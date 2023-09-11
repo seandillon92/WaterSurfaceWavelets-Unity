@@ -1,4 +1,4 @@
-<img src="Docs/BoatDemo6MB.gif" width="500" height="281"/>
+![Demo](Docs/BoatDemo6MB.gif)
 
 # Water Surface Wavelets
 Unity Package for interactive water surfaces.
@@ -60,7 +60,7 @@ Hardware used for measurements:
 
 
 ## Installation
-TBA
+Install via the package manager. See https://docs.unity3d.com/Manual/upm-ui-giturl.html
 
 ## Usage
 ### Creating a new surface
