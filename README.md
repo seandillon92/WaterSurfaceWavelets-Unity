@@ -128,7 +128,7 @@ Store/Load the current state of the simulation, during Play Mode.
 Press the Play button on the Editor to go into Play Mode or create and run a build.
 
 ### API
-You can use the public API to distrurb the water surface.
+You can use the public API to disturb the water surface.
 
  ```csharp
         /// <summary>
