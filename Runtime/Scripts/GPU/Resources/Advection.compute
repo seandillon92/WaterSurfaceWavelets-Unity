@@ -18,6 +18,7 @@ RWTexture3D<float> Write;
 float Default[16];
 float deltaTime;
 float groupSpeed;
+float resolution_factor;
 SamplerState linearClampSampler;
 SamplerState pointClampSampler;
 
@@ -61,7 +62,7 @@ float Theta2iTheta(float theta)
 
 float2 groupVelocity(uint3 id)
 {
-    float cg = groupSpeed;
+    float cg = groupSpeed * resolution_factor;
     float theta = iTheta2Theta(id.z);
     return cg * float2(cos(theta), sin(theta));
 }

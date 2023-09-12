@@ -82,6 +82,8 @@ namespace WaveGrid
 
             //Create shader
             m_shader = (ComputeShader)Resources.Load("Advection");
+            var factor = m_settings.simulation.GetResolution() / 128;
+            m_shader.SetFloat("resolution_factor", factor);
             m_shader.SetFloat("groupSpeed", profileBuffer.groupSpeed);
             m_shader.SetVector(
                 "dx",

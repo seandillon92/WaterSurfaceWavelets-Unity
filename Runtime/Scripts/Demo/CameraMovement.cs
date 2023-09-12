@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CameraMovement : MonoBehaviour
 {
@@ -17,21 +18,27 @@ public class CameraMovement : MonoBehaviour
     private Vector3? m_last_right_mouse_pos;
     private Vector3? m_last_middle_mouse_pos;
 
+
+    [SerializeField]
+    private MouseButton rotate_mouse_button;
+    [SerializeField]
+    private MouseButton pan_mouse_button;
+
     private void Update()
     {
         if (rotate)
         {
-            HandleRightMouse();
+            HandleRotation();
         }
 
         if (translate)
         {
-            HandleMiddleMouse();
-            HandleMouseScroll();
+            HandleTranslationPan();
+            HandleTranslationZoom();
         }
     }
 
-    private void HandleMouseScroll()
+    private void HandleTranslationZoom()
     {
         if (Input.mouseScrollDelta.magnitude > 0)
         {
@@ -42,9 +49,9 @@ public class CameraMovement : MonoBehaviour
         }
     }
 
-    private void HandleMiddleMouse()
+    private void HandleTranslationPan()
     {
-        if (Input.GetMouseButton(2))
+        if (Input.GetMouseButton((int)pan_mouse_button))
         {
             var pos = Input.mousePosition;
             if (m_last_middle_mouse_pos != null)
@@ -64,10 +71,10 @@ public class CameraMovement : MonoBehaviour
         }
     }
 
-    private void HandleRightMouse()
+    private void HandleRotation()
     {
        
-        if (Input.GetMouseButton(2))
+        if (Input.GetMouseButton((int)rotate_mouse_button))
         {
             var pos = Input.mousePosition;
             if (m_last_right_mouse_pos != null)

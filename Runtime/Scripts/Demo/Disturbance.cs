@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 using WaterWaveSurface;
 internal class Disturbance : MonoBehaviour
 {
-    private Vector3? m_previous_left_mouse_position;
+    private Vector3? m_previous_distrurbance_mouse_position;
 
     [SerializeField]
     private float m_disturbance;
@@ -12,6 +13,9 @@ internal class Disturbance : MonoBehaviour
 
     [SerializeField]
     private bool m_enableRain = true;
+
+    [SerializeField]
+    private MouseButton m_disturbanceMouseButton;
 
     // Update is called once per frame
     void Update()
@@ -23,7 +27,7 @@ internal class Disturbance : MonoBehaviour
     private void BoatPath()
     {
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton((int)m_disturbanceMouseButton))
         {
             var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             var waterLevel = m_waterSurface.Settings.environment.water_level;
@@ -31,21 +35,18 @@ internal class Disturbance : MonoBehaviour
             float t = -posY / ray.direction.y;
             var pos = ray.origin + t * ray.direction;
 
-            if (m_previous_left_mouse_position != null)
+            if (m_previous_distrurbance_mouse_position != null)
             {
-                float velocity = Vector3.Distance(m_previous_left_mouse_position.Value, pos) * Time.deltaTime;
-                var direction = (pos - m_previous_left_mouse_position).Value.normalized;
-                var dir1 = direction + Vector3.forward * 0.5f;
-                var dir2 = direction + Vector3.back * 0.5f;
-                m_waterSurface.AddPointDirectionDisturbance(pos, dir1, m_disturbance * velocity, false);
-                m_waterSurface.AddPointDirectionDisturbance(pos, dir2, m_disturbance * velocity, false);
+                float velocity = Vector3.Distance(m_previous_distrurbance_mouse_position.Value, pos) * Time.deltaTime;
+                var direction = (pos - m_previous_distrurbance_mouse_position).Value.normalized;
+                m_waterSurface.AddPointDirectionDisturbance(pos, direction, m_disturbance, true);
             }
 
-            m_previous_left_mouse_position = pos;
+            m_previous_distrurbance_mouse_position = pos;
         }
         else
         {
-            m_previous_left_mouse_position = null;
+            m_previous_distrurbance_mouse_position = null;
         }
     }
 
