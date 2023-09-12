@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 6349194306477307655}
   - component: {fileID: 2974168371674892653}
-  - component: {fileID: 5829637658706589845}
   m_Layer: 4
   m_Name: WaterSurface
   m_TagString: Untagged
@@ -115,19 +114,5 @@ MonoBehaviour:
     dt: 0
     updateSimulation: 1
     amplitudeMultiplier: 1
+    frequencyMultiplier: 1
     renderOutsideBorders: 1
---- !u!114 &5829637658706589845
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4866389373062132709}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58cbf14c1f6f36c4cb657ba5909586e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_disturbance: 0.1
-  m_waterSurface: {fileID: 2974168371674892653}
-  m_enableRain: 0

@@ -15,8 +15,9 @@ internal class WaterSurfaceEditor : Editor
         var prefab = 
             AssetDatabase.LoadAssetAtPath<GameObject>(
                 "Packages/com.sean-dillon.water-wave-surfaces/Assets/Prefabs/WaterSurface.prefab");
-
-        Selection.activeObject = PrefabUtility.InstantiatePrefab(prefab);
+        var instance = PrefabUtility.InstantiatePrefab(prefab);
+        PrefabUtility.UnpackPrefabInstance(instance as GameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+        Selection.activeObject = instance;
 
     }
 
