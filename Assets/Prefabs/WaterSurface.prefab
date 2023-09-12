@@ -94,12 +94,12 @@ MonoBehaviour:
         m_Bits: 0
       heights: {fileID: 0}
       gradients: {fileID: 0}
-      material: {fileID: 0}
+      material: {fileID: 2100000, guid: 7c61362ab7fb6ff4989cb0e71d5a5482, type: 2}
       resolution: 256
     visualization:
       resolution: 100
       camera: {fileID: 0}
-      material: {fileID: 2100000, guid: 938ca63ed5c2b5b41bb5bc4a9ea14c96, type: 2}
+      material: {fileID: 2100000, guid: 43dc860a5ce857346a3ae29595c56b4b, type: 2}
     reflection:
       onlySkybox: 0
       rendersPerFrame: 6
