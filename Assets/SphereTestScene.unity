@@ -214,7 +214,7 @@ Transform:
   m_GameObject: {fileID: 128991569}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.65464985, y: -1.489657, z: -1.9930248}
-  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -332,7 +332,7 @@ Transform:
   m_GameObject: {fileID: 4402226384296297935}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.65464985, y: -1.489657, z: -1.9930248}
-  m_LocalScale: {x: 50, y: 50, z: 50}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -399,24 +399,24 @@ MonoBehaviour:
       n_zeta: 1
       initial_time: 100
     environment:
-      size: {x: 0, y: 0}
+      size: {x: 1, y: 1}
       transform:
-        e00: 0
+        e00: 2
         e01: 0
         e02: 0
-        e03: 0
+        e03: -0.65464985
         e10: 0
-        e11: 0
+        e11: 2
         e12: 0
-        e13: 0
+        e13: -1.489657
         e20: 0
         e21: 0
-        e22: 0
-        e23: 0
+        e22: 2
+        e23: -1.9930248
         e30: 0
         e31: 0
         e32: 0
-        e33: 0
+        e33: 1
       water_level: -1.3791823
       resolution: 1024
       cullingMask:
@@ -436,8 +436,8 @@ MonoBehaviour:
       material: {fileID: 2100000, guid: 7c61362ab7fb6ff4989cb0e71d5a5482, type: 2}
       resolution: 256
     visualization:
-      resolution: 100
-      camera: {fileID: 0}
+      resolution: 1000
+      camera: {fileID: 280236433}
       material: {fileID: 2100000, guid: 43dc860a5ce857346a3ae29595c56b4b, type: 2}
     reflection:
       onlySkybox: 0
@@ -451,7 +451,8 @@ MonoBehaviour:
         m_Bits: 0
       camera: {fileID: 0}
   m_updateSettings:
-    dt: 0
+    dt: 0.0860523
     updateSimulation: 1
-    amplitudeMultiplier: 1
+    amplitudeMultiplier: 0.05
+    frequencyMultiplier: 36.64
     renderOutsideBorders: 1

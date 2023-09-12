@@ -20,6 +20,7 @@ namespace WaveGrid
 
         public bool updateSimulation = true;
         public float amplitudeMultiplier = 4f;
+        public float frequencyMultiplier = 1f;
 
         public bool renderOutsideBorders = true;
     }

@@ -13,6 +13,7 @@
 
 uniform sampler2D textureData;
 uniform float profilePeriod;
+uniform float scale;
 
 uniform float waterLevel;
 uniform float3 cameraPos;
@@ -122,7 +123,7 @@ float3 wavePosition(float3 pos, float amplitude[DIR_NUM]) {
         float angle = a * TAU;
         float2 kdir = float2(cos(angle), sin(angle));
         float kdir_x = dot(pos.xz, kdir) + TAU * sin(SEED * a);
-        float w = kdir_x / profilePeriod;
+        float w = scale * kdir_x / profilePeriod;
 
         float4 tt = DX * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
 
@@ -144,7 +145,7 @@ float3 waveNormal(float3 pos, float amplitude[DIR_NUM]) {
         float angle = a * TAU;
         float2 kdir = float2(cos(angle), sin(angle));
         float kdir_x = dot(pos.xz, kdir) + TAU * sin(a * SEED);
-        float w = kdir_x / profilePeriod;
+        float w = scale * kdir_x / profilePeriod;
         float4 tt = DX * iAmpl(angle, amplitude) * tex2Dlod(textureData, float4(w, 0, 0, 0));
 
         tx.xz += kdir.x * tt.zw;

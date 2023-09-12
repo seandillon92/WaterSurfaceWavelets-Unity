@@ -121,6 +121,7 @@ namespace WaveGrid
             m_material.SetMatrix(m_cameraInverseProjection_id,
                 m_camera.transform.localToWorldMatrix * Matrix4x4.Scale(new Vector3(1.1f, 1.1f, 1f)) * m_camera.projectionMatrix.inverse);
             m_material.SetFloat("amp_mult", settings.amplitudeMultiplier);
+            m_material.SetFloat("scale", settings.frequencyMultiplier);
             m_material.SetFloat("renderOutsideBorders", settings.renderOutsideBorders ? 1.0f : 0.0f);
             if (m_settings.boat.useBoat)
             {
