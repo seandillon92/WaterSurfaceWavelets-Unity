@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: waterSurfacePBR
+  m_Name: WaterSurfaceMaterial
   m_Shader: {fileID: 4800000, guid: 6c924f68b5615c94291ea23f5de3e35a, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []

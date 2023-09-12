@@ -26,8 +26,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4866389373062132709}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 256, y: 0, z: 255.99998}
-  m_LocalScale: {x: 512, y: 553.79584, z: 512}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -78,7 +78,7 @@ MonoBehaviour:
         e31: 0
         e32: 0
         e33: 0
-      water_level: 113
+      water_level: 1
       resolution: 1024
       cullingMask:
         serializedVersion: 2
@@ -87,6 +87,7 @@ MonoBehaviour:
       heights: {fileID: 0}
       gradients: {fileID: 0}
     boat:
+      useBoat: 0
       boat: {fileID: 0}
       cullingMask:
         serializedVersion: 2
